@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { useResume } from '../context/ResumeContext';
 
@@ -19,9 +18,9 @@ const TemplateSelection = () => {
   ];
 
   const otherTemplates = [
-    'https://images.pexels.com/photos/4348401/pexels-photo-4348401.jpeg?auto=compress&cs=tinysrgb&w=200&h=280&fit=crop',
-    'https://images.pexels.com/photos/4348402/pexels-photo-4348402.jpeg?auto=compress&cs=tinysrgb&w=200&h=280&fit=crop',
-    'https://images.pexels.com/photos/4348403/pexels-photo-4348403.jpeg?auto=compress&cs=tinysrgb&w=200&h=280&fit=crop',
+    '/src/assets/TemplateCV.png',
+    '/src/assets/TemplateCV.png',
+    '/src/assets/TemplateCV.png',
   ];
 
   const handleTemplateSelect = (templateId: string) => {
@@ -101,7 +100,7 @@ const TemplateSelection = () => {
                     <img
                       src={image}
                       alt={`Template ${index + 1}`}
-                      className="w-full h-32 object-cover"
+                      className="w-full h-40 object-contain p-2"
                     />
                   </div>
                 ))}
@@ -115,17 +114,12 @@ const TemplateSelection = () => {
               onClick={handleChooseLater}
               className="bg-accent hover:bg-accent/90 text-background px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-accent/20 flex items-center space-x-2 mx-auto group"
             >
-              <span>I'll choose later</span>
+              <span>Skip for Now (Use Default)</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
 
-          {/* Character Illustration */}
-          <div className="fixed bottom-8 right-8 lg:right-16">
-            <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center shadow-lg">
-              <span className="text-background text-sm font-medium">👤</span>
-            </div>
-          </div>
+          {/* Character Illustration removed as requested */}
         </div>
       </div>
     </div>

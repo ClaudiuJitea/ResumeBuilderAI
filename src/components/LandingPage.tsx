@@ -1,4 +1,3 @@
-import React from 'react';
 import { Check, ArrowRight, Sparkles, Smartphone, Ruler, Diamond, Download } from 'lucide-react';
 import { useResume } from '../context/ResumeContext';
 
@@ -6,9 +5,9 @@ const LandingPage = () => {
   const { dispatch } = useResume();
 
   const features = [
-    'No Subscriptions, No Watermarks!',
+    'Your Professional Resume, Ready in Minutes',
     'FREE Download, AI and fully customizable Resume',
-    'Professional Resume, ATS Compatible'
+    'Upgrade Your Resume. Upgrade Your Future.'
   ];
 
   return (
@@ -27,7 +26,7 @@ const LandingPage = () => {
                 <br />
                 <span className="text-heading">Resume</span> in Just
                 <br />
-                <span className="text-accent">4 Minutes</span>
+                <span className="text-accent">5 Minutes</span>
               </h1>
 
               <div className="space-y-4 mb-12">
@@ -123,16 +122,20 @@ const LandingPage = () => {
       <div className="py-20 bg-card relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primaryText to-primaryText"></div>
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-accent/30 to-heading/30"></div>
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           {/* Section Header */}
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-primaryText mb-6">
-              Why Choose Our
+          <div className="text-center mb-16 animate-fade-in">
+            <div className="inline-block bg-accent/20 text-accent px-4 py-2 rounded-full text-sm font-medium mb-8">
+              Premium Features, Zero Cost
+            </div>
+            <h2 className="text-5xl lg:text-6xl font-bold text-primaryText mb-6 leading-tight">
+              Why Choose
               <br />
-              <span className="text-heading">Resume Builder?</span>
+              <span className="text-heading">Our Resume</span> 
+              <span className="text-accent">Builder?</span>
             </h2>
             <p className="text-xl text-primaryText/80 max-w-3xl mx-auto">
               Create professional, ATS-friendly resumes with AI-powered features and beautiful templates
@@ -143,7 +146,7 @@ const LandingPage = () => {
           <div className="grid lg:grid-cols-2 gap-16 items-center mb-20">
             {/* Feature 1 - AI Powered */}
             <div className="order-2 lg:order-1">
-              <div className="bg-background rounded-2xl p-8 border border-border shadow-xl">
+              <div className="bg-background rounded-2xl p-8 border border-border shadow-xl hover:shadow-2xl hover:border-accent/30 transition-all duration-300">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mr-4">
                     <span className="text-background font-bold text-lg">AI</span>
@@ -166,7 +169,7 @@ const LandingPage = () => {
             </div>
             <div className="order-1 lg:order-2 flex justify-center">
               <div className="relative">
-                <div className="w-80 h-80 bg-gradient-to-br from-accent/20 to-heading/20 rounded-2xl flex items-center justify-center border border-accent/30">
+                <div className="w-80 h-80 bg-gradient-to-br from-accent/20 to-heading/20 rounded-2xl flex items-center justify-center border border-accent/30 shadow-xl transform hover:scale-105 transition-all duration-300">
                   <div className="text-center">
                     <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
                       <Sparkles className="text-background w-12 h-12" />
@@ -183,7 +186,7 @@ const LandingPage = () => {
           <div className="grid lg:grid-cols-2 gap-16 items-center mb-20">
             <div className="flex justify-center">
               <div className="relative">
-                <div className="w-80 h-80 bg-gradient-to-br from-heading/20 to-accent/20 rounded-2xl flex items-center justify-center border border-heading/30">
+                <div className="w-80 h-80 bg-gradient-to-br from-heading/20 to-accent/20 rounded-2xl flex items-center justify-center border border-heading/30 shadow-xl transform hover:scale-105 transition-all duration-300">
                   <div className="text-center">
                     <div className="w-24 h-24 bg-heading rounded-full flex items-center justify-center mx-auto mb-4">
                       <Smartphone className="text-background w-12 h-12" />
@@ -195,7 +198,7 @@ const LandingPage = () => {
               </div>
             </div>
             <div>
-              <div className="bg-background rounded-2xl p-8 border border-border shadow-xl">
+              <div className="bg-background rounded-2xl p-8 border border-border shadow-xl hover:shadow-2xl hover:border-heading/30 transition-all duration-300">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 bg-heading rounded-full flex items-center justify-center mr-4">
                     <Ruler className="text-background w-6 h-6" />
@@ -219,21 +222,20 @@ const LandingPage = () => {
           </div>
 
           {/* Feature 3 - Free & Professional */}
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 items-center mb-20">
             <div className="order-2 lg:order-1">
-              <div className="bg-background rounded-2xl p-8 border border-border shadow-xl">
+              <div className="bg-background rounded-2xl p-8 border border-border shadow-xl hover:shadow-2xl hover:border-loginBtn/30 transition-all duration-300">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 bg-loginBtn rounded-full flex items-center justify-center mr-4">
                     <Diamond className="text-background w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-primaryText">100% Free & Professional</h3>
-                    <p className="text-loginBtn font-medium">No Hidden Costs</p>
+                    <h3 className="text-2xl font-bold text-primaryText">Professional & Affordable</h3>
+                    <p className="text-loginBtn font-medium">Flexible Plans – Full Access at a Fair Price</p>
                   </div>
                 </div>
                 <p className="text-primaryText/80 text-lg leading-relaxed mb-6">
-                  Create unlimited resumes, download in PDF format, and access all premium features 
-                  completely free. No subscriptions, no watermarks, no limitations.
+                  Create unlimited resumes, download in PDF format, and unlock all premium features with a simple, transparent subscription.\nNo hidden fees, no watermarks – just job-winning resumes that work.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <span className="bg-loginBtn/20 text-loginBtn px-3 py-1 rounded-full text-sm font-medium">No Watermarks</span>
@@ -244,13 +246,13 @@ const LandingPage = () => {
             </div>
             <div className="order-1 lg:order-2 flex justify-center">
               <div className="relative">
-                <div className="w-80 h-80 bg-gradient-to-br from-loginBtn/20 to-accent/20 rounded-2xl flex items-center justify-center border border-loginBtn/30">
+                <div className="w-80 h-80 bg-gradient-to-br from-loginBtn/20 to-accent/20 rounded-2xl flex items-center justify-center border border-loginBtn/30 shadow-xl transform hover:scale-105 transition-all duration-300">
                   <div className="text-center">
                     <div className="w-24 h-24 bg-loginBtn rounded-full flex items-center justify-center mx-auto mb-4">
                       <Download className="text-background w-12 h-12" />
                     </div>
-                    <h4 className="text-xl font-bold text-primaryText mb-2">Completely Free</h4>
-                    <p className="text-primaryText/60">No subscriptions required</p>
+                    <h4 className="text-xl font-bold text-primaryText mb-2">Affordable & Transparent</h4>
+                    <p className="text-primaryText/60">No Hidden Fees – Cancel Anytime</p>
                   </div>
                 </div>
               </div>
@@ -259,7 +261,7 @@ const LandingPage = () => {
 
           {/* Call to Action */}
           <div className="text-center mt-20">
-            <div className="bg-gradient-to-r from-accent/10 to-heading/10 rounded-3xl p-12 border border-accent/20">
+            <div className="bg-gradient-to-r from-accent/10 to-heading/10 rounded-3xl p-12 border border-accent/20 shadow-xl transform hover:scale-[1.02] transition-all duration-300">
               <h3 className="text-3xl font-bold text-primaryText mb-4">
                 Ready to Create Your Perfect Resume?
               </h3>

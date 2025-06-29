@@ -17,7 +17,6 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
   // Dynamic color styles
   const primaryColor = colorTheme?.primary || '#00FFCC';
   const secondaryColor = colorTheme?.secondary || '#00E6B8';
-  const accentColor = colorTheme?.accent || '#3DDC91';
   const gradientFrom = colorTheme?.gradient?.from || primaryColor;
   const gradientTo = colorTheme?.gradient?.to || secondaryColor;
 

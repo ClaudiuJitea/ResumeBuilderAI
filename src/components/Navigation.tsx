@@ -1,4 +1,3 @@
-import React from 'react';
 import { useResume } from '../context/ResumeContext';
 
 const Navigation = () => {
@@ -7,8 +6,8 @@ const Navigation = () => {
   if (state.currentStep !== 'landing') return null;
 
   return (
-    <nav className="fixed top-4 left-4 right-4 z-50 bg-background/95 backdrop-blur-md border border-border rounded-2xl shadow-2xl shadow-black/20">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[90%] z-50 bg-background/95 backdrop-blur-md border border-border rounded-2xl shadow-2xl shadow-black/20">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-10">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
             <div className="text-heading font-bold text-xl bg-gradient-to-r from-accent to-heading bg-clip-text text-transparent">

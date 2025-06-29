@@ -9,7 +9,7 @@ interface ModernTemplateProps {
 
 const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, currentPage = 1 }) => {
   const { state } = useResume();
-  const { personalInfo, workExperience, education, skills, languages, projects } = state.resumeData;
+  const { personalInfo, workExperience, education, skills, languages, projects, skillsConfig } = state.resumeData;
   const colorTheme = state.resumeData.colorTheme;
 
   const scaleFactor = fontSize / 100;
@@ -20,6 +20,76 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
   const accentColor = colorTheme?.accent || '#3DDC91';
   const gradientFrom = colorTheme?.gradient?.from || primaryColor;
   const gradientTo = colorTheme?.gradient?.to || secondaryColor;
+
+  const renderSkillLevel = (level: number, skillStyle: string, isDarkBackground = false) => {
+    const style = skillStyle || 'dots';
+    const activeColor = isDarkBackground ? '#FFFFFF' : primaryColor;
+    const inactiveColor = isDarkBackground ? 'rgba(255, 255, 255, 0.3)' : '#E5E7EB';
+    
+    switch (style) {
+      case 'dots':
+        return (
+          <div className="flex space-x-1">
+            {[1, 2, 3, 4, 5].map((dot) => (
+              <div
+                key={dot}
+                style={{ 
+                  width: `${Math.max(6, 8 * scaleFactor)}px`, 
+                  height: `${Math.max(6, 8 * scaleFactor)}px`,
+                  backgroundColor: dot <= level ? activeColor : inactiveColor,
+                  borderRadius: '50%'
+                }}
+              />
+            ))}
+          </div>
+        );
+      case 'bars':
+        return (
+          <div className="flex space-x-1">
+            {[1, 2, 3, 4, 5].map((bar) => (
+              <div
+                key={bar}
+                style={{ 
+                  width: `${Math.max(4, 6 * scaleFactor)}px`, 
+                  height: `${Math.max(8, 16 * scaleFactor)}px`,
+                  backgroundColor: bar <= level ? activeColor : inactiveColor,
+                  borderRadius: '2px'
+                }}
+              />
+            ))}
+          </div>
+        );
+      case 'pills':
+        return (
+          <div className="flex space-x-1">
+            {[1, 2, 3, 4, 5].map((pill) => (
+              <div
+                key={pill}
+                style={{ 
+                  width: `${Math.max(8, 12 * scaleFactor)}px`, 
+                  height: `${Math.max(4, 6 * scaleFactor)}px`,
+                  backgroundColor: pill <= level ? activeColor : inactiveColor,
+                  borderRadius: '50%'
+                }}
+              />
+            ))}
+          </div>
+        );
+      default:
+        return (
+          <div className="w-full bg-gray-200 rounded-full" style={{ height: `${12 * scaleFactor}px` }}>
+            <div 
+              className="rounded-full transition-all duration-300"
+              style={{ 
+                width: `${(level / 5) * 100}%`,
+                height: `${12 * scaleFactor}px`,
+                background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`
+              }}
+            ></div>
+          </div>
+        );
+    }
+  };
 
   // Determine content for each page
   const renderPage1 = () => (
@@ -93,19 +163,25 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
             <div style={{ display: 'flex', flexDirection: 'column', gap: `${16 * scaleFactor}px` }}>
               {personalInfo.phone && (
                 <div className="flex items-center" style={{ fontSize: `${Math.max(8, 14 * scaleFactor)}px` }}>
-                  <Phone className="flex-shrink-0" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px`, marginRight: `${12 * scaleFactor}px` }} />
+                  {personalInfo.contactStyle === 'symbols' && (
+                    <Phone className="flex-shrink-0" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px`, marginRight: `${12 * scaleFactor}px` }} />
+                  )}
                   <span>{personalInfo.phone}</span>
                 </div>
               )}
               {personalInfo.email && (
                 <div className="flex items-center" style={{ fontSize: `${Math.max(8, 14 * scaleFactor)}px` }}>
-                  <Mail className="flex-shrink-0" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px`, marginRight: `${12 * scaleFactor}px` }} />
+                  {personalInfo.contactStyle === 'symbols' && (
+                    <Mail className="flex-shrink-0" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px`, marginRight: `${12 * scaleFactor}px` }} />
+                  )}
                   <span className="break-all">{personalInfo.email}</span>
                 </div>
               )}
               {personalInfo.location && (
                 <div className="flex items-center" style={{ fontSize: `${Math.max(8, 14 * scaleFactor)}px` }}>
-                  <MapPin className="flex-shrink-0" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px`, marginRight: `${12 * scaleFactor}px` }} />
+                  {personalInfo.contactStyle === 'symbols' && (
+                    <MapPin className="flex-shrink-0" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px`, marginRight: `${12 * scaleFactor}px` }} />
+                  )}
                   <span>{personalInfo.location}</span>
                 </div>
               )}
@@ -388,16 +464,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
                     >
                       {skill.name}
                     </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full" style={{ height: `${12 * scaleFactor}px` }}>
-                    <div 
-                      className="rounded-full transition-all duration-300"
-                      style={{ 
-                        width: `${(skill.level / 5) * 100}%`,
-                        height: `${12 * scaleFactor}px`,
-                        background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`
-                      }}
-                    ></div>
+                    {renderSkillLevel(skill.level, skillsConfig?.style || 'dots')}
                   </div>
                 </div>
               ))
@@ -494,15 +561,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
                   <div key={index} style={{ fontSize: `${Math.max(8, 14 * scaleFactor)}px` }}>
                     <div className="flex justify-between items-center" style={{ marginBottom: `${4 * scaleFactor}px` }}>
                       <span className="font-medium">{skill.name}</span>
-                    </div>
-                    <div className="w-full bg-white/20 rounded-full" style={{ height: `${8 * scaleFactor}px` }}>
-                      <div 
-                        className="bg-white rounded-full transition-all duration-300"
-                        style={{ 
-                          width: `${(skill.level / 5) * 100}%`,
-                          height: `${8 * scaleFactor}px`
-                        }}
-                      ></div>
+                      {renderSkillLevel(skill.level, skillsConfig?.style || 'dots', true)}
                     </div>
                   </div>
                 ))}

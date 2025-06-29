@@ -35,7 +35,7 @@ const initialState: ResumeState = {
       email: '',
       phone: '',
       location: '',
-      contactStyle: 'none',
+      contactStyle: 'symbols',
     },
     workExperience: [],
     education: [],
@@ -58,6 +58,10 @@ const initialState: ResumeState = {
         from: '#00FFCC',
         to: '#3DDC91'
       }
+    },
+    skillsConfig: {
+      style: 'dots',
+      position: 'left'
     }
   },
 };

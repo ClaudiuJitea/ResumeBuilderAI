@@ -15,11 +15,11 @@ import { Skill } from '../../types/resume';
 
 const SkillsForm = () => {
   const { state, dispatch } = useResume();
-  const { skills } = state.resumeData;
+  const { skills, skillsConfig } = state.resumeData;
   const [newSkillName, setNewSkillName] = useState('');
   const [newSkillLevel, setNewSkillLevel] = useState(3);
-  const [skillPosition, setSkillPosition] = useState<'left' | 'right'>('left');
-  const [skillStyle, setSkillStyle] = useState<'dots' | 'pills' | 'bars'>('dots');
+  const [skillPosition, setSkillPosition] = useState<'left' | 'right'>(skillsConfig?.position || 'left');
+  const [skillStyle, setSkillStyle] = useState<'dots' | 'pills' | 'bars'>(skillsConfig?.style || 'dots');
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
 
   const addSkill = () => {
@@ -56,6 +56,19 @@ const SkillsForm = () => {
     dispatch({
       type: 'UPDATE_RESUME_DATA',
       payload: { skills: updatedSkills }
+    });
+  };
+
+  const updateSkillsConfig = (config: Partial<{ style: 'dots' | 'pills' | 'bars'; position: 'left' | 'right' }>) => {
+    const currentConfig = skillsConfig || { style: 'dots' as const, position: 'left' as const };
+    dispatch({
+      type: 'UPDATE_RESUME_DATA',
+      payload: { 
+        skillsConfig: { 
+          ...currentConfig, 
+          ...config 
+        } 
+      }
     });
   };
 
@@ -299,7 +312,11 @@ const SkillsForm = () => {
               name="position"
               value="left"
               checked={skillPosition === 'left'}
-              onChange={(e) => setSkillPosition(e.target.value as 'left' | 'right')}
+              onChange={(e) => {
+                const position = e.target.value as 'left' | 'right';
+                setSkillPosition(position);
+                updateSkillsConfig({ position });
+              }}
               className="sr-only"
             />
             <div className={`w-4 h-4 rounded-full border-2 mr-2 ${
@@ -317,7 +334,11 @@ const SkillsForm = () => {
               name="position"
               value="right"
               checked={skillPosition === 'right'}
-              onChange={(e) => setSkillPosition(e.target.value as 'left' | 'right')}
+              onChange={(e) => {
+                const position = e.target.value as 'left' | 'right';
+                setSkillPosition(position);
+                updateSkillsConfig({ position });
+              }}
               className="sr-only"
             />
             <div className={`w-4 h-4 rounded-full border-2 mr-2 ${
@@ -343,7 +364,11 @@ const SkillsForm = () => {
                 name="style"
                 value="dots"
                 checked={skillStyle === 'dots'}
-                onChange={(e) => setSkillStyle(e.target.value as 'dots' | 'pills' | 'bars')}
+                onChange={(e) => {
+                  const style = e.target.value as 'dots' | 'pills' | 'bars';
+                  setSkillStyle(style);
+                  updateSkillsConfig({ style });
+                }}
                 className="sr-only"
               />
               <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
@@ -374,7 +399,11 @@ const SkillsForm = () => {
                 name="style"
                 value="pills"
                 checked={skillStyle === 'pills'}
-                onChange={(e) => setSkillStyle(e.target.value as 'dots' | 'pills' | 'bars')}
+                onChange={(e) => {
+                  const style = e.target.value as 'dots' | 'pills' | 'bars';
+                  setSkillStyle(style);
+                  updateSkillsConfig({ style });
+                }}
                 className="sr-only"
               />
               <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
@@ -405,7 +434,11 @@ const SkillsForm = () => {
                 name="style"
                 value="bars"
                 checked={skillStyle === 'bars'}
-                onChange={(e) => setSkillStyle(e.target.value as 'dots' | 'pills' | 'bars')}
+                onChange={(e) => {
+                  const style = e.target.value as 'dots' | 'pills' | 'bars';
+                  setSkillStyle(style);
+                  updateSkillsConfig({ style });
+                }}
                 className="sr-only"
               />
               <div className={`w-4 h-4 rounded-full border-2 mr-3 ${

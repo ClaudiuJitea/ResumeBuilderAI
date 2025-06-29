@@ -8,7 +8,7 @@ interface ProfessionalTemplateProps {
 
 const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 100 }) => {
   const { state } = useResume();
-  const { personalInfo, workExperience, education, skills } = state.resumeData;
+  const { personalInfo, workExperience, education, skills, skillsConfig } = state.resumeData;
   const colorTheme = state.resumeData.colorTheme;
 
   const scaleFactor = fontSize / 100;
@@ -17,6 +17,62 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
   const primaryColor = colorTheme?.primary || '#14B8A6';
   const secondaryColor = colorTheme?.secondary || '#0F766E';
   const accentColor = colorTheme?.accent || '#5EEAD4';
+
+  const renderSkillLevel = (level: number, skillStyle: string) => {
+    const style = skillStyle || 'dots';
+    switch (style) {
+      case 'dots':
+        return (
+          <div className="flex space-x-1">
+            {[1, 2, 3, 4, 5].map((dot) => (
+              <div
+                key={dot}
+                className={`rounded-full`}
+                style={{ 
+                  width: `${Math.max(6, 8 * scaleFactor)}px`, 
+                  height: `${Math.max(6, 8 * scaleFactor)}px`,
+                  backgroundColor: dot <= level ? primaryColor : '#D1D5DB'
+                }}
+              />
+            ))}
+          </div>
+        );
+      case 'bars':
+        return (
+          <div className="flex space-x-1">
+            {[1, 2, 3, 4, 5].map((bar) => (
+              <div
+                key={bar}
+                className={`rounded-sm`}
+                style={{ 
+                  width: `${Math.max(4, 6 * scaleFactor)}px`, 
+                  height: `${Math.max(8, 16 * scaleFactor)}px`,
+                  backgroundColor: bar <= level ? primaryColor : '#D1D5DB'
+                }}
+              />
+            ))}
+          </div>
+        );
+      case 'pills':
+        return (
+          <div className="flex space-x-1">
+            {[1, 2, 3, 4, 5].map((pill) => (
+              <div
+                key={pill}
+                className={`rounded-full`}
+                style={{ 
+                  width: `${Math.max(8, 12 * scaleFactor)}px`, 
+                  height: `${Math.max(4, 6 * scaleFactor)}px`,
+                  backgroundColor: pill <= level ? primaryColor : '#D1D5DB'
+                }}
+              />
+            ))}
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div 
@@ -294,16 +350,18 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
             <div style={{ display: 'flex', flexDirection: 'column', gap: `${16 * scaleFactor}px` }}>
               {personalInfo.phone && (
                 <div className="flex items-center">
-                  <div 
-                    className="rounded-full flex items-center justify-center mr-3"
-                    style={{ 
-                      width: `${32 * scaleFactor}px`, 
-                      height: `${32 * scaleFactor}px`,
-                      backgroundColor: primaryColor
-                    }}
-                  >
-                    <Phone className="text-white" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} />
-                  </div>
+                  {personalInfo.contactStyle === 'symbols' && (
+                    <div 
+                      className="rounded-full flex items-center justify-center mr-3"
+                      style={{ 
+                        width: `${32 * scaleFactor}px`, 
+                        height: `${32 * scaleFactor}px`,
+                        backgroundColor: primaryColor
+                      }}
+                    >
+                      <Phone className="text-white" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} />
+                    </div>
+                  )}
                   <span style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}>
                     {personalInfo.phone}
                   </span>
@@ -312,16 +370,18 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
               
               {personalInfo.email && (
                 <div className="flex items-center">
-                  <div 
-                    className="rounded-full flex items-center justify-center mr-3"
-                    style={{ 
-                      width: `${32 * scaleFactor}px`, 
-                      height: `${32 * scaleFactor}px`,
-                      backgroundColor: primaryColor
-                    }}
-                  >
-                    <Mail className="text-white" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} />
-                  </div>
+                  {personalInfo.contactStyle === 'symbols' && (
+                    <div 
+                      className="rounded-full flex items-center justify-center mr-3"
+                      style={{ 
+                        width: `${32 * scaleFactor}px`, 
+                        height: `${32 * scaleFactor}px`,
+                        backgroundColor: primaryColor
+                      }}
+                    >
+                      <Mail className="text-white" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} />
+                    </div>
+                  )}
                   <span 
                     className="break-all"
                     style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}
@@ -333,58 +393,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
               
               {personalInfo.location && (
                 <div className="flex items-center">
-                  <div 
-                    className="rounded-full flex items-center justify-center mr-3"
-                    style={{ 
-                      width: `${32 * scaleFactor}px`, 
-                      height: `${32 * scaleFactor}px`,
-                      backgroundColor: primaryColor
-                    }}
-                  >
-                    <MapPin className="text-white" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} />
-                  </div>
-                  <span style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}>
-                    {personalInfo.location}
-                  </span>
-                </div>
-              )}
-
-              {/* Default contact info if none provided */}
-              {!personalInfo.phone && !personalInfo.email && !personalInfo.location && (
-                <>
-                  <div className="flex items-center">
-                    <div 
-                      className="rounded-full flex items-center justify-center mr-3"
-                      style={{ 
-                        width: `${32 * scaleFactor}px`, 
-                        height: `${32 * scaleFactor}px`,
-                        backgroundColor: primaryColor
-                      }}
-                    >
-                      <Phone className="text-white" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} />
-                    </div>
-                    <span style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}>
-                      +111 222 333 444 55
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <div 
-                      className="rounded-full flex items-center justify-center mr-3"
-                      style={{ 
-                        width: `${32 * scaleFactor}px`, 
-                        height: `${32 * scaleFactor}px`,
-                        backgroundColor: primaryColor
-                      }}
-                    >
-                      <Mail className="text-white" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} />
-                    </div>
-                    <span style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}>
-                      youremailhere@gmail.com
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center">
+                  {personalInfo.contactStyle === 'symbols' && (
                     <div 
                       className="rounded-full flex items-center justify-center mr-3"
                       style={{ 
@@ -395,6 +404,65 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
                     >
                       <MapPin className="text-white" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} />
                     </div>
+                  )}
+                  <span style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}>
+                    {personalInfo.location}
+                  </span>
+                </div>
+              )}
+
+              {/* Default contact info if none provided */}
+              {!personalInfo.phone && !personalInfo.email && !personalInfo.location && (
+                <>
+                  <div className="flex items-center">
+                    {personalInfo.contactStyle === 'symbols' && (
+                      <div 
+                        className="rounded-full flex items-center justify-center mr-3"
+                        style={{ 
+                          width: `${32 * scaleFactor}px`, 
+                          height: `${32 * scaleFactor}px`,
+                          backgroundColor: primaryColor
+                        }}
+                      >
+                        <Phone className="text-white" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} />
+                      </div>
+                    )}
+                    <span style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}>
+                      +111 222 333 444 55
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    {personalInfo.contactStyle === 'symbols' && (
+                      <div 
+                        className="rounded-full flex items-center justify-center mr-3"
+                        style={{ 
+                          width: `${32 * scaleFactor}px`, 
+                          height: `${32 * scaleFactor}px`,
+                          backgroundColor: primaryColor
+                        }}
+                      >
+                        <Mail className="text-white" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} />
+                      </div>
+                    )}
+                    <span style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}>
+                      youremailhere@gmail.com
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    {personalInfo.contactStyle === 'symbols' && (
+                      <div 
+                        className="rounded-full flex items-center justify-center mr-3"
+                        style={{ 
+                          width: `${32 * scaleFactor}px`, 
+                          height: `${32 * scaleFactor}px`,
+                          backgroundColor: primaryColor
+                        }}
+                      >
+                        <MapPin className="text-white" style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} />
+                      </div>
+                    )}
                     <span style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}>
                       Your city and country
                     </span>
@@ -541,13 +609,15 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
                                         skill.name.toLowerCase().includes('conflict') ||
                                         skill.name.toLowerCase().includes('leadership') ||
                                         skill.name.toLowerCase().includes('communication')).map((skill, index) => (
-                    <span 
-                      key={index}
-                      className="text-gray-300"
-                      style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}
-                    >
-                      {skill.name}
-                    </span>
+                    <div key={index} className="flex items-center justify-between">
+                      <span 
+                        className="text-gray-300"
+                        style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}
+                      >
+                        {skill.name}
+                      </span>
+                      {renderSkillLevel(skill.level, skillsConfig?.style || 'dots')}
+                    </div>
                   ))
                 ) : (
                   <>
@@ -582,13 +652,15 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
                                         !skill.name.toLowerCase().includes('conflict') &&
                                         !skill.name.toLowerCase().includes('leadership') &&
                                         !skill.name.toLowerCase().includes('communication')).map((skill, index) => (
-                    <span 
-                      key={index}
-                      className="text-gray-300"
-                      style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}
-                    >
-                      {skill.name}
-                    </span>
+                    <div key={index} className="flex items-center justify-between">
+                      <span 
+                        className="text-gray-300"
+                        style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}
+                      >
+                        {skill.name}
+                      </span>
+                      {renderSkillLevel(skill.level, skillsConfig?.style || 'dots')}
+                    </div>
                   ))
                 ) : (
                   <>

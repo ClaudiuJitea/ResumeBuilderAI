@@ -103,6 +103,10 @@ export interface ResumeData {
   links: { name: string; url: string }[];
   references: Reference[];
   colorTheme?: ColorTheme;
+  skillsConfig?: {
+    style: 'dots' | 'pills' | 'bars';
+    position: 'left' | 'right';
+  };
 }
 
 export interface ResumeSection {

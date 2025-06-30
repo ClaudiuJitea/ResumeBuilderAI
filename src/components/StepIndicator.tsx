@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Briefcase, GraduationCap, Lightbulb, Download, Check, Edit3, Languages, Heart, Award, Trophy, Code, Globe, Image } from 'lucide-react';
+import { User, Briefcase, GraduationCap, Lightbulb, Download, Check, Edit3, Languages, Heart, Award, Trophy, Code, Globe, Image, Sparkles } from 'lucide-react';
 import { useResume } from '../context/ResumeContext';
 import { StepType } from '../types/resume';
 
@@ -19,6 +19,7 @@ const StepIndicator = () => {
     projects: Code,
     links: Globe,
     photo: Image,
+    decorator: Sparkles,
     finish: Download,
   };
 
@@ -35,6 +36,7 @@ const StepIndicator = () => {
     projects: 'Projects',
     links: 'Links',
     photo: 'Photo',
+    decorator: 'Decorator',
     finish: 'Finish',
   };
 

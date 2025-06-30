@@ -9,7 +9,7 @@ export const templateConfigs: Record<string, TemplateConfig> = {
       'interests', 'skills', 'certificates', 'links', 'achievements', 'projects'
     ],
     requiredSections: ['education', 'experience', 'about', 'skills'],
-    buildSteps: ['personal', 'experience', 'education', 'skills', 'aboutMe', 'languages', 'projects', 'interests', 'certificates', 'achievements', 'links', 'photo', 'finish']
+    buildSteps: ['personal', 'experience', 'education', 'skills', 'aboutMe', 'languages', 'projects', 'interests', 'certificates', 'achievements', 'links', 'photo', 'decorator', 'finish']
   },
   professional: {
     id: 'professional',
@@ -19,7 +19,7 @@ export const templateConfigs: Record<string, TemplateConfig> = {
       'certificates', 'achievements', 'projects', 'links'
     ],
     requiredSections: ['education', 'experience', 'about', 'skills'],
-    buildSteps: ['personal', 'experience', 'education', 'skills', 'aboutMe', 'projects', 'certificates', 'achievements', 'links', 'photo', 'finish']
+    buildSteps: ['personal', 'experience', 'education', 'skills', 'aboutMe', 'projects', 'certificates', 'achievements', 'links', 'photo', 'decorator', 'finish']
   },
   creative: {
     id: 'creative',
@@ -29,7 +29,7 @@ export const templateConfigs: Record<string, TemplateConfig> = {
       'projects', 'links', 'interests', 'achievements'
     ],
     requiredSections: ['experience', 'about', 'skills', 'projects'],
-    buildSteps: ['personal', 'experience', 'education', 'skills', 'aboutMe', 'projects', 'interests', 'achievements', 'links', 'photo', 'finish']
+    buildSteps: ['personal', 'experience', 'education', 'skills', 'aboutMe', 'projects', 'interests', 'achievements', 'links', 'photo', 'decorator', 'finish']
   },
   minimal: {
     id: 'minimal',
@@ -38,7 +38,7 @@ export const templateConfigs: Record<string, TemplateConfig> = {
       'education', 'experience', 'about', 'skills', 'links'
     ],
     requiredSections: ['education', 'experience', 'about', 'skills'],
-    buildSteps: ['personal', 'experience', 'education', 'skills', 'aboutMe', 'links', 'finish']
+    buildSteps: ['personal', 'experience', 'education', 'skills', 'aboutMe', 'links', 'decorator', 'finish']
   },
   executive: {
     id: 'executive',
@@ -48,7 +48,7 @@ export const templateConfigs: Record<string, TemplateConfig> = {
       'achievements', 'certificates', 'links'
     ],
     requiredSections: ['experience', 'about', 'skills', 'achievements'],
-    buildSteps: ['personal', 'experience', 'education', 'skills', 'aboutMe', 'achievements', 'certificates', 'links', 'finish']
+    buildSteps: ['personal', 'experience', 'education', 'skills', 'aboutMe', 'achievements', 'certificates', 'links', 'decorator', 'finish']
   },
   academic: {
     id: 'academic',
@@ -58,7 +58,7 @@ export const templateConfigs: Record<string, TemplateConfig> = {
       'achievements', 'certificates', 'projects', 'links'
     ],
     requiredSections: ['education', 'about', 'skills', 'achievements'],
-    buildSteps: ['personal', 'education', 'experience', 'skills', 'aboutMe', 'achievements', 'projects', 'certificates', 'links', 'finish']
+    buildSteps: ['personal', 'education', 'experience', 'skills', 'aboutMe', 'achievements', 'projects', 'certificates', 'links', 'decorator', 'finish']
   }
 };
 
@@ -96,7 +96,7 @@ export const getBuildStepsForTemplate = (templateId: string, selectedSections: s
   
   // Filter build steps based on selected sections
   const filteredSteps = config.buildSteps.filter(step => {
-    if (step === 'personal' || step === 'finish') return true;
+    if (step === 'personal' || step === 'decorator' || step === 'finish') return true;
     
     // Map step names to section IDs
     const stepToSectionMap: Record<string, string> = {

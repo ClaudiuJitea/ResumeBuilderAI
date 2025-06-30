@@ -88,6 +88,33 @@ export interface ColorTheme {
   };
 }
 
+export interface Decoration {
+  id: string;
+  type: 'separator' | 'indicator' | 'fog' | 'mist' | 'gray-fullness' | '3-circles' | 'setting-planet' | 'beam' | 'pyramid' | 'dust' | 'business-card' | 'sharp-thread';
+  position: {
+    x: number;
+    y: number;
+  };
+  size: {
+    width: number;
+    height: number;
+  };
+  properties?: {
+    color?: string;
+    thickness?: number;
+    opacity?: number;
+  };
+}
+
+export interface DecoratorSettings {
+  selectedFont?: string;
+  selectedTemplate?: string;
+  selectedColorScheme?: string;
+  selectedDecorations?: string[];
+  gdprContent?: string;
+  decorations?: Decoration[];
+}
+
 export interface ResumeData {
   personalInfo: PersonalInfo;
   workExperience: WorkExperience[];
@@ -107,6 +134,7 @@ export interface ResumeData {
     style: 'dots' | 'pills' | 'bars';
     position: 'left' | 'right';
   };
+  decoratorSettings?: DecoratorSettings;
 }
 
 export interface ResumeSection {
@@ -118,7 +146,7 @@ export interface ResumeSection {
   required?: boolean;
 }
 
-export type StepType = 'personal' | 'experience' | 'education' | 'skills' | 'aboutMe' | 'languages' | 'interests' | 'certificates' | 'achievements' | 'projects' | 'links' | 'photo' | 'finish';
+export type StepType = 'personal' | 'experience' | 'education' | 'skills' | 'aboutMe' | 'languages' | 'interests' | 'certificates' | 'achievements' | 'projects' | 'links' | 'photo' | 'decorator' | 'finish';
 
 export interface TemplateConfig {
   id: string;

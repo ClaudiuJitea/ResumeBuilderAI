@@ -13,6 +13,7 @@ import InterestsForm from './forms/InterestsForm';
 import CertificatesForm from './forms/CertificatesForm';
 import AchievementsForm from './forms/AchievementsForm';
 import LinksForm from './forms/LinksForm';
+import DecoratorForm from './forms/DecoratorForm';
 import FinishForm from './forms/FinishForm';
 import StepIndicator from './StepIndicator';
 import ResumePreview from './ResumePreview';
@@ -46,6 +47,8 @@ const ResumeBuilder = () => {
         return <AchievementsForm />;
       case 'links':
         return <LinksForm />;
+      case 'decorator':
+        return <DecoratorForm />;
       case 'finish':
         return <FinishForm />;
       default:

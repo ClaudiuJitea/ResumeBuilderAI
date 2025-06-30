@@ -4,6 +4,7 @@ import { useResume } from '../context/ResumeContext';
 import ModernTemplate from './templates/ModernTemplate';
 import ProfessionalTemplate from './templates/ProfessionalTemplate';
 import ColorThemeSelector from './ColorThemeSelector';
+import InteractiveSeparator from './InteractiveSeparator';
 
 const ResumePreview = () => {
   const { state } = useResume();
@@ -35,6 +36,9 @@ const ResumePreview = () => {
         return <ModernTemplate fontSize={fontSize} currentPage={currentPage} />;
     }
   };
+
+  // Get decorations from the context
+  const decorations = state.resumeData.decoratorSettings?.decorations || [];
 
   return (
     <div className="h-screen overflow-y-auto relative">
@@ -110,7 +114,7 @@ const ResumePreview = () => {
       {/* Resume Content - A4 Format */}
       <div className="p-8 bg-gray-100">
         <div 
-          className="mx-auto bg-white shadow-2xl transition-transform duration-300" 
+          className="mx-auto bg-white shadow-2xl transition-transform duration-300 relative" 
           data-resume-preview
           style={{ 
             width: '210mm', 
@@ -123,6 +127,25 @@ const ResumePreview = () => {
           }}
         >
           {renderTemplate()}
+          
+          {/* Decorations Overlay - Only show in decorator step */}
+          {state.builderStep === 'decorator' && decorations.length > 0 && (
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="relative w-full h-full pointer-events-auto">
+                {decorations.map((decoration) => {
+                  if (decoration.type === 'separator') {
+                    return (
+                      <InteractiveSeparator
+                        key={decoration.id}
+                        decoration={decoration}
+                      />
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

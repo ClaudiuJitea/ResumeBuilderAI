@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { ResumeData, ResumeSection, StepType, ColorTheme } from '../types/resume';
+import { ResumeData, ResumeSection, StepType, ColorTheme, DecoratorSettings, Decoration } from '../types/resume';
 import { getSectionsForTemplate, getBuildStepsForTemplate } from '../utils/templateConfig';
 
 interface ResumeState {
@@ -19,7 +19,11 @@ type ResumeAction =
   | { type: 'UPDATE_PERSONAL_INFO'; payload: Partial<ResumeData['personalInfo']> }
   | { type: 'UPDATE_RESUME_DATA'; payload: Partial<ResumeData> }
   | { type: 'UPDATE_BUILD_STEPS'; payload: StepType[] }
-  | { type: 'SET_COLOR_THEME'; payload: ColorTheme };
+  | { type: 'SET_COLOR_THEME'; payload: ColorTheme }
+  | { type: 'UPDATE_DECORATOR_SETTINGS'; payload: Partial<DecoratorSettings> }
+  | { type: 'ADD_DECORATION'; payload: Decoration }
+  | { type: 'UPDATE_DECORATION'; payload: { id: string; updates: Partial<Decoration> } }
+  | { type: 'REMOVE_DECORATION'; payload: string };
 
 const initialState: ResumeState = {
   currentStep: 'landing',
@@ -126,6 +130,99 @@ const resumeReducer = (state: ResumeState, action: ResumeAction): ResumeState =>
         resumeData: {
           ...state.resumeData,
           colorTheme: action.payload
+        }
+      };
+    case 'UPDATE_DECORATOR_SETTINGS':
+      const defaultDecoratorSettings: DecoratorSettings = {
+        selectedFont: 'Roboto',
+        selectedTemplate: 'Classic',
+        selectedColorScheme: '#2563eb',
+        selectedDecorations: [],
+        gdprContent: '',
+        decorations: []
+      };
+      
+      return {
+        ...state,
+        resumeData: {
+          ...state.resumeData,
+          decoratorSettings: {
+            ...defaultDecoratorSettings,
+            ...state.resumeData.decoratorSettings,
+            ...action.payload
+          }
+        }
+      };
+    case 'ADD_DECORATION':
+      const currentDecorations = state.resumeData.decoratorSettings?.decorations || [];
+      const defaultSettings1: DecoratorSettings = {
+        selectedFont: 'Roboto',
+        selectedTemplate: 'Classic',
+        selectedColorScheme: '#2563eb',
+        selectedDecorations: [],
+        gdprContent: '',
+        decorations: []
+      };
+      
+      return {
+        ...state,
+        resumeData: {
+          ...state.resumeData,
+          decoratorSettings: {
+            ...defaultSettings1,
+            ...state.resumeData.decoratorSettings,
+            decorations: [...currentDecorations, action.payload]
+          }
+        }
+      };
+    case 'UPDATE_DECORATION':
+      const existingDecorations = state.resumeData.decoratorSettings?.decorations || [];
+      const defaultSettings2: DecoratorSettings = {
+        selectedFont: 'Roboto',
+        selectedTemplate: 'Classic',
+        selectedColorScheme: '#2563eb',
+        selectedDecorations: [],
+        gdprContent: '',
+        decorations: []
+      };
+      
+      return {
+        ...state,
+        resumeData: {
+          ...state.resumeData,
+          decoratorSettings: {
+            ...defaultSettings2,
+            ...state.resumeData.decoratorSettings,
+            decorations: existingDecorations.map(decoration =>
+              decoration.id === action.payload.id
+                ? { ...decoration, ...action.payload.updates }
+                : decoration
+            )
+          }
+        }
+      };
+    case 'REMOVE_DECORATION':
+      const decorationsToFilter = state.resumeData.decoratorSettings?.decorations || [];
+      const defaultSettings3: DecoratorSettings = {
+        selectedFont: 'Roboto',
+        selectedTemplate: 'Classic',
+        selectedColorScheme: '#2563eb',
+        selectedDecorations: [],
+        gdprContent: '',
+        decorations: []
+      };
+      
+      return {
+        ...state,
+        resumeData: {
+          ...state.resumeData,
+          decoratorSettings: {
+            ...defaultSettings3,
+            ...state.resumeData.decoratorSettings,
+            decorations: decorationsToFilter.filter(
+              decoration => decoration.id !== action.payload
+            )
+          }
         }
       };
     default:

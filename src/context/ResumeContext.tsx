@@ -3,7 +3,7 @@ import { ResumeData, ResumeSection, StepType, ColorTheme, DecoratorSettings, Dec
 import { getSectionsForTemplate, getBuildStepsForTemplate } from '../utils/templateConfig';
 
 interface ResumeState {
-  currentStep: 'landing' | 'templates' | 'sections' | 'builder' | 'gallery';
+  currentStep: 'landing' | 'templates' | 'sections' | 'builder' | 'gallery' | 'admin';
   builderStep: StepType;
   selectedTemplate: string;
   selectedSections: ResumeSection[];

@@ -5,7 +5,10 @@ import {
   ArrowLeft, 
   Search,
   Info,
-  Palette
+  Palette,
+  Copy,
+  Trash2,
+  Plus
 } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
 
@@ -118,6 +121,58 @@ const DecoratorForm = () => {
       }
     });
   }, [selectedFont, selectedTemplate, selectedColorScheme, gdprContent, dispatch]);
+
+  // Get current separators
+  const currentSeparators = decoratorSettings?.decorations?.filter(d => d.type === 'separator') || [];
+
+  // Duplicate separator function
+  const handleDuplicateSeparator = () => {
+    const separatorId = `separator-${Date.now()}`;
+    const offsetX = 20 + Math.random() * 50; // Random offset to avoid overlap
+    const offsetY = 20 + Math.random() * 50;
+    
+    dispatch({
+      type: 'ADD_DECORATION',
+      payload: {
+        id: separatorId,
+        type: 'separator',
+        position: { x: 50 + offsetX, y: 200 + offsetY },
+        size: { width: 200, height: 4 },
+        properties: {
+          color: separatorColor,
+          thickness: 4,
+          opacity: 1
+        }
+      }
+    });
+  };
+
+  // Add new separator function
+  const handleAddSeparator = () => {
+    const separatorId = `separator-${Date.now()}`;
+    dispatch({
+      type: 'ADD_DECORATION',
+      payload: {
+        id: separatorId,
+        type: 'separator',
+        position: { x: 50, y: 200 + (currentSeparators.length * 50) }, // Stack them vertically
+        size: { width: 200, height: 4 },
+        properties: {
+          color: separatorColor,
+          thickness: 4,
+          opacity: 1
+        }
+      }
+    });
+  };
+
+  // Remove specific separator function
+  const handleRemoveSeparator = (separatorId: string) => {
+    dispatch({
+      type: 'REMOVE_DECORATION',
+      payload: separatorId
+    });
+  };
 
   const handleNext = () => {
     const nextStepIndex = state.availableBuildSteps.findIndex(step => step === 'decorator') + 1;
@@ -251,35 +306,109 @@ const DecoratorForm = () => {
           </div>
         </div>
 
-        {/* Separator Color Picker - Only show when Separator is selected */}
+        {/* Separator Management - Only show when Separator is selected */}
         {selectedDecorations.includes('Separator') && (
           <div className="bg-card rounded-xl p-6 border border-border">
-            <h3 className="text-lg font-bold text-primaryText mb-4 flex items-center">
-              <Palette className="w-5 h-5 mr-2 text-accent" />
-              Separator Color
+            <h3 className="text-lg font-bold text-primaryText mb-6 flex items-center">
+              <Palette className="w-5 h-5 mr-2 text-primaryText" />
+              Separator Management
             </h3>
-            <div className="flex items-center space-x-4">
-              <label className="block text-primaryText font-medium">Choose separator color:</label>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="color"
-                  value={separatorColor}
-                  onChange={(e) => handleSeparatorColorChange(e.target.value)}
-                  className="w-10 h-10 rounded-lg border border-border cursor-pointer"
-                  title="Pick separator color"
-                />
-                <input
-                  type="text"
-                  value={separatorColor}
-                  onChange={(e) => handleSeparatorColorChange(e.target.value)}
-                  className="px-3 py-2 bg-background border border-border rounded-lg text-primaryText font-mono text-sm w-24"
-                  placeholder="#000000"
-                />
+            
+            {/* Separator Count and Actions */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <span className="text-primaryText font-medium">
+                    Active Separators: {currentSeparators.length}
+                  </span>
+                  <div className="h-6 w-px bg-border"></div>
+                  <span className="text-primaryText/60 text-sm">
+                    Drag to move, resize from right edge
+                  </span>
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={handleAddSeparator}
+                  className="flex items-center space-x-2 px-4 py-2 bg-accent hover:bg-accent/90 text-background rounded-lg font-medium transition-all duration-200 hover:scale-105"
+                  title="Add new separator"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Separator</span>
+                </button>
+                
+                {currentSeparators.length > 0 && (
+                  <button
+                    onClick={handleDuplicateSeparator}
+                    className="flex items-center space-x-2 px-4 py-2 bg-primaryText hover:bg-primaryText/90 text-background rounded-lg font-medium transition-all duration-200 hover:scale-105"
+                    title="Duplicate last separator"
+                  >
+                    <Copy className="w-4 h-4" />
+                    <span>Duplicate</span>
+                  </button>
+                )}
               </div>
             </div>
-            <p className="text-primaryText/60 text-sm mt-2">
-              This color will be applied to all separator elements on your resume.
-            </p>
+
+            {/* Color Picker */}
+            <div className="mb-6">
+              <div className="flex items-center space-x-4 mb-2">
+                <label className="block text-primaryText font-medium">Separator Color:</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="color"
+                    value={separatorColor}
+                    onChange={(e) => handleSeparatorColorChange(e.target.value)}
+                    className="w-10 h-10 rounded-lg border border-border cursor-pointer"
+                    title="Pick separator color"
+                  />
+                  <input
+                    type="text"
+                    value={separatorColor}
+                    onChange={(e) => handleSeparatorColorChange(e.target.value)}
+                    className="px-3 py-2 bg-background border border-border rounded-lg text-primaryText font-mono text-sm w-24"
+                    placeholder="#000000"
+                  />
+                </div>
+              </div>
+              <p className="text-primaryText/60 text-sm">
+                This color will be applied to all separator elements on your resume.
+              </p>
+            </div>
+
+            {/* Individual Separator List */}
+            {currentSeparators.length > 0 && (
+              <div>
+                <h4 className="text-primaryText font-medium mb-3">Individual Separators:</h4>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {currentSeparators.map((separator, index) => (
+                    <div
+                      key={separator.id}
+                      className="flex items-center justify-between p-3 bg-background rounded-lg border border-border"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 rounded-full bg-primaryText"></div>
+                        <span className="text-primaryText text-sm">
+                          Separator {index + 1}
+                        </span>
+                        <span className="text-primaryText/60 text-xs">
+                          ({Math.round(separator.position.x)}, {Math.round(separator.position.y)})
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleRemoveSeparator(separator.id)}
+                        className="flex items-center justify-center w-8 h-8 text-primaryText/60 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
+                        title="Remove this separator"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

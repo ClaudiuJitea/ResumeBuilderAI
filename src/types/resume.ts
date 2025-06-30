@@ -146,7 +146,7 @@ export interface ResumeSection {
   required?: boolean;
 }
 
-export type StepType = 'personal' | 'experience' | 'education' | 'skills' | 'aboutMe' | 'languages' | 'interests' | 'certificates' | 'achievements' | 'projects' | 'links' | 'photo' | 'decorator' | 'finish';
+export type StepType = 'personal' | 'experience' | 'education' | 'skills' | 'aboutMe' | 'languages' | 'interests' | 'certificates' | 'achievements' | 'projects' | 'links' | 'photo' | 'decorator' | 'finish' | 'admin';
 
 export interface TemplateConfig {
   id: string;

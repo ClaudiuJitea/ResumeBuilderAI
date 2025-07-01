@@ -6,9 +6,7 @@ import {
   X, 
   GripVertical,
   Lightbulb,
-  Star,
-  Circle,
-  BarChart3
+  Circle
 } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
 import { Skill } from '../../types/resume';

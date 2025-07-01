@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, 
   Undo2, 
@@ -21,6 +21,34 @@ const SkillsForm = () => {
   const [skillPosition, setSkillPosition] = useState<'left' | 'right'>(skillsConfig?.position || 'left');
   const [skillStyle, setSkillStyle] = useState<'dots' | 'pills' | 'bars'>(skillsConfig?.style || 'dots');
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [hasAutoPopulated, setHasAutoPopulated] = useState(false);
+
+  // Auto-populate from extracted CV data
+  useEffect(() => {
+    if (state.extractedCVData && !hasAutoPopulated && skills.length === 0) {
+      const cvSkills = state.extractedCVData.skills;
+      
+      if (cvSkills && Array.isArray(cvSkills) && cvSkills.length > 0) {
+        const mappedSkills: Skill[] = cvSkills.map((skill: any, index: number) => ({
+          id: `cv-skill-${Date.now()}-${index}`,
+          name: typeof skill === 'string' ? skill : (skill.name || skill.skill || ''),
+          level: typeof skill === 'object' && skill.level ? 
+                Math.min(Math.max(skill.level, 1), 5) : 
+                3 // Default level
+        })).filter((skill: Skill) => skill.name.trim() !== '');
+
+        if (mappedSkills.length > 0) {
+          dispatch({
+            type: 'UPDATE_RESUME_DATA',
+            payload: { skills: mappedSkills }
+          });
+
+          setHasAutoPopulated(true);
+          console.log('Auto-populated skills from CV data:', mappedSkills);
+        }
+      }
+    }
+  }, [state.extractedCVData, hasAutoPopulated, skills.length, dispatch]);
 
   const addSkill = () => {
     if (newSkillName.trim()) {

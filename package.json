@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "server": "node server/server.js",
     "dev:server": "nodemon server/server.js",
-    "start": "npm run build && npm run server"
+    "start": "npm run build && npm run server",
+    "reset-db": "node server/resetDatabase.js",
+    "migrate-db": "node server/migrateDatabase.js"
   },
   "overrides": {
     "glob": "^10.3.10",
@@ -30,6 +32,10 @@
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.0",
     "lucide-react": "^0.344.0",
+    "multer": "^2.0.1",
+    "node-fetch": "^2.7.0",
+    "openrouter-ai": "^2.1.32",
+    "pdf-parse": "^1.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -40,6 +46,9 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.5",
+    "@types/multer": "^1.4.12",
+    "@types/node-fetch": "^2.6.4",
+    "@types/pdf-parse": "^1.1.5",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.6.0",

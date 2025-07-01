@@ -1,10 +1,14 @@
-import React from 'react';
-import { ArrowRight, Undo2, User } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowRight, Undo2, User, Upload } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
+import AIAssistanceButton from '../ai/AIAssistanceButton';
+import CVParseUpload from '../ai/CVParseUpload';
 
 const PersonalInfoForm = () => {
   const { state, dispatch } = useResume();
   const { personalInfo } = state.resumeData;
+  const [showCVUpload, setShowCVUpload] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<string>('');
 
   const handleInputChange = (field: string, value: string) => {
     dispatch({
@@ -25,6 +29,58 @@ const PersonalInfoForm = () => {
     dispatch({ type: 'SET_STEP', payload: 'sections' });
   };
 
+  const handleCVDataExtracted = (extractedData: any) => {
+    try {
+      // Map extracted data to personal info fields
+      const personalData = extractedData.personal_information || extractedData.personalInfo;
+      
+      if (personalData) {
+        if (personalData.name) {
+          // Split full name into first and last name
+          const nameParts = personalData.name.trim().split(' ');
+          if (nameParts.length >= 2) {
+            handleInputChange('firstName', nameParts[0]);
+            handleInputChange('lastName', nameParts.slice(1).join(' '));
+          } else if (nameParts.length === 1) {
+            handleInputChange('firstName', nameParts[0]);
+          }
+        }
+        
+        // Handle individual name fields if available
+        if (personalData.firstName || personalData.first_name) {
+          handleInputChange('firstName', personalData.firstName || personalData.first_name);
+        }
+        if (personalData.lastName || personalData.last_name) {
+          handleInputChange('lastName', personalData.lastName || personalData.last_name);
+        }
+        
+        if (personalData.email) {
+          handleInputChange('email', personalData.email);
+        }
+        if (personalData.phone) {
+          handleInputChange('phone', personalData.phone);
+        }
+        if (personalData.location) {
+          handleInputChange('location', personalData.location);
+        }
+        if (personalData.position) {
+          handleInputChange('position', personalData.position);
+        }
+      }
+
+      // Store the full extracted data in resume context for use in other forms
+      dispatch({ type: 'SET_EXTRACTED_CV_DATA', payload: extractedData });
+      console.log('Extracted CV data applied to personal info and stored in context:', extractedData);
+
+    } catch (error) {
+      console.error('Error processing extracted CV data:', error);
+    }
+  };
+
+  const handleAISuggestion = (suggestions: string) => {
+    setAiSuggestions(suggestions);
+  };
+
   return (
     <div className="max-w-md mx-auto">
       {/* Info Box */}
@@ -41,6 +97,42 @@ const PersonalInfoForm = () => {
             <User className="text-accent w-6 h-6" />
           </div>
         </div>
+      </div>
+
+      {/* AI Assistance Header */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="text-center mb-4">
+          <h4 className="font-medium text-blue-900 mb-1">AI-Powered Assistance</h4>
+          <p className="text-xs text-blue-700">
+            Get AI help with your personal information
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => setShowCVUpload(true)}
+            className="flex items-center justify-center space-x-2 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg transition-colors text-sm font-medium h-8"
+          >
+            <Upload className="w-4 h-4" />
+            <span>Upload CV</span>
+          </button>
+          <AIAssistanceButton
+            type="suggest"
+            section="personalInfo"
+            context={`Current info: ${personalInfo.firstName} ${personalInfo.lastName}, ${personalInfo.position || 'no position specified'}`}
+            onResult={handleAISuggestion}
+            className="w-full justify-center h-8"
+            size="sm"
+          />
+        </div>
+        
+        {/* AI Suggestions Display */}
+        {aiSuggestions && (
+          <div className="mt-4 p-3 bg-white border border-blue-200 rounded-lg">
+            <h5 className="font-medium text-blue-900 mb-2 text-sm">AI Suggestions:</h5>
+            <div className="text-sm text-blue-800 whitespace-pre-wrap">{aiSuggestions}</div>
+          </div>
+        )}
       </div>
 
       {/* Form Fields */}
@@ -187,6 +279,14 @@ const PersonalInfoForm = () => {
           </button>
         </div>
       </form>
+
+      {/* CV Upload Modal */}
+      {showCVUpload && (
+        <CVParseUpload
+          onClose={() => setShowCVUpload(false)}
+          onDataExtracted={handleCVDataExtracted}
+        />
+      )}
     </div>
   );
 };

@@ -13,13 +13,16 @@ import {
   CheckCircle,
   AlertCircle,
   Calendar,
-  Mail
+  Mail,
+  Key
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { User, PaginatedUsers, CreateUserData, ApiResponse } from '../../types/auth';
+import ApiKeyManagement from './ApiKeyManagement';
 
 const AdminDashboard: React.FC = () => {
   const { token } = useAuth();
+  const [activeTab, setActiveTab] = useState('users');
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState({
     total: 0,
@@ -188,19 +191,58 @@ const AdminDashboard: React.FC = () => {
             <h1 className="text-3xl font-bold text-primaryText">Admin Dashboard</h1>
             <p className="text-primaryText/60 mt-2">User management and system administration</p>
           </div>
-          <div className="flex-shrink-0">
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-accent text-background rounded-lg hover:bg-accent/90 transition-colors w-full sm:w-auto justify-center"
-            >
-              <UserPlus className="w-4 h-4" />
-              <span>Create User</span>
-            </button>
+          {activeTab === 'users' && (
+            <div className="flex-shrink-0">
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-accent text-background rounded-lg hover:bg-accent/90 transition-colors w-full sm:w-auto justify-center"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Create User</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className="border-b border-border">
+            <nav className="flex space-x-8">
+              <button
+                onClick={() => setActiveTab('users')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'users'
+                    ? 'border-accent text-accent'
+                    : 'border-transparent text-primaryText/60 hover:text-primaryText hover:border-border'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <Users className="w-4 h-4" />
+                  <span>User Management</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('api-keys')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'api-keys'
+                    ? 'border-accent text-accent'
+                    : 'border-transparent text-primaryText/60 hover:text-primaryText hover:border-border'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <Key className="w-4 h-4" />
+                  <span>API Keys</span>
+                </div>
+              </button>
+            </nav>
           </div>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        {/* Content */}
+        {activeTab === 'users' && (
+          <>
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <div className="bg-card border border-border rounded-xl p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -488,15 +530,22 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
 
-      {/* Create User Modal */}
-      {showCreateModal && (
-        <CreateUserModal
-          onClose={() => setShowCreateModal(false)}
-          onSubmit={handleCreateUser}
-        />
+        {/* Create User Modal */}
+        {showCreateModal && (
+          <CreateUserModal
+            onClose={() => setShowCreateModal(false)}
+            onSubmit={handleCreateUser}
+          />
+        )}
+        </>
       )}
+
+      {/* API Key Management */}
+      {activeTab === 'api-keys' && (
+        <ApiKeyManagement />
+      )}
+      </div>
     </div>
   );
 };

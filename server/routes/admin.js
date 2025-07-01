@@ -480,4 +480,186 @@ router.get('/dashboard/stats', (req, res) => {
   }
 });
 
+// === API KEY MANAGEMENT ROUTES ===
+
+// Get all API keys
+router.get('/api-keys', (req, res) => {
+  try {
+    const apiKeys = database.apiKeyOperations.getAllApiKeys.all();
+    
+    // Hide actual API keys, only show last 4 characters
+    const sanitizedKeys = apiKeys.map(key => ({
+      ...key,
+      apiKey: `****${key.apiKey.slice(-4)}`
+    }));
+    
+    res.json({
+      success: true,
+      data: { apiKeys: sanitizedKeys }
+    });
+    
+  } catch (error) {
+    console.error('Get API keys error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch API keys'
+    });
+  }
+});
+
+// Save/Update API key
+router.post('/api-keys', (req, res) => {
+  try {
+    const { service, apiKey, selectedModel } = req.body;
+    
+    // Validation
+    if (!service || !apiKey) {
+      return res.status(400).json({
+        success: false,
+        message: 'Service and API key are required'
+      });
+    }
+    
+    // Default model if not provided
+    const model = selectedModel || 'anthropic/claude-3.5-sonnet';
+    
+    // Validate service type
+    const allowedServices = ['openrouter'];
+    if (!allowedServices.includes(service)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid service type'
+      });
+    }
+    
+    // Save/update API key
+    const existingKey = database.apiKeyOperations.getApiKeyByService.get(service);
+    
+    if (existingKey) {
+      database.apiKeyOperations.updateApiKey.run(apiKey, model, 1, service);
+    } else {
+      database.apiKeyOperations.insertApiKey.run(service, apiKey, model, 1);
+    }
+    
+    res.json({
+      success: true,
+      message: `${service} API key saved successfully`
+    });
+    
+  } catch (error) {
+    console.error('Save API key error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to save API key'
+    });
+  }
+});
+
+// Delete API key
+router.delete('/api-keys/:service', (req, res) => {
+  try {
+    const { service } = req.params;
+    
+    database.apiKeyOperations.deleteApiKey.run(service);
+    
+    res.json({
+      success: true,
+      message: `${service} API key deleted successfully`
+    });
+    
+  } catch (error) {
+    console.error('Delete API key error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete API key'
+    });
+  }
+});
+
+// Get available models from OpenRouter
+router.get('/api-keys/openrouter/models', async (req, res) => {
+  try {
+    const apiKeyRecord = database.apiKeyOperations.getApiKey.get('openrouter');
+    
+    if (!apiKeyRecord) {
+      return res.status(400).json({
+        success: false,
+        message: 'OpenRouter API key not configured'
+      });
+    }
+
+    const fetch = require('node-fetch');
+    const response = await fetch('https://openrouter.ai/api/v1/models', {
+      headers: {
+        'Authorization': `Bearer ${apiKeyRecord.apiKey}`,
+        'HTTP-Referer': 'http://localhost:3001',
+        'X-Title': 'ResumeAI Assistant'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenRouter API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // Filter and format models for better UX
+    const formattedModels = data.data
+      .filter(model => !model.id.includes('moderated') && !model.id.includes('extended'))
+      .map(model => ({
+        id: model.id,
+        name: model.name || model.id.split('/').pop(),
+        provider: model.id.split('/')[0],
+        context_length: model.context_length,
+        pricing: model.pricing
+      }))
+      .sort((a, b) => a.provider.localeCompare(b.provider) || a.name.localeCompare(b.name));
+
+    res.json({
+      success: true,
+      data: { models: formattedModels }
+    });
+
+  } catch (error) {
+    console.error('Fetch models error:', error);
+    res.status(500).json({
+      success: false,
+      message: `Failed to fetch models: ${error.message}`
+    });
+  }
+});
+
+// Test API key
+router.post('/api-keys/:service/test', async (req, res) => {
+  try {
+    const { service } = req.params;
+    
+    if (service === 'openrouter') {
+      const aiService = require('../services/aiService');
+      
+      // Test with a simple request
+      await aiService.makeRequest([
+        { role: 'user', content: 'Hello, please respond with "API key test successful"' }
+      ]);
+      
+      res.json({
+        success: true,
+        message: 'API key test successful'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: 'Unknown service'
+      });
+    }
+    
+  } catch (error) {
+    console.error('Test API key error:', error);
+    res.status(500).json({
+      success: false,
+      message: `API key test failed: ${error.message}`
+    });
+  }
+});
+
 module.exports = router; 

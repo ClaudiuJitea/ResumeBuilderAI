@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, 
   Undo2, 
@@ -18,6 +18,35 @@ const WorkExperienceForm = () => {
   const { workExperience } = state.resumeData;
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [hasAutoPopulated, setHasAutoPopulated] = useState(false);
+
+  // Auto-populate from extracted CV data
+  useEffect(() => {
+    if (state.extractedCVData && !hasAutoPopulated && workExperience.length === 0) {
+      const cvWorkExperience = state.extractedCVData.work_experience || state.extractedCVData.workExperience;
+      
+      if (cvWorkExperience && Array.isArray(cvWorkExperience) && cvWorkExperience.length > 0) {
+        const mappedExperience: WorkExperience[] = cvWorkExperience.map((exp: any, index: number) => ({
+          id: `cv-${Date.now()}-${index}`,
+          company: exp.company || '',
+          position: exp.position || exp.title || '',
+          startDate: exp.start_date || exp.startDate || exp.dates?.split(' - ')[0] || '',
+          endDate: exp.end_date || exp.endDate || (exp.dates?.includes(' - ') ? exp.dates.split(' - ')[1] : '') || '',
+          current: (exp.end_date || exp.endDate || exp.dates || '').toLowerCase().includes('present') || 
+                   (exp.end_date || exp.endDate || exp.dates || '').toLowerCase().includes('current'),
+          description: exp.description || ''
+        }));
+
+        dispatch({
+          type: 'UPDATE_RESUME_DATA',
+          payload: { workExperience: mappedExperience }
+        });
+
+        setHasAutoPopulated(true);
+        console.log('Auto-populated work experience from CV data:', mappedExperience);
+      }
+    }
+  }, [state.extractedCVData, hasAutoPopulated, workExperience.length, dispatch]);
 
   const toggleExpanded = (id: string) => {
     const newExpanded = new Set(expandedEntries);

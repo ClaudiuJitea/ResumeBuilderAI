@@ -53,10 +53,24 @@ const createTables = () => {
     )
   `;
 
+  // API keys table for AI services
+  const createApiKeysTable = `
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      service TEXT NOT NULL UNIQUE,
+      apiKey TEXT NOT NULL,
+      selectedModel TEXT DEFAULT 'anthropic/claude-3.5-sonnet',
+      isActive INTEGER DEFAULT 1,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
+
   // Execute table creation
   db.exec(createUsersTable);
   db.exec(createSessionsTable);
   db.exec(createResumesTable);
+  db.exec(createApiKeysTable);
 
   console.log('Database tables created successfully');
 };
@@ -78,7 +92,7 @@ const createDefaultAdmin = async () => {
 };
 
 // Initialize prepared statements after tables are created
-let userOperations, sessionOperations, resumeOperations;
+let userOperations, sessionOperations, resumeOperations, apiKeyOperations;
 
 const initializePreparedStatements = () => {
   // User operations
@@ -186,17 +200,73 @@ const initializePreparedStatements = () => {
       DELETE FROM user_resumes WHERE id = ? AND userId = ?
     `)
   };
+
+  // API key operations
+  apiKeyOperations = {
+    // Check if API key exists
+    getApiKeyByService: db.prepare(`
+      SELECT * FROM api_keys WHERE service = ?
+    `),
+
+    // Insert new API key
+    insertApiKey: db.prepare(`
+      INSERT INTO api_keys (service, apiKey, selectedModel, isActive) 
+      VALUES (?, ?, ?, ?)
+    `),
+
+    // Update existing API key
+    updateApiKey: db.prepare(`
+      UPDATE api_keys SET apiKey = ?, selectedModel = ?, isActive = ?, updatedAt = CURRENT_TIMESTAMP 
+      WHERE service = ?
+    `),
+
+    // Get API key by service
+    getApiKey: db.prepare(`
+      SELECT * FROM api_keys WHERE service = ? AND isActive = 1
+    `),
+
+    // Get all API keys
+    getAllApiKeys: db.prepare(`
+      SELECT * FROM api_keys ORDER BY createdAt DESC
+    `),
+
+    // Delete API key
+    deleteApiKey: db.prepare(`
+      DELETE FROM api_keys WHERE service = ?
+    `),
+
+    // Deactivate API key
+    deactivateApiKey: db.prepare(`
+      UPDATE api_keys SET isActive = 0, updatedAt = CURRENT_TIMESTAMP WHERE service = ?
+    `)
+  };
 };
 
 // Initialize database
 const initializeDatabase = async () => {
   try {
+    console.log('🔧 Creating database tables...');
     createTables();
+    
+    console.log('📝 Initializing prepared statements...');
     initializePreparedStatements();
+    
+    console.log('👤 Creating default admin user...');
     await createDefaultAdmin();
-    console.log('Database initialized successfully');
+    
+    console.log('✅ Database initialized successfully');
+    
+    // Test API key operations
+    try {
+      apiKeyOperations.getAllApiKeys.all();
+      console.log('🔑 API key operations ready');
+    } catch (error) {
+      console.error('⚠️  API key operations failed:', error.message);
+    }
+    
   } catch (error) {
-    console.error('Database initialization error:', error);
+    console.error('❌ Database initialization error:', error);
+    throw error;
   }
 };
 
@@ -214,5 +284,6 @@ module.exports = {
   cleanExpiredSessions,
   get userOperations() { return userOperations; },
   get sessionOperations() { return sessionOperations; },
-  get resumeOperations() { return resumeOperations; }
+  get resumeOperations() { return resumeOperations; },
+  get apiKeyOperations() { return apiKeyOperations; }
 }; 

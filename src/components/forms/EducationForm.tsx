@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, 
   Undo2, 
@@ -21,6 +21,53 @@ const EducationForm = () => {
   const { education } = state.resumeData;
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [hasAutoPopulated, setHasAutoPopulated] = useState(false);
+
+  // Auto-populate from extracted CV data
+  useEffect(() => {
+    if (state.extractedCVData && !hasAutoPopulated && education.length === 0) {
+      const cvEducation = state.extractedCVData.education;
+      
+      if (cvEducation && Array.isArray(cvEducation) && cvEducation.length > 0) {
+        const mappedEducation: Education[] = cvEducation.map((edu: any, index: number) => {
+          // Determine education type based on degree/school name
+          let educationType = 'other';
+          const degree = (edu.degree || '').toLowerCase();
+          const school = (edu.school || edu.institution || '').toLowerCase();
+          
+          if (degree.includes('bachelor') || degree.includes('master') || degree.includes('phd') || 
+              degree.includes('doctorate') || school.includes('university') || school.includes('college')) {
+            educationType = 'university';
+          } else if (degree.includes('diploma') || school.includes('technical') || school.includes('polytechnic')) {
+            educationType = 'technical';
+          } else if (school.includes('high school') || school.includes('secondary')) {
+            educationType = 'high-school';
+          }
+
+          return {
+            id: `cv-edu-${Date.now()}-${index}`,
+            type: educationType,
+            institution: edu.school || edu.institution || '',
+            degree: edu.degree || '',
+            field: edu.field || edu.major || '',
+            startDate: edu.start_date || edu.startDate || edu.dates?.split(' - ')[0] || '',
+            endDate: edu.end_date || edu.endDate || (edu.dates?.includes(' - ') ? edu.dates.split(' - ')[1] : '') || '',
+            current: (edu.end_date || edu.endDate || edu.dates || '').toLowerCase().includes('present') || 
+                     (edu.end_date || edu.endDate || edu.dates || '').toLowerCase().includes('current'),
+            additionalInfo: edu.description || edu.additionalInfo || ''
+          };
+        });
+
+        dispatch({
+          type: 'UPDATE_RESUME_DATA',
+          payload: { education: mappedEducation }
+        });
+
+        setHasAutoPopulated(true);
+        console.log('Auto-populated education from CV data:', mappedEducation);
+      }
+    }
+  }, [state.extractedCVData, hasAutoPopulated, education.length, dispatch]);
 
   const educationTypes = [
     { id: 'high-school', name: 'High School', icon: School },

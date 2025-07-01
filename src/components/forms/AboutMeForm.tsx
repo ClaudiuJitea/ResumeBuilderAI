@@ -13,6 +13,7 @@ import {
   Briefcase
 } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
+import AIAssistanceButton from '../ai/AIAssistanceButton';
 
 const AboutMeForm = () => {
   const { state, dispatch } = useResume();
@@ -21,6 +22,7 @@ const AboutMeForm = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedTone, setSelectedTone] = useState<'professional' | 'creative' | 'friendly'>('professional');
+  const [aiSuggestions, setAiSuggestions] = useState<string>('');
 
   const tones = [
     { 
@@ -107,6 +109,14 @@ const AboutMeForm = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleAISuggestion = (suggestions: string) => {
+    setAiSuggestions(suggestions);
+  };
+
+  const handleAIRephrase = (rephrasedText: string) => {
+    setCurrentText(rephrasedText);
+  };
+
   const handleNext = () => {
     saveAboutMe();
     const currentIndex = state.availableBuildSteps.findIndex(step => step === state.builderStep);
@@ -177,6 +187,52 @@ const AboutMeForm = () => {
             );
           })}
         </div>
+      </div>
+
+      {/* AI Assistance Section */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <h4 className="font-medium text-blue-900 mb-3">AI Writing Assistant</h4>
+        <div className="flex flex-wrap gap-2 mb-4">
+          <AIAssistanceButton
+            type="suggest"
+            section="aboutMe"
+            context={`Name: ${personalInfo.firstName} ${personalInfo.lastName}, Position: ${personalInfo.position || 'professional'}, Tone: ${selectedTone}`}
+            onResult={handleAISuggestion}
+            size="sm"
+          />
+          {currentText && (
+            <>
+              <AIAssistanceButton
+                type="rephrase"
+                currentText={currentText}
+                style="professional"
+                onResult={handleAIRephrase}
+                size="sm"
+              />
+              <AIAssistanceButton
+                type="improve"
+                section="aboutMe"
+                currentText={currentText}
+                onResult={handleAIRephrase}
+                size="sm"
+              />
+            </>
+          )}
+        </div>
+        
+        {/* AI Suggestions Display */}
+        {aiSuggestions && (
+          <div className="p-3 bg-white border border-blue-200 rounded-lg">
+            <h5 className="font-medium text-blue-900 mb-2">AI Suggestions:</h5>
+            <div className="text-sm text-blue-800 whitespace-pre-wrap">{aiSuggestions}</div>
+            <button
+              onClick={() => setCurrentText(aiSuggestions)}
+              className="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors"
+            >
+              Use This Text
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Main Text Area */}

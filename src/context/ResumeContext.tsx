@@ -9,6 +9,7 @@ interface ResumeState {
   selectedSections: ResumeSection[];
   availableBuildSteps: StepType[];
   resumeData: ResumeData;
+  extractedCVData?: any;
 }
 
 type ResumeAction = 
@@ -23,7 +24,8 @@ type ResumeAction =
   | { type: 'UPDATE_DECORATOR_SETTINGS'; payload: Partial<DecoratorSettings> }
   | { type: 'ADD_DECORATION'; payload: Decoration }
   | { type: 'UPDATE_DECORATION'; payload: { id: string; updates: Partial<Decoration> } }
-  | { type: 'REMOVE_DECORATION'; payload: string };
+  | { type: 'REMOVE_DECORATION'; payload: string }
+  | { type: 'SET_EXTRACTED_CV_DATA'; payload: any };
 
 const initialState: ResumeState = {
   currentStep: 'landing',
@@ -224,6 +226,11 @@ const resumeReducer = (state: ResumeState, action: ResumeAction): ResumeState =>
             )
           }
         }
+      };
+    case 'SET_EXTRACTED_CV_DATA':
+      return {
+        ...state,
+        extractedCVData: action.payload
       };
     default:
       return state;

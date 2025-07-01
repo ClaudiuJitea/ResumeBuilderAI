@@ -99,7 +99,7 @@ const TemplateSelection = () => {
                   Other <span className="text-accent">Templates</span>
                 </h2>
                 <div className="space-y-4 mb-6">
-                  {otherTemplates.map((template, index) => (
+                  {otherTemplates.map((template) => (
                     <div
                       key={template.id}
                       className="bg-slate-800 rounded-lg shadow-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-all duration-200 hover:shadow-xl p-4"

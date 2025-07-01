@@ -212,6 +212,45 @@ class AIService {
     return await this.makeRequest(messages);
   }
 
+  async generateCombinedCVProfile(targetRole, extractedCVDataArray) {
+    const cvDataSummary = extractedCVDataArray.map((cvData, index) => 
+      `CV ${index + 1}:\n${JSON.stringify(cvData, null, 2)}`
+    ).join('\n\n');
+
+    const messages = [
+      {
+        role: 'system',
+        content: `You are a professional CV analysis and combination assistant. You will analyze multiple CVs and create a comprehensive profile optimized for a specific target role.
+
+        Your task:
+        1. Analyze all provided CVs and extract the best information from each
+        2. Combine and optimize the information for the target role: "${targetRole}"
+        3. Remove duplicates and consolidate similar experiences
+        4. Enhance descriptions to align with the target role
+        5. Prioritize the most relevant experiences and skills
+
+        Return a JSON object with these sections:
+        - personal_information (best contact info and professional title optimized for target role)
+        - work_experience (combined and optimized, most relevant first)
+        - education (all education, most relevant first)
+        - skills (comprehensive list, grouped by relevance to target role)
+        - projects (best projects that showcase relevant skills)
+        - certifications (all relevant certifications)
+        - achievements (most impressive achievements)
+        - languages (all languages with highest proficiency levels)
+
+        Focus on quality over quantity and relevance to the target role.`
+      },
+      {
+        role: 'user',
+        content: `Target role: ${targetRole}\n\nCVs to analyze and combine:\n\n${cvDataSummary}`
+      }
+    ];
+
+    const response = await this.makeRequest(messages, null, 3000);
+    return this.cleanJsonResponse(response);
+  }
+
   async generateJobTailoredSuggestions(jobDescription, resumeData) {
     const messages = [
       {
@@ -228,4 +267,4 @@ class AIService {
   }
 }
 
-module.exports = new AIService(); 
+module.exports = AIService; 

@@ -9,6 +9,7 @@ import SectionSelection from './components/SectionSelection';
 import ResumeBuilder from './components/ResumeBuilder';
 import AuthPage from './components/auth/AuthPage';
 import AdminDashboard from './components/admin/AdminDashboard';
+import YourCVs from './components/YourCVs';
 
 const AppContent = () => {
   const { state } = useResume();
@@ -53,6 +54,8 @@ const AppContent = () => {
         return <SectionSelection />;
       case 'builder':
         return <ResumeBuilder />;
+      case 'yourCVs':
+        return <YourCVs />;
       default:
         return <LandingPage />;
     }

@@ -635,7 +635,8 @@ router.post('/api-keys/:service/test', async (req, res) => {
     const { service } = req.params;
     
     if (service === 'openrouter') {
-      const aiService = require('../services/aiService');
+      const AIService = require('../services/aiService');
+      const aiService = new AIService();
       
       // Test with a simple request
       await aiService.makeRequest([

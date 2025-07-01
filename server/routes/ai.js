@@ -2,7 +2,8 @@ const express = require('express');
 const multer = require('multer');
 const pdf = require('pdf-parse');
 const { authenticateToken } = require('../middleware/auth');
-const aiService = require('../services/aiService');
+const AIService = require('../services/aiService');
+const aiService = new AIService();
 
 const router = express.Router();
 

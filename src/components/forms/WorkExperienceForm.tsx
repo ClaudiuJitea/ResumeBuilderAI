@@ -277,23 +277,82 @@ const WorkExperienceForm = () => {
     setDraggedItem(null);
   };
 
-  const generateAIDescription = (position: string, company: string) => {
-    // Simulate AI generation with a placeholder
-    const aiDescriptions = [
-      `Responsible for developing and implementing strategic initiatives at ${company}. Led cross-functional teams to achieve key business objectives and drive operational excellence.`,
-      `Managed day-to-day operations and contributed to the growth of ${company}. Collaborated with stakeholders to deliver high-quality results and exceed performance targets.`,
-      `Executed key projects and initiatives in the ${position} role at ${company}. Demonstrated strong leadership skills and contributed to team success through innovative solutions.`
-    ];
-    
-    const randomDescription = aiDescriptions[Math.floor(Math.random() * aiDescriptions.length)];
-    return randomDescription;
+  const enhanceDescription = async (position: string, company: string, currentDescription: string) => {
+    try {
+      // If there's existing description, enhance it; otherwise create a professional template
+      let textToEnhance = currentDescription;
+      
+      if (!textToEnhance || textToEnhance.trim().length === 0) {
+        // Create a basic template if no description exists
+        textToEnhance = `Worked as ${position} at ${company}. Responsible for daily tasks and contributing to team objectives.`;
+      }
+      
+      const response = await fetch('/api/ai/rephrase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          text: textToEnhance,
+          style: 'professional'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to enhance description');
+      }
+
+      const data = await response.json();
+      let enhancedText = data.data.rephrasedText;
+      
+      // Clean up the response if it contains multiple options or explanations
+      if (enhancedText.includes('**Option') || enhancedText.includes('Here are a few options')) {
+        // Extract the first clean option or create a professional description
+        const lines = enhancedText.split('\n');
+        for (const line of lines) {
+          // Look for lines that start with bullet points or quotes that contain actual content
+          if (line.includes('"') && !line.includes('Option') && !line.includes('Key improvements')) {
+            const match = line.match(/"([^"]+)"/);
+            if (match && match[1].length > 20) {
+              enhancedText = match[1];
+              break;
+            }
+          }
+        }
+        
+        // If we couldn't extract a clean option, create a professional one
+        if (enhancedText.includes('**Option') || enhancedText.includes('Here are a few options')) {
+          enhancedText = `Executed key responsibilities as ${position} at ${company}, contributing to operational excellence through strategic planning and effective collaboration. Managed daily workflows while maintaining high performance standards and delivering measurable results.`;
+        }
+      }
+      
+      return enhancedText;
+    } catch (error) {
+      console.error('Error enhancing description:', error);
+      // Fallback to a more professional template
+      return `Served as ${position} at ${company}, contributing to organizational goals through dedicated work and professional collaboration. Managed responsibilities efficiently while maintaining high standards of performance and supporting team objectives.`;
+    }
   };
 
-  const handleAIGenerate = (id: string) => {
+  const handleAIGenerate = async (id: string) => {
     const entry = workExperience.find(exp => exp.id === id);
     if (entry && entry.position && entry.company) {
-      const aiDescription = generateAIDescription(entry.position, entry.company);
-      updateEntry(id, 'description', aiDescription);
+      // Show loading state
+      updateEntry(id, 'description', 'Enhancing with AI...');
+      
+      try {
+        const enhancedDescription = await enhanceDescription(
+          entry.position, 
+          entry.company, 
+          entry.description
+        );
+        updateEntry(id, 'description', enhancedDescription);
+      } catch (error) {
+        // Restore original description on error
+        updateEntry(id, 'description', entry.description);
+        console.error('Failed to enhance description:', error);
+      }
     }
   };
 
@@ -419,7 +478,7 @@ const WorkExperienceForm = () => {
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <label className="block text-primaryText text-sm font-medium">
-                          Job Description
+                          Job Description & Responsibilities
                         </label>
                         <button
                           onClick={() => handleAIGenerate(entry.id)}
@@ -431,15 +490,15 @@ const WorkExperienceForm = () => {
                           }`}
                         >
                           <Sparkles className="w-4 h-4" />
-                          <span>AI</span>
+                          <span>AI Enhance</span>
                         </button>
                       </div>
                       <textarea
                         value={entry.description}
                         onChange={(e) => updateEntry(entry.id, 'description', e.target.value)}
-                        rows={4}
+                        rows={6}
                         className="w-full px-3 py-2 bg-background border border-border rounded-lg text-primaryText focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none"
-                        placeholder="Describe your responsibilities"
+                        placeholder="Describe your key responsibilities, daily tasks, achievements, and workflow. Include specific projects, technologies used, and measurable results. Click 'AI Enhance' to polish your description with professional language and industry-specific terminology."
                       />
                     </div>
 

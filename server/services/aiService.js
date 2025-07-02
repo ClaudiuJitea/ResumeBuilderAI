@@ -485,20 +485,28 @@ Expected output: ["VMware vSphere", "Docker Containers", "Firewalls", "Routing",
 
   async rephraseContent(originalText, style = 'professional') {
     const stylePrompts = {
-      professional: 'Rephrase this text to be more professional and impactful for a resume',
-      concise: 'Rephrase this text to be more concise while maintaining all key information',
-      detailed: 'Rephrase this text to be more detailed and comprehensive',
-      actionOriented: 'Rephrase this text to emphasize actions and achievements using strong action verbs'
+      professional: 'Rephrase this text to be more professional and impactful for a resume. Return ONLY the enhanced text, no explanations or multiple options.',
+      concise: 'Rephrase this text to be more concise while maintaining all key information. Return ONLY the enhanced text.',
+      detailed: 'Rephrase this text to be more detailed and comprehensive. Return ONLY the enhanced text.',
+      actionOriented: 'Rephrase this text to emphasize actions and achievements using strong action verbs. Return ONLY the enhanced text.'
     };
 
     const messages = [
       {
         role: 'system',
-        content: `You are a professional resume writing assistant. ${stylePrompts[style] || stylePrompts.professional}. Maintain the factual content while improving the presentation.`
+        content: `You are a professional resume writing assistant. ${stylePrompts[style] || stylePrompts.professional}. 
+
+CRITICAL INSTRUCTIONS:
+- Return ONLY the enhanced text that can be directly used in a resume
+- DO NOT provide multiple options or explanations
+- DO NOT include phrases like "Here are options" or "**Option 1**"
+- DO NOT include any formatting markers or bullet points
+- Return a single, polished paragraph that directly replaces the original text
+- Maintain the factual content while improving the professional presentation`
       },
       {
         role: 'user',
-        content: `Rephrase this text: "${originalText}"`
+        content: `Enhance this work experience description for a resume: "${originalText}"`
       }
     ];
 

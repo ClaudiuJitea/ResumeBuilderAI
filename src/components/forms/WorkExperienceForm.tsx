@@ -26,16 +26,151 @@ const WorkExperienceForm = () => {
       const cvWorkExperience = state.extractedCVData.work_experience || state.extractedCVData.workExperience;
       
       if (cvWorkExperience && Array.isArray(cvWorkExperience) && cvWorkExperience.length > 0) {
-        const mappedExperience: WorkExperience[] = cvWorkExperience.map((exp: any, index: number) => ({
-          id: `cv-${Date.now()}-${index}`,
-          company: exp.company || '',
-          position: exp.position || exp.title || '',
-          startDate: exp.start_date || exp.startDate || exp.dates?.split(' - ')[0] || '',
-          endDate: exp.end_date || exp.endDate || (exp.dates?.includes(' - ') ? exp.dates.split(' - ')[1] : '') || '',
-          current: (exp.end_date || exp.endDate || exp.dates || '').toLowerCase().includes('present') || 
-                   (exp.end_date || exp.endDate || exp.dates || '').toLowerCase().includes('current'),
-          description: exp.description || ''
-        }));
+        console.log('Auto-populating work experience from CV data:', cvWorkExperience);
+        
+        const mappedExperience: WorkExperience[] = cvWorkExperience.map((exp: any, index: number) => {
+          // Helper function to parse and format dates
+          const parseDate = (dateStr: string): string => {
+            if (!dateStr) return '';
+            
+            // Handle various date formats
+            const dateString = dateStr.toString().trim();
+            
+            // If it's already in MM/YYYY format, return as is
+            if (/^\d{2}\/\d{4}$/.test(dateString)) {
+              return dateString;
+            }
+            
+            // If it's already in MM-YYYY format, convert to MM/YYYY
+            if (/^\d{2}-\d{4}$/.test(dateString)) {
+              return dateString.replace('-', '/');
+            }
+            
+            // Handle Month YYYY format (e.g., "January 2020", "Jan 2020")
+            const monthYearMatch = dateString.match(/^(\w+)\s+(\d{4})$/i);
+            if (monthYearMatch) {
+              const monthName = monthYearMatch[1].toLowerCase();
+              const year = monthYearMatch[2];
+              
+              const monthMap: { [key: string]: string } = {
+                'january': '01', 'jan': '01',
+                'february': '02', 'feb': '02',
+                'march': '03', 'mar': '03',
+                'april': '04', 'apr': '04',
+                'may': '05',
+                'june': '06', 'jun': '06',
+                'july': '07', 'jul': '07',
+                'august': '08', 'aug': '08',
+                'september': '09', 'sep': '09', 'sept': '09',
+                'october': '10', 'oct': '10',
+                'november': '11', 'nov': '11',
+                'december': '12', 'dec': '12'
+              };
+              
+              const month = monthMap[monthName] || '01';
+              return `${month}/${year}`;
+            }
+            
+            // Handle YYYY-MM format
+            if (/^\d{4}-\d{2}$/.test(dateString)) {
+              const [year, month] = dateString.split('-');
+              return `${month}/${year}`;
+            }
+            
+            // Handle YYYY/MM format
+            if (/^\d{4}\/\d{2}$/.test(dateString)) {
+              const [year, month] = dateString.split('/');
+              return `${month}/${year}`;
+            }
+            
+            // Handle just year (YYYY)
+            if (/^\d{4}$/.test(dateString)) {
+              return `01/${dateString}`;
+            }
+            
+            // Return as is for other formats
+            return dateString;
+          };
+
+          // Determine start and end dates from various possible fields
+          let startDate = '';
+          let endDate = '';
+          let isCurrent = false;
+
+          // Check for start_date/end_date fields
+          if (exp.start_date) {
+            startDate = parseDate(exp.start_date);
+          }
+          if (exp.end_date) {
+            endDate = parseDate(exp.end_date);
+            isCurrent = ['present', 'current', 'ongoing'].some(term => 
+              exp.end_date.toString().toLowerCase().includes(term)
+            );
+          }
+
+          // Check for startDate/endDate fields (alternative naming)
+          if (!startDate && exp.startDate) {
+            startDate = parseDate(exp.startDate);
+          }
+          if (!endDate && exp.endDate) {
+            endDate = parseDate(exp.endDate);
+            isCurrent = ['present', 'current', 'ongoing'].some(term => 
+              exp.endDate.toString().toLowerCase().includes(term)
+            );
+          }
+
+          // Check for duration field and try to parse it
+          if ((!startDate || !endDate) && exp.duration) {
+            const durationStr = exp.duration.toString();
+            
+            // Try to parse "Month YYYY - Month YYYY" or similar formats
+            const durationMatch = durationStr.match(/^(.+?)\s*[-–—]\s*(.+?)$/);
+            if (durationMatch) {
+              if (!startDate) {
+                startDate = parseDate(durationMatch[1].trim());
+              }
+              if (!endDate) {
+                const endPart = durationMatch[2].trim();
+                isCurrent = ['present', 'current', 'ongoing'].some(term => 
+                  endPart.toLowerCase().includes(term)
+                );
+                if (!isCurrent) {
+                  endDate = parseDate(endPart);
+                }
+              }
+            }
+          }
+
+          // Check for dates field (legacy support)
+          if ((!startDate || !endDate) && exp.dates) {
+            const datesStr = exp.dates.toString();
+            const datesMatch = datesStr.match(/^(.+?)\s*[-–—]\s*(.+?)$/);
+            if (datesMatch) {
+              if (!startDate) {
+                startDate = parseDate(datesMatch[1].trim());
+              }
+              if (!endDate) {
+                const endPart = datesMatch[2].trim();
+                isCurrent = ['present', 'current', 'ongoing'].some(term => 
+                  endPart.toLowerCase().includes(term)
+                );
+                if (!isCurrent) {
+                  endDate = parseDate(endPart);
+                }
+              }
+            }
+          }
+
+          return {
+            id: `cv-${Date.now()}-${index}`,
+            company: exp.company || '',
+            position: exp.position || exp.title || exp.role || '',
+            startDate: startDate,
+            endDate: endDate,
+            current: isCurrent,
+            description: exp.description || ''
+          };
+        });
 
         dispatch({
           type: 'UPDATE_RESUME_DATA',
@@ -44,6 +179,7 @@ const WorkExperienceForm = () => {
 
         setHasAutoPopulated(true);
         console.log('Auto-populated work experience from CV data:', mappedExperience);
+        console.log(`Successfully mapped ${mappedExperience.length} work experience entries`);
       }
     }
   }, [state.extractedCVData, hasAutoPopulated, workExperience.length, dispatch]);

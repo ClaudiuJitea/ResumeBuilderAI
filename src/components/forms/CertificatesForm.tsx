@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, 
   Undo2, 
@@ -29,6 +29,7 @@ const CertificatesForm = () => {
   const { certificates } = state.resumeData;
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [hasAutoPopulated, setHasAutoPopulated] = useState(false);
 
   // Convert string array to Certificate objects for backward compatibility
   const certificateObjects: Certificate[] = certificates.map((cert, index) => {
@@ -42,6 +43,89 @@ const CertificatesForm = () => {
     }
     return cert as Certificate;
   });
+
+  // Auto-populate from extracted CV data
+  useEffect(() => {
+    if (state.extractedCVData && !hasAutoPopulated && certificates.length === 0) {
+      const cvCertifications = state.extractedCVData.certifications || state.extractedCVData.certificates;
+      
+      if (cvCertifications && Array.isArray(cvCertifications) && cvCertifications.length > 0) {
+        console.log('Auto-populating certifications from CV data:', cvCertifications);
+        
+        const mappedCertifications: Certificate[] = cvCertifications.map((cert: any, index: number) => {
+          // Helper function to parse and format dates
+          const parseDate = (dateStr: string): string => {
+            if (!dateStr) return '';
+            
+            // Handle various date formats
+            const dateString = dateStr.toString().trim();
+            
+            // If it's already in MM/YYYY format, return as is
+            if (/^\d{2}\/\d{4}$/.test(dateString)) {
+              return dateString;
+            }
+            
+            // If it's already in MM-YYYY format, convert to MM/YYYY
+            if (/^\d{2}-\d{4}$/.test(dateString)) {
+              return dateString.replace('-', '/');
+            }
+            
+            // Handle Month YYYY format (e.g., "January 2020", "Jan 2020")
+            const monthYearMatch = dateString.match(/^(\w+)\s+(\d{4})$/i);
+            if (monthYearMatch) {
+              const monthName = monthYearMatch[1].toLowerCase();
+              const year = monthYearMatch[2];
+              
+              const monthMap: { [key: string]: string } = {
+                'january': '01', 'jan': '01',
+                'february': '02', 'feb': '02',
+                'march': '03', 'mar': '03',
+                'april': '04', 'apr': '04',
+                'may': '05',
+                'june': '06', 'jun': '06',
+                'july': '07', 'jul': '07',
+                'august': '08', 'aug': '08',
+                'september': '09', 'sep': '09', 'sept': '09',
+                'october': '10', 'oct': '10',
+                'november': '11', 'nov': '11',
+                'december': '12', 'dec': '12'
+              };
+              
+              const month = monthMap[monthName] || '01';
+              return `${month}/${year}`;
+            }
+            
+            // Handle just year (YYYY)
+            if (/^\d{4}$/.test(dateString)) {
+              return `01/${dateString}`;
+            }
+            
+            // Return as is for other formats
+            return dateString;
+          };
+
+          return {
+            id: `cv-cert-${Date.now()}-${index}`,
+            name: cert.name || cert.title || cert.certification || '',
+            issuer: cert.issuer || cert.organization || cert.issuing_organization || cert.provider || '',
+            date: parseDate(cert.date_obtained || cert.date || cert.year || ''),
+            expiryDate: parseDate(cert.expiry_date || cert.expires || ''),
+            credentialId: cert.credential_id || cert.credentialId || '',
+            credentialUrl: cert.credential_url || cert.credentialUrl || cert.url || ''
+          };
+        });
+
+        dispatch({
+          type: 'UPDATE_RESUME_DATA',
+          payload: { certificates: mappedCertifications }
+        });
+
+        setHasAutoPopulated(true);
+        console.log('Auto-populated certifications from CV data:', mappedCertifications);
+        console.log(`Successfully mapped ${mappedCertifications.length} certification entries`);
+      }
+    }
+  }, [state.extractedCVData, hasAutoPopulated, certificates.length, dispatch]);
 
   const toggleExpanded = (id: string) => {
     const newExpanded = new Set(expandedEntries);

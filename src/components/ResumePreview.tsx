@@ -21,6 +21,15 @@ const ResumePreview = () => {
     setZoomLevel(parseInt(e.target.value));
   };
 
+  // Add zoom control functions
+  const handleZoomOut = () => {
+    setZoomLevel(Math.max(30, zoomLevel - 10));
+  };
+
+  const handleZoomIn = () => {
+    setZoomLevel(Math.min(150, zoomLevel + 10));
+  };
+
   // Determine if we need multiple pages based on content
   const { workExperience, projects, skills } = state.resumeData;
   const needsSecondPage = workExperience.length > 2 || projects.length > 0 || skills.length > 6;
@@ -153,7 +162,14 @@ const ResumePreview = () => {
       <div className="fixed bottom-0 left-1/2 right-0 bg-card/95 backdrop-blur-sm border-t border-border p-4 z-20">
         <div className="max-w-md mx-auto">
           <div className="flex items-center space-x-4">
-            <ZoomOut className="w-5 h-5 text-primaryText/60" />
+            <button 
+              onClick={handleZoomOut}
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-background border border-border text-primaryText/60 hover:text-accent hover:border-accent/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={zoomLevel <= 30}
+              title="Zoom Out (10%)"
+            >
+              <ZoomOut className="w-5 h-5" />
+            </button>
             <div className="flex-1 flex items-center space-x-3">
               <span className="text-sm text-primaryText/60 min-w-[40px]">Zoom:</span>
               <input 
@@ -169,7 +185,14 @@ const ResumePreview = () => {
               />
               <span className="text-sm text-primaryText font-medium min-w-[45px]">{zoomLevel}%</span>
             </div>
-            <ZoomIn className="w-5 h-5 text-primaryText/60" />
+            <button 
+              onClick={handleZoomIn}
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-background border border-border text-primaryText/60 hover:text-accent hover:border-accent/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={zoomLevel >= 150}
+              title="Zoom In (10%)"
+            >
+              <ZoomIn className="w-5 h-5" />
+            </button>
           </div>
           
           {/* Quick Zoom Buttons */}

@@ -305,7 +305,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
               className="text-gray-600 leading-relaxed"
               style={{ 
                 fontSize: `${Math.max(8, 14 * scaleFactor)}px`,
-                lineHeight: `${Math.max(12, 20 * scaleFactor)}px`
+                lineHeight: `${Math.max(12, 20 * scaleFactor)}px`,
+                whiteSpace: 'pre-line'
               }}
             >
               {state.resumeData.aboutMe || 
@@ -371,7 +372,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
                           className="text-gray-600 leading-relaxed"
                           style={{ 
                             fontSize: `${Math.max(8, 12 * scaleFactor)}px`,
-                            lineHeight: `${Math.max(12, 18 * scaleFactor)}px`
+                            lineHeight: `${Math.max(12, 18 * scaleFactor)}px`,
+                            whiteSpace: 'pre-line'
                           }}
                         >
                           {exp.description}
@@ -653,7 +655,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
                           className="text-gray-600 leading-relaxed"
                           style={{ 
                             fontSize: `${Math.max(8, 12 * scaleFactor)}px`,
-                            lineHeight: `${Math.max(12, 18 * scaleFactor)}px`
+                            lineHeight: `${Math.max(12, 18 * scaleFactor)}px`,
+                            whiteSpace: 'pre-line'
                           }}
                         >
                           {exp.description}
@@ -731,7 +734,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
                           style={{ 
                             fontSize: `${Math.max(8, 12 * scaleFactor)}px`,
                             lineHeight: `${Math.max(12, 18 * scaleFactor)}px`,
-                            marginBottom: `${8 * scaleFactor}px`
+                            marginBottom: `${8 * scaleFactor}px`,
+                            whiteSpace: 'pre-line'
                           }}
                         >
                           {project.description}

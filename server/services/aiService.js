@@ -517,11 +517,22 @@ CRITICAL INSTRUCTIONS:
     const messages = [
       {
         role: 'system',
-        content: `You are a professional resume writing assistant. Analyze and improve the ${sectionType} section. Provide specific suggestions for improvement, focusing on impact, clarity, and professional presentation. Return suggestions in a structured format.`
+        content: `You are a professional resume writing assistant. Your task is to improve and polish the provided ${sectionType} section content. 
+
+CRITICAL INSTRUCTIONS:
+- Return ONLY the improved, polished version of the content
+- Do NOT provide analysis, suggestions, or explanations
+- Focus on making the content more professional, impactful, and concise
+- Use strong action verbs and quantifiable achievements where appropriate
+- Maintain the original meaning but enhance the presentation
+- Keep the same general length and structure
+- Return the text ready to be used directly in a resume
+
+For aboutMe sections: Make it professional, concise, and value-focused while maintaining the person's tone and key points.`
       },
       {
         role: 'user',
-        content: `Improve this ${sectionType} section:\n\n${JSON.stringify(sectionData, null, 2)}`
+        content: `Improve this ${sectionType} content and return only the enhanced version:\n\n${sectionData}`
       }
     ];
 
@@ -726,61 +737,83 @@ Example: ["VMware vSphere", "Docker", "Networking", "PowerShell", "Python", "Win
     const messages = [
       {
         role: 'system',
-        content: `You are an expert IT resume skills organizer. Your job is to intelligently categorize technical skills into granular, professional categories. 
+        content: `You are an expert resume skills organizer for ALL professions. Your job is to intelligently categorize skills into relevant, professional categories that work for any career field.
 
 CRITICAL REQUIREMENTS:
-1. Create 6-8 GRANULAR, SPECIFIC categories (MANDATORY: minimum 6, maximum 8 categories)
+1. Create 4-6 MEANINGFUL categories based on the skills provided (MANDATORY: minimum 4, maximum 6 categories)
 2. Skills can appear in MULTIPLE relevant categories when appropriate
-3. Focus on technical domains and expertise areas
-4. Use professional category names that showcase expertise depth
-5. ALWAYS create at least 6 categories even if you need to split broader categories into more specific ones
+3. Adapt categories to the profession and skills present - don't force technical categories on non-technical skills
+4. Use professional category names that make sense for the specific skill set
+5. EVERY skill must be categorized - do not leave any skill uncategorized
 
-PREFERRED SKILL CATEGORIES (create as many as relevant, up to 8):
-- "Networking" - TCP/IP, Routing, Switching, VLANs, Firewalls, VPN, DNS, DHCP, NAT, Network Protocols
-- "System Administration" - Windows Server, Linux, Active Directory, Group Policy, PowerShell, Scripting, Server Management
-- "Virtualization" - VMware vSphere, ESXi, Hyper-V, Virtual Machines, vCenter, Docker, Containers
-- "Cloud Technologies" - AWS, Azure, Google Cloud, Cloud Computing, SaaS, IaaS, PaaS
-- "Security" - Cybersecurity, Information Security, Network Security, Penetration Testing, Risk Assessment
-- "Database Management" - SQL, MySQL, PostgreSQL, Database Administration, Data Management
-- "Programming & Scripting" - Python, PowerShell, JavaScript, Automation, Scripting Languages
-- "Storage & Backup" - SAN, NAS, Backup Solutions, Data Storage, Disaster Recovery
+UNIVERSAL SKILL CATEGORIES TO CHOOSE FROM (select 4-6 that are most relevant):
 
-CROSS-CATEGORIZATION RULES:
-- "Active Directory" can be in both "System Administration" AND "Security"
-- "Firewalls" can be in both "Networking" AND "Security" 
-- "PowerShell" can be in both "System Administration" AND "Programming & Scripting"
-- "VMware NSX" can be in both "Virtualization" AND "Networking"
-- "Windows Server" can be in both "System Administration" AND "Virtualization"
+TECHNICAL/IT PROFESSIONS:
+- "Technical Skills" - Programming languages, software, platforms, technical tools
+- "System Administration" - Server management, networking, security, infrastructure
+- "Development & Programming" - Coding languages, frameworks, development tools
+- "Cloud & DevOps" - Cloud platforms, automation, CI/CD, containerization
+- "Data & Analytics" - Databases, data analysis, business intelligence, reporting
+- "Cybersecurity" - Security tools, compliance, risk management, encryption
 
-ADVANCED TECHNICAL SKILLS IDENTIFICATION:
-- Recognize vendor-specific technologies (Cisco, VMware, Microsoft, Nutanix, etc.)
-- Identify protocols and standards (OSPF, BGP, SNMP, LDAP, Kerberos, etc.)
-- Categorize certification-related skills appropriately
-- Group related technologies logically
+BUSINESS/MANAGEMENT PROFESSIONS:
+- "Leadership & Management" - Team leadership, project management, strategic planning
+- "Communication & Interpersonal" - Presentation, negotiation, customer service, collaboration
+- "Business & Strategic" - Business analysis, strategy, operations, process improvement
+- "Financial & Analytical" - Financial analysis, budgeting, accounting, data analysis
+- "Marketing & Sales" - Digital marketing, sales, branding, customer acquisition
+- "Operations & Process" - Operations management, quality assurance, workflow optimization
+
+HEALTHCARE/EDUCATION PROFESSIONS:
+- "Clinical Skills" - Medical procedures, patient care, diagnostics, treatment
+- "Teaching & Training" - Curriculum development, instruction, assessment, mentoring
+- "Research & Analysis" - Research methodology, data collection, statistical analysis
+- "Patient/Student Relations" - Communication, counseling, support, advocacy
+
+CREATIVE/DESIGN PROFESSIONS:
+- "Design & Creative" - Graphic design, UI/UX, visual arts, creative software
+- "Media & Production" - Video editing, photography, content creation, broadcasting
+- "Writing & Content" - Content writing, copywriting, editing, storytelling
+
+GENERAL CATEGORIES (for any profession):
+- "Technical Skills" - Any technical tools, software, platforms
+- "Soft Skills" - Communication, leadership, teamwork, problem-solving
+- "Professional Skills" - Industry-specific competencies and certifications
+- "Tools & Software" - Specific applications, platforms, and technical tools
+
+INTELLIGENT CATEGORIZATION STRATEGY:
+1. Analyze the skill set to identify the professional domain
+2. Select 4-6 categories that best represent the skills present
+3. Prioritize categories that contain the most skills
+4. Use descriptive, professional category names
+5. Allow cross-categorization for skills that fit multiple domains
+
+CROSS-CATEGORIZATION EXAMPLES:
+- "Project Management" can be in both "Leadership & Management" AND "Professional Skills"
+- "SQL" can be in both "Technical Skills" AND "Data & Analytics"
+- "Communication" can be in both "Soft Skills" AND "Communication & Interpersonal"
+- "Excel" can be in both "Technical Skills" AND "Financial & Analytical"
 
 FORMAT: Return a JSON array where skills can appear multiple times with different categories:
 [
-  {"name": "Active Directory", "category": "System Administration"},
-  {"name": "Active Directory", "category": "Security"},
-  {"name": "VMware vSphere", "category": "Virtualization"},
-  {"name": "Firewalls", "category": "Networking"},
-  {"name": "Firewalls", "category": "Security"},
-  {"name": "PowerShell", "category": "System Administration"},
-  {"name": "PowerShell", "category": "Programming & Scripting"}
+  {"name": "Project Management", "category": "Leadership & Management"},
+  {"name": "Python", "category": "Technical Skills"},
+  {"name": "Communication", "category": "Soft Skills"},
+  {"name": "SQL", "category": "Data & Analytics"},
+  {"name": "Excel", "category": "Technical Skills"}
 ]
 
 IMPORTANT: 
-- Create EXACTLY 6-8 relevant categories based on the skills provided (MANDATORY)
-- If you have fewer than 6 natural categories, split broader categories into more specific ones
+- Create 4-6 relevant categories based on the skills provided (MANDATORY)
+- Adapt to the profession - don't use technical categories for non-technical skills
+- Use meaningful, professional category names
 - Allow logical cross-categorization when skills fit multiple domains
-- Use specific, professional category names
-- Maximum 12 skills per category to keep it manageable
-- Prioritize the most relevant categorizations if a skill could fit in many categories
-- EVERY skill must be categorized - do not leave any skill uncategorized`
+- EVERY skill must be categorized - no skill should be left out
+- Focus on creating categories that showcase professional competence`
       },
       {
         role: 'user',
-        content: `Organize these technical skills into granular professional categories with cross-categorization where appropriate:\n\n${JSON.stringify(skillsList)}`
+        content: `Organize these skills into 4-6 professional categories appropriate for the skill set. Adapt categories to match the profession:\n\n${JSON.stringify(skillsList)}`
       }
     ];
 
@@ -802,11 +835,11 @@ IMPORTANT:
         const categories = [...new Set(categorizedSkills.map(skill => skill.category))];
         console.log(`Created ${categories.length} skill categories:`, categories);
         
-        // Validate we have 6-8 categories as requested
-        if (categories.length < 6) {
-          console.warn(`WARNING: Only ${categories.length} categories created, expected 6-8. Categories:`, categories);
-        } else if (categories.length > 8) {
-          console.warn(`WARNING: ${categories.length} categories created, expected max 8. Categories:`, categories);
+        // Validate we have 4-6 categories as requested
+        if (categories.length < 4) {
+          console.warn(`WARNING: Only ${categories.length} categories created, expected 4-6. Categories:`, categories);
+        } else if (categories.length > 6) {
+          console.warn(`WARNING: ${categories.length} categories created, expected max 6. Categories:`, categories);
         } else {
           console.log(`✓ Perfect! Created ${categories.length} categories as requested.`);
         }
@@ -826,7 +859,7 @@ IMPORTANT:
       // Fallback: return skills without categories
       return skillsList.map(skill => ({
         name: typeof skill === 'string' ? skill : skill.name,
-        category: 'Technical Skills'
+        category: 'Professional Skills'
       }));
     }
   }

@@ -12,7 +12,6 @@ const CVParseUpload: React.FC<CVParseUploadProps> = ({ onClose, onDataExtracted 
   const { token } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [progressStage, setProgressStage] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -55,30 +54,7 @@ const CVParseUpload: React.FC<CVParseUploadProps> = ({ onClose, onDataExtracted 
     }
   };
 
-  const simulateProgress = (targetProgress: number, stage: string, duration: number = 2000) => {
-    return new Promise<void>((resolve) => {
-      setProgressStage(stage);
-      const startProgress = progress;
-      const progressDiff = targetProgress - startProgress;
-      const startTime = Date.now();
-
-      const updateProgress = () => {
-        const elapsed = Date.now() - startTime;
-        const progressRatio = Math.min(elapsed / duration, 1);
-        const currentProgress = startProgress + (progressDiff * progressRatio);
-        
-        setProgress(Math.round(currentProgress));
-        
-        if (progressRatio < 1) {
-          requestAnimationFrame(updateProgress);
-        } else {
-          resolve();
-        }
-      };
-      
-      requestAnimationFrame(updateProgress);
-    });
-  };
+  // Remove the fake progress simulation
 
   const handleUpload = async () => {
     if (!file) {
@@ -89,16 +65,10 @@ const CVParseUpload: React.FC<CVParseUploadProps> = ({ onClose, onDataExtracted 
     try {
       setUploading(true);
       setError(null);
-      setProgress(0);
-
-      // Stage 1: Uploading
-      await simulateProgress(30, 'Uploading file...', 800);
+      setProgressStage('Processing document...');
 
       const formData = new FormData();
       formData.append('cvFile', file);
-
-      // Stage 2: Processing
-      await simulateProgress(60, 'Processing document...', 1000);
 
       const response = await fetch('/api/ai/parse-cv', {
         method: 'POST',
@@ -108,17 +78,12 @@ const CVParseUpload: React.FC<CVParseUploadProps> = ({ onClose, onDataExtracted 
         body: formData,
       });
 
-      // Stage 3: Parsing
-      await simulateProgress(90, 'Extracting information...', 1500);
-
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to parse CV');
       }
 
-      // Stage 4: Complete
-      setProgress(100);
       setProgressStage('Complete!');
       setSuccess(true);
 
@@ -130,7 +95,6 @@ const CVParseUpload: React.FC<CVParseUploadProps> = ({ onClose, onDataExtracted 
 
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to parse CV');
-      setProgress(0);
       setProgressStage('');
     } finally {
       setUploading(false);
@@ -140,7 +104,6 @@ const CVParseUpload: React.FC<CVParseUploadProps> = ({ onClose, onDataExtracted 
   const removeFile = () => {
     setFile(null);
     setError(null);
-    setProgress(0);
     setProgressStage('');
     setSuccess(false);
     if (fileInputRef.current) {
@@ -227,19 +190,11 @@ const CVParseUpload: React.FC<CVParseUploadProps> = ({ onClose, onDataExtracted 
               )}
             </div>
 
-            {/* Progress Bar */}
+            {/* Loading Animation */}
             {uploading && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs">
-                  <span className="text-primaryText">{progressStage}</span>
-                  <span className="text-primaryText/60">{progress}%</span>
-                </div>
-                <div className="w-full bg-background rounded-full h-2">
-                  <div
-                    className="bg-accent h-2 rounded-full transition-all duration-300 ease-out"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
+              <div className="flex items-center justify-center space-x-3 py-4">
+                <div className="w-6 h-6 border-2 border-accent/30 border-t-accent rounded-full animate-spin"></div>
+                <span className="text-primaryText text-sm">{progressStage}</span>
               </div>
             )}
           </div>

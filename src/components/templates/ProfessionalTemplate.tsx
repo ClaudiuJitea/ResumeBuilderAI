@@ -145,7 +145,8 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
               className="text-gray-700 leading-relaxed"
               style={{ 
                 fontSize: `${Math.max(8, 12 * scaleFactor)}px`,
-                lineHeight: `${Math.max(12, 18 * scaleFactor)}px`
+                lineHeight: `${Math.max(12, 18 * scaleFactor)}px`,
+                whiteSpace: 'pre-line'
               }}
             >
               {state.resumeData.aboutMe || 
@@ -228,7 +229,8 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
                           style={{ 
                             fontSize: `${Math.max(8, 12 * scaleFactor)}px`,
                             lineHeight: `${Math.max(12, 18 * scaleFactor)}px`,
-                            marginBottom: `${8 * scaleFactor}px`
+                            marginBottom: `${8 * scaleFactor}px`,
+                            whiteSpace: 'pre-line'
                           }}
                         >
                           {exp.description}

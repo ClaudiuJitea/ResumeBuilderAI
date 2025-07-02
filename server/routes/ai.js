@@ -239,11 +239,11 @@ router.post('/improve-section', async (req, res) => {
       });
     }
 
-    const improvements = await aiService.improveSection(sectionType, sectionData);
+    const improvedText = await aiService.improveSection(sectionType, sectionData);
     
     res.json({
       success: true,
-      data: { improvements }
+      data: { improvements: improvedText }
     });
 
   } catch (error) {

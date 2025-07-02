@@ -19,8 +19,18 @@ dist-ssr
 
 # Environment variables
 .env
-.env.*
-!.env.example
+.env.local
+.env.production
+.env.development
+
+# Database files (contain sensitive data)
+*.sqlite
+*.sqlite3
+*.db
+
+# API keys and secrets
+api-keys.json
+secrets.json
 
 # Editor directories and files
 .vscode/*
@@ -44,3 +54,7 @@ debug
 .cache
 .npm
 .eslintcache
+
+# OS generated files
+Thumbs.db
+.DS_Store

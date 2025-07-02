@@ -1,8 +1,15 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "resumebuilderai",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "A modern, AI-powered resume builder application with secure authentication and content generation",
+  "keywords": ["resume", "cv", "ai", "react", "nodejs", "typescript", "pdf"],
+  "author": "Your Name <your.email@example.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/ResumeBuilderAI.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -12,7 +19,8 @@
     "dev:server": "nodemon server/server.js",
     "start": "npm run build && npm run server",
     "reset-db": "node server/resetDatabase.js",
-    "migrate-db": "node server/migrateDatabase.js"
+    "migrate-db": "node server/migrateDatabase.js",
+    "setup": "echo 'Please copy .env.example to .env and configure your environment variables before running the application' && echo 'Run npm run reset-db to initialize the database'"
   },
   "overrides": {
     "glob": "^10.3.10",
@@ -25,6 +33,7 @@
     "bcryptjs": "^3.0.2",
     "better-sqlite3": "^12.2.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "express-rate-limit": "^7.5.1",
     "helmet": "^8.1.0",
@@ -34,7 +43,6 @@
     "lucide-react": "^0.344.0",
     "multer": "^2.0.1",
     "node-fetch": "^2.7.0",
-    "openrouter-ai": "^2.1.32",
     "pdf-parse": "^1.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
@@ -63,5 +71,10 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
     "vite": "^7.0.0"
-  }
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "license": "MIT"
 }

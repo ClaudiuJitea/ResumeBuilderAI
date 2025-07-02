@@ -2,9 +2,12 @@ const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 
+// Load environment variables
+require('dotenv').config();
+
 console.log('🔄 Resetting database...');
 
-const dbPath = path.join(__dirname, 'database.sqlite');
+const dbPath = path.join(__dirname, process.env.DATABASE_PATH || 'database.sqlite');
 const db = new Database(dbPath);
 
 try {
@@ -66,19 +69,25 @@ try {
     );
   `);
 
-  // Create default admin user
+  // Create default admin user from environment variables
   console.log('👤 Creating default admin user...');
   
-  const hashedPassword = bcrypt.hashSync('admin123', 12);
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@yourdomain.com';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'change-this-password';
+  const adminFirstName = process.env.ADMIN_FIRST_NAME || 'Admin';
+  const adminLastName = process.env.ADMIN_LAST_NAME || 'User';
+  
+  const hashedPassword = bcrypt.hashSync(adminPassword, 12);
   const createAdmin = db.prepare(`
     INSERT INTO users (email, password, firstName, lastName, role)
     VALUES (?, ?, ?, ?, ?)
   `);
   
-  createAdmin.run('admin@resumeai.com', hashedPassword, 'Admin', 'User', 'admin');
+  createAdmin.run(adminEmail, hashedPassword, adminFirstName, adminLastName, 'admin');
 
   console.log('✅ Database reset completed successfully!');
-  console.log('🔑 Default admin credentials: admin@resumeai.com / admin123');
+  console.log(`🔑 Default admin credentials: ${adminEmail} / ${adminPassword}`);
+  console.log('⚠️  IMPORTANT: Change the admin password after first login!');
   
 } catch (error) {
   console.error('❌ Database reset failed:', error);

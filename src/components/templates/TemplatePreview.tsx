@@ -190,7 +190,7 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ templateId, className
                 <div className="w-1 h-1 bg-teal-400 rounded-full mr-0.5 flex items-center justify-center">
                   <Mail className="w-0.5 h-0.5 text-white" />
                 </div>
-                <span style={{ fontSize: '1.5px' }}>email@gmail.com</span>
+                <span style={{ fontSize: '1.5px' }}>your-email@example.com</span>
               </div>
             </div>
           </div>

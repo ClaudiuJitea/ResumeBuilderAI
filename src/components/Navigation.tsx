@@ -62,7 +62,7 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-12">
             <div className="text-heading font-bold text-xl bg-gradient-to-r from-accent to-heading bg-clip-text text-transparent">
-              ResumeBuilder
+              ResumeBuilderAI
             </div>
             <div className="hidden md:flex space-x-8">
               <button 

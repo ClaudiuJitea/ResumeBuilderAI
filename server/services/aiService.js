@@ -345,7 +345,7 @@ class AIService {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'http://localhost:3001',
+        'HTTP-Referer': process.env.FRONTEND_URL || 'http://localhost:3001',
         'X-Title': 'ResumeAI Assistant'
       },
       body: JSON.stringify({

@@ -448,7 +448,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
                       </div>
                     )}
                     <span style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}>
-                      youremailhere@gmail.com
+                      your-email@example.com
                     </span>
                   </div>
                   

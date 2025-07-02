@@ -4,6 +4,11 @@ A modern, AI-powered resume builder application built with React, TypeScript, an
 
 ![ResumeBuilderAI Screenshot](screenshoots/Screenshot01.png)
 
+![ResumeBuilderAI Screenshot](screenshoots/Screenshot02.png)
+
+![ResumeBuilderAI Screenshot](screenshoots/Screenshot03.png)
+
+
 ## ✨ Features
 
 ### 🎨 Resume Building
@@ -48,7 +53,7 @@ A modern, AI-powered resume builder application built with React, TypeScript, an
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/yourusername/ResumeBuilderAI.git
+git clone https://github.com/ClaudiuJitea/ResumeBuilderAI.git
 cd ResumeBuilderAI
 npm install
 ```

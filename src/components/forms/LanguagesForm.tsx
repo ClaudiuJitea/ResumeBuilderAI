@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, 
   Undo2, 
@@ -7,20 +7,26 @@ import {
   GripVertical,
   Languages as LanguagesIcon,
   ChevronDown,
-  Circle,
-  Star
+  Circle
 } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
 import { Skill } from '../../types/resume';
 
 const LanguagesForm = () => {
   const { state, dispatch } = useResume();
-  const { languages } = state.resumeData;
+  const { languages, languagesConfig } = state.resumeData;
   const [newLanguageName, setNewLanguageName] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('A1');
-  const [languageStyle, setLanguageStyle] = useState<'standard' | 'plus' | 'dots'>('plus');
+  const [languageStyle, setLanguageStyle] = useState<'dots' | 'pills' | 'bars'>(languagesConfig?.style || 'dots');
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [showLevelDropdown, setShowLevelDropdown] = useState(false);
+
+  // Sync local state with resume data
+  useEffect(() => {
+    if (languagesConfig?.style && languagesConfig.style !== languageStyle) {
+      setLanguageStyle(languagesConfig.style);
+    }
+  }, [languagesConfig?.style]);
 
   const popularLanguages = [
     'English', 'German', 'Polish', 'Spanish', 'French', 'Italian', 
@@ -55,11 +61,11 @@ const LanguagesForm = () => {
 
   const addCustomLanguage = () => {
     if (newLanguageName.trim() && !languages.find(lang => lang.name.toLowerCase() === newLanguageName.toLowerCase())) {
-      const levelObj = languageLevels.find(level => level.id === selectedLevel);
+      const levelValue = languageLevels.find(level => level.id === selectedLevel)?.value || 1;
       const newLanguage: Skill = {
         id: Date.now().toString(),
-        name: newLanguageName.trim(),
-        level: levelObj?.value || 3
+        name: newLanguageName,
+        level: levelValue
       };
 
       const updatedLanguages = [...languages, newLanguage];
@@ -82,16 +88,27 @@ const LanguagesForm = () => {
   };
 
   const updateLanguageLevel = (id: string, levelId: string) => {
-    const levelObj = languageLevels.find(level => level.id === levelId);
-    if (levelObj) {
-      const updatedLanguages = languages.map(lang =>
-        lang.id === id ? { ...lang, level: levelObj.value } : lang
-      );
-      dispatch({
-        type: 'UPDATE_RESUME_DATA',
-        payload: { languages: updatedLanguages }
-      });
-    }
+    const levelValue = languageLevels.find(level => level.id === levelId)?.value || 1;
+    const updatedLanguages = languages.map(lang =>
+      lang.id === id ? { ...lang, level: levelValue } : lang
+    );
+    dispatch({
+      type: 'UPDATE_RESUME_DATA',
+      payload: { languages: updatedLanguages }
+    });
+  };
+
+  const updateLanguagesConfig = (config: Partial<{ style: 'dots' | 'pills' | 'bars' }>) => {
+    const currentConfig = languagesConfig || { style: 'dots' as const };
+    dispatch({
+      type: 'UPDATE_RESUME_DATA',
+      payload: { 
+        languagesConfig: { 
+          ...currentConfig, 
+          ...config 
+        } 
+      }
+    });
   };
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
@@ -107,22 +124,20 @@ const LanguagesForm = () => {
   const handleDrop = (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
     
-    if (!draggedItem || draggedItem === targetId) return;
-
-    const draggedIndex = languages.findIndex(lang => lang.id === draggedItem);
-    const targetIndex = languages.findIndex(lang => lang.id === targetId);
-
-    if (draggedIndex === -1 || targetIndex === -1) return;
-
-    const newLanguages = [...languages];
-    const [draggedLanguage] = newLanguages.splice(draggedIndex, 1);
-    newLanguages.splice(targetIndex, 0, draggedLanguage);
-
-    dispatch({
-      type: 'UPDATE_RESUME_DATA',
-      payload: { languages: newLanguages }
-    });
-
+    if (draggedItem && draggedItem !== targetId) {
+      const draggedIndex = languages.findIndex(lang => lang.id === draggedItem);
+      const targetIndex = languages.findIndex(lang => lang.id === targetId);
+      
+      const newLanguages = [...languages];
+      const [draggedLanguage] = newLanguages.splice(draggedIndex, 1);
+      newLanguages.splice(targetIndex, 0, draggedLanguage);
+      
+      dispatch({
+        type: 'UPDATE_RESUME_DATA',
+        payload: { languages: newLanguages }
+      });
+    }
+    
     setDraggedItem(null);
   };
 
@@ -133,43 +148,42 @@ const LanguagesForm = () => {
 
   const renderLanguageLevel = (level: number, style: string) => {
     const maxLevel = 7; // Native level
-    const percentage = (level / maxLevel) * 100;
 
     switch (style) {
-      case 'standard':
-        return (
-          <div className="w-full bg-border rounded-full h-2">
-            <div 
-              className="bg-accent rounded-full h-2 transition-all duration-300"
-              style={{ width: `${percentage}%` }}
-            ></div>
-          </div>
-        );
-      case 'plus':
+      case 'dots':
         return (
           <div className="flex space-x-1">
-            {[1, 2, 3, 4, 5, 6, 7].map((dot) => (
-              <div
+            {[1, 2, 3, 4, 5].map((dot) => (
+              <Circle
                 key={dot}
                 className={`w-2 h-2 ${
-                  dot <= level ? 'bg-accent' : 'bg-border'
-                } transition-colors duration-200`}
-                style={{ 
-                  clipPath: dot <= level ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' : 'none',
-                  borderRadius: dot > level ? '50%' : '0'
-                }}
+                  dot <= Math.round((level / maxLevel) * 5) ? 'fill-accent text-accent' : 'text-border'
+                }`}
               />
             ))}
           </div>
         );
-      case 'dots':
+      case 'pills':
         return (
           <div className="flex space-x-1">
-            {[1, 2, 3, 4, 5, 6, 7].map((dot) => (
-              <Circle
-                key={dot}
-                className={`w-2 h-2 ${
-                  dot <= level ? 'fill-accent text-accent' : 'text-border'
+            {[1, 2, 3, 4, 5].map((pill) => (
+              <div
+                key={pill}
+                className={`w-3 h-1.5 rounded-full ${
+                  pill <= Math.round((level / maxLevel) * 5) ? 'bg-accent' : 'bg-border'
+                }`}
+              />
+            ))}
+          </div>
+        );
+      case 'bars':
+        return (
+          <div className="flex space-x-1">
+            {[1, 2, 3, 4, 5].map((bar) => (
+              <div
+                key={bar}
+                className={`w-1.5 h-3 rounded-sm ${
+                  bar <= Math.round((level / maxLevel) * 5) ? 'bg-accent' : 'bg-border'
                 }`}
               />
             ))}
@@ -362,68 +376,13 @@ const LanguagesForm = () => {
               <input
                 type="radio"
                 name="style"
-                value="standard"
-                checked={languageStyle === 'standard'}
-                onChange={(e) => setLanguageStyle(e.target.value as 'standard' | 'plus' | 'dots')}
-                className="sr-only"
-              />
-              <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                languageStyle === 'standard' 
-                  ? 'border-accent bg-accent' 
-                  : 'border-border'
-              }`}>
-                {languageStyle === 'standard' && <div className="w-2 h-2 bg-background rounded-full m-0.5" />}
-              </div>
-              <span className="text-primaryText text-sm">Standard</span>
-            </div>
-            <div className="w-16 bg-border rounded-full h-2">
-              <div className="bg-accent rounded-full h-2 w-3/5"></div>
-            </div>
-          </label>
-
-          <label className="flex items-center justify-between cursor-pointer">
-            <div className="flex items-center">
-              <input
-                type="radio"
-                name="style"
-                value="plus"
-                checked={languageStyle === 'plus'}
-                onChange={(e) => setLanguageStyle(e.target.value as 'standard' | 'plus' | 'dots')}
-                className="sr-only"
-              />
-              <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                languageStyle === 'plus' 
-                  ? 'border-accent bg-accent' 
-                  : 'border-border'
-              }`}>
-                {languageStyle === 'plus' && <div className="w-2 h-2 bg-background rounded-full m-0.5" />}
-              </div>
-              <span className="text-primaryText text-sm">Plus</span>
-            </div>
-            <div className="flex space-x-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <div
-                  key={star}
-                  className={`w-2 h-2 ${
-                    star <= 3 ? 'bg-accent' : 'bg-border'
-                  }`}
-                  style={{ 
-                    clipPath: star <= 3 ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' : 'none',
-                    borderRadius: star > 3 ? '50%' : '0'
-                  }}
-                />
-              ))}
-            </div>
-          </label>
-
-          <label className="flex items-center justify-between cursor-pointer">
-            <div className="flex items-center">
-              <input
-                type="radio"
-                name="style"
                 value="dots"
                 checked={languageStyle === 'dots'}
-                onChange={(e) => setLanguageStyle(e.target.value as 'standard' | 'plus' | 'dots')}
+                onChange={(e) => {
+                  const style = e.target.value as 'dots' | 'pills' | 'bars';
+                  setLanguageStyle(style);
+                  updateLanguagesConfig({ style });
+                }}
                 className="sr-only"
               />
               <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
@@ -441,6 +400,76 @@ const LanguagesForm = () => {
                   key={dot}
                   className={`w-2 h-2 ${
                     dot <= 3 ? 'fill-accent text-accent' : 'text-border'
+                  }`}
+                />
+              ))}
+            </div>
+          </label>
+
+          <label className="flex items-center justify-between cursor-pointer">
+            <div className="flex items-center">
+              <input
+                type="radio"
+                name="style"
+                value="pills"
+                checked={languageStyle === 'pills'}
+                onChange={(e) => {
+                  const style = e.target.value as 'dots' | 'pills' | 'bars';
+                  setLanguageStyle(style);
+                  updateLanguagesConfig({ style });
+                }}
+                className="sr-only"
+              />
+              <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
+                languageStyle === 'pills' 
+                  ? 'border-accent bg-accent' 
+                  : 'border-border'
+              }`}>
+                {languageStyle === 'pills' && <div className="w-2 h-2 bg-background rounded-full m-0.5" />}
+              </div>
+              <span className="text-primaryText text-sm">Pills</span>
+            </div>
+            <div className="flex space-x-1">
+              {[1, 2, 3, 4, 5].map((pill) => (
+                <div
+                  key={pill}
+                  className={`w-3 h-1.5 rounded-full ${
+                    pill <= 3 ? 'bg-accent' : 'bg-border'
+                  }`}
+                />
+              ))}
+            </div>
+          </label>
+
+          <label className="flex items-center justify-between cursor-pointer">
+            <div className="flex items-center">
+              <input
+                type="radio"
+                name="style"
+                value="bars"
+                checked={languageStyle === 'bars'}
+                onChange={(e) => {
+                  const style = e.target.value as 'dots' | 'pills' | 'bars';
+                  setLanguageStyle(style);
+                  updateLanguagesConfig({ style });
+                }}
+                className="sr-only"
+              />
+              <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
+                languageStyle === 'bars' 
+                  ? 'border-accent bg-accent' 
+                  : 'border-border'
+              }`}>
+                {languageStyle === 'bars' && <div className="w-2 h-2 bg-background rounded-full m-0.5" />}
+              </div>
+              <span className="text-primaryText text-sm">Bars</span>
+            </div>
+            <div className="flex space-x-1">
+              {[1, 2, 3, 4, 5].map((bar) => (
+                <div
+                  key={bar}
+                  className={`w-1.5 h-3 rounded-sm ${
+                    bar <= 3 ? 'bg-accent' : 'bg-border'
                   }`}
                 />
               ))}

@@ -1,15 +1,16 @@
 import React from 'react';
-import { Phone, Mail, MapPin, Calendar, User, Briefcase, GraduationCap, Award, Globe, Code, ExternalLink } from 'lucide-react';
+import { Phone, Mail, MapPin, Calendar, User, Briefcase, GraduationCap, Award, Globe, Code, ExternalLink, Heart, Github, Linkedin, Twitter, Instagram, Facebook, Youtube, Link } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
 
 interface ModernTemplateProps {
   fontSize?: number;
   currentPage?: number;
+  printMode?: boolean;
 }
 
-const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, currentPage = 1 }) => {
+const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, currentPage = 1, printMode = false }) => {
   const { state } = useResume();
-  const { personalInfo, workExperience, education, skills, languages, projects, skillsConfig } = state.resumeData;
+  const { personalInfo, workExperience, education, skills, languages, projects, interests, certificates, links, skillsConfig, languagesConfig } = state.resumeData;
   const colorTheme = state.resumeData.colorTheme;
 
   const scaleFactor = fontSize / 100;
@@ -32,11 +33,11 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
             {[1, 2, 3, 4, 5].map((dot) => (
               <div
                 key={dot}
+                className={`rounded-full`}
                 style={{ 
                   width: `${Math.max(6, 8 * scaleFactor)}px`, 
                   height: `${Math.max(6, 8 * scaleFactor)}px`,
-                  backgroundColor: dot <= level ? activeColor : inactiveColor,
-                  borderRadius: '50%'
+                  backgroundColor: dot <= level ? activeColor : inactiveColor
                 }}
               />
             ))}
@@ -48,11 +49,11 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
             {[1, 2, 3, 4, 5].map((bar) => (
               <div
                 key={bar}
+                className={`rounded-sm`}
                 style={{ 
                   width: `${Math.max(4, 6 * scaleFactor)}px`, 
                   height: `${Math.max(8, 16 * scaleFactor)}px`,
-                  backgroundColor: bar <= level ? activeColor : inactiveColor,
-                  borderRadius: '2px'
+                  backgroundColor: bar <= level ? activeColor : inactiveColor
                 }}
               />
             ))}
@@ -64,39 +65,46 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
             {[1, 2, 3, 4, 5].map((pill) => (
               <div
                 key={pill}
+                className={`rounded-full`}
                 style={{ 
                   width: `${Math.max(8, 12 * scaleFactor)}px`, 
                   height: `${Math.max(4, 6 * scaleFactor)}px`,
-                  backgroundColor: pill <= level ? activeColor : inactiveColor,
-                  borderRadius: '50%'
+                  backgroundColor: pill <= level ? activeColor : inactiveColor
                 }}
               />
             ))}
           </div>
         );
       default:
-        return (
-          <div className="w-full bg-gray-200 rounded-full" style={{ height: `${12 * scaleFactor}px` }}>
-            <div 
-              className="rounded-full transition-all duration-300"
-              style={{ 
-                width: `${(level / 5) * 100}%`,
-                height: `${12 * scaleFactor}px`,
-                background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`
-              }}
-            ></div>
-          </div>
-        );
+        return null;
     }
+  };
+
+  const renderLanguageLevel = (level: number, style: string, isDarkBackground = false) => {
+    const maxLevel = 7; // Native level
+    const normalizedLevel = Math.round((level / maxLevel) * 5); // Convert to 1-5 scale
+    return renderSkillLevel(normalizedLevel, style, isDarkBackground);
+  };
+
+  // Helper function to get platform icon
+  const getPlatformIcon = (url: string) => {
+    if (url.includes('linkedin.com')) return Linkedin;
+    if (url.includes('github.com')) return Github;
+    if (url.includes('twitter.com') || url.includes('x.com')) return Twitter;
+    if (url.includes('instagram.com')) return Instagram;
+    if (url.includes('facebook.com')) return Facebook;
+    if (url.includes('youtube.com')) return Youtube;
+    if (url.includes('http')) return Globe;
+    return Link;
   };
 
   // Determine content for each page
   const renderPage1 = () => (
     <div 
-      className="bg-white w-full h-full shadow-2xl overflow-hidden flex"
+      className="bg-white w-full shadow-2xl overflow-hidden flex"
       style={{ 
         width: '210mm', 
-        height: '297mm',
+        minHeight: '297mm',
         fontSize: `${Math.max(8, 14 * scaleFactor)}px`
       }}
     >
@@ -248,15 +256,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
                   <div key={index} style={{ fontSize: `${Math.max(8, 14 * scaleFactor)}px` }}>
                     <div className="flex justify-between items-center" style={{ marginBottom: `${4 * scaleFactor}px` }}>
                       <span className="font-medium">{lang.name}</span>
-                    </div>
-                    <div className="w-full bg-white/20 rounded-full" style={{ height: `${8 * scaleFactor}px` }}>
-                      <div 
-                        className="bg-white rounded-full transition-all duration-300"
-                        style={{ 
-                          width: `${(lang.level / 7) * 100}%`,
-                          height: `${8 * scaleFactor}px`
-                        }}
-                      ></div>
+                      {renderLanguageLevel(lang.level, languagesConfig?.style || 'dots', true)}
                     </div>
                   </div>
                 ))
@@ -267,16 +267,42 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
                       <div key={lang}>
                         <div className="flex justify-between items-center" style={{ marginBottom: `${4 * scaleFactor}px` }}>
                           <span className="font-medium">{lang}</span>
+                          {renderLanguageLevel(index === 0 ? 6 : index === 1 ? 4 : 3, languagesConfig?.style || 'dots', true)}
                         </div>
-                        <div className="w-full bg-white/20 rounded-full" style={{ height: `${8 * scaleFactor}px` }}>
-                          <div 
-                            className="bg-white rounded-full"
-                            style={{ 
-                              width: index === 0 ? '80%' : index === 1 ? '60%' : '40%',
-                              height: `${8 * scaleFactor}px`
-                            }}
-                          ></div>
-                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Interests Section */}
+        <div className="flex-1">
+          <div className="flex items-center" style={{ marginBottom: `${16 * scaleFactor}px` }}>
+            <Heart className="mr-3" style={{ width: `${20 * scaleFactor}px`, height: `${20 * scaleFactor}px` }} />
+            <h2 
+              className="font-bold tracking-wide"
+              style={{ fontSize: `${Math.max(10, 18 * scaleFactor)}px` }}
+            >
+              INTERESTS
+            </h2>
+          </div>
+          <div className="border-t-2 border-white/30" style={{ paddingTop: `${16 * scaleFactor}px` }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: `${12 * scaleFactor}px` }}>
+              {interests.length > 0 ? (
+                interests.map((interest, index) => (
+                  <div key={index} style={{ fontSize: `${Math.max(8, 14 * scaleFactor)}px` }}>
+                    <span className="font-medium">{interest}</span>
+                  </div>
+                ))
+              ) : (
+                <div style={{ fontSize: `${Math.max(8, 14 * scaleFactor)}px` }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: `${12 * scaleFactor}px` }}>
+                    {['Reading', 'Traveling', 'Cooking', 'Sports', 'Gaming'].map((interest, index) => (
+                      <div key={interest}>
+                        <span className="font-medium">{interest}</span>
                       </div>
                     ))}
                   </div>
@@ -444,7 +470,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
         </div>
 
         {/* Skills Section */}
-        <div>
+        <div style={{ marginBottom: `${32 * scaleFactor}px` }}>
           <div className="flex items-center" style={{ marginBottom: `${16 * scaleFactor}px` }}>
             <Award className="mr-3" style={{ width: `${24 * scaleFactor}px`, height: `${24 * scaleFactor}px`, color: primaryColor }} />
             <h2 
@@ -504,16 +530,144 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
             )}
           </div>
         </div>
+
+        {/* Certificates Section - Only show on page 1 if not moving to page 2 */}
+        {certificates.length > 0 && !shouldMoveCertificatesToPage2 && (
+          <div style={{ marginBottom: `${32 * scaleFactor}px` }}>
+            <div className="flex items-center" style={{ marginBottom: `${16 * scaleFactor}px` }}>
+              <Award className="mr-3" style={{ width: `${24 * scaleFactor}px`, height: `${24 * scaleFactor}px`, color: primaryColor }} />
+              <h2 
+                className="font-bold text-gray-800 tracking-wide"
+                style={{ fontSize: `${Math.max(12, 20 * scaleFactor)}px` }}
+              >
+                CERTIFICATES & CERTIFICATIONS
+              </h2>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: `${16 * scaleFactor}px` }}>
+              {certificates.slice(0, 4).map((cert, index) => {
+                // Handle both string and Certificate object formats
+                const certificate = typeof cert === 'string' ? { name: cert, issuer: '', date: '' } : cert;
+                return (
+                  <div key={index} className="relative">
+                    <div className="flex items-start">
+                      <div 
+                        className="rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ 
+                          width: `${24 * scaleFactor}px`, 
+                          height: `${24 * scaleFactor}px`,
+                          marginRight: `${12 * scaleFactor}px`,
+                          marginTop: `${2 * scaleFactor}px`,
+                          backgroundColor: primaryColor
+                        }}
+                      >
+                        <Award className="text-white" style={{ width: `${12 * scaleFactor}px`, height: `${12 * scaleFactor}px` }} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 
+                          className="font-bold text-gray-800"
+                          style={{ 
+                            fontSize: `${Math.max(8, 14 * scaleFactor)}px`,
+                            marginBottom: `${4 * scaleFactor}px`
+                          }}
+                        >
+                          {certificate.name}
+                        </h3>
+                        {certificate.issuer && (
+                          <p 
+                            className="font-medium"
+                            style={{ 
+                              fontSize: `${Math.max(8, 12 * scaleFactor)}px`, 
+                              color: primaryColor,
+                              marginBottom: `${2 * scaleFactor}px`
+                            }}
+                          >
+                            {certificate.issuer}
+                          </p>
+                        )}
+                        {certificate.date && (
+                          <span 
+                            className="text-gray-500 font-medium"
+                            style={{ fontSize: `${Math.max(8, 11 * scaleFactor)}px` }}
+                          >
+                            {certificate.date}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Links Section - Only show on page 1 if not moving to page 2 */}
+        {links.length > 0 && !shouldMoveLinksToPage2 && (
+          <div>
+            <div className="flex items-center" style={{ marginBottom: `${16 * scaleFactor}px` }}>
+              <ExternalLink className="mr-3" style={{ width: `${24 * scaleFactor}px`, height: `${24 * scaleFactor}px`, color: primaryColor }} />
+              <h2 
+                className="font-bold text-gray-800 tracking-wide"
+                style={{ fontSize: `${Math.max(12, 20 * scaleFactor)}px` }}
+              >
+                LINKS & SOCIAL MEDIA
+              </h2>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: `${16 * scaleFactor}px` }}>
+              {links.slice(0, 5).map((link, index) => {
+                const IconComponent = getPlatformIcon(link.url);
+                return (
+                  <div key={index} className="relative">
+                    <div className="flex items-start">
+                      <div 
+                        className="rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ 
+                          width: `${24 * scaleFactor}px`, 
+                          height: `${24 * scaleFactor}px`,
+                          marginRight: `${12 * scaleFactor}px`,
+                          marginTop: `${2 * scaleFactor}px`,
+                          backgroundColor: primaryColor
+                        }}
+                      >
+                        <IconComponent className="text-white" style={{ width: `${12 * scaleFactor}px`, height: `${12 * scaleFactor}px` }} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 
+                          className="font-bold text-gray-800"
+                          style={{ 
+                            fontSize: `${Math.max(8, 14 * scaleFactor)}px`,
+                            marginBottom: `${4 * scaleFactor}px`
+                          }}
+                        >
+                          {link.name}
+                        </h3>
+                        <p 
+                          className="text-gray-600 break-all"
+                          style={{ 
+                            fontSize: `${Math.max(8, 12 * scaleFactor)}px`,
+                            lineHeight: `${Math.max(12, 16 * scaleFactor)}px`
+                          }}
+                        >
+                          {link.url}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 
   const renderPage2 = () => (
     <div 
-      className="bg-white w-full h-full shadow-2xl overflow-hidden flex"
+      className="bg-white w-full shadow-2xl overflow-hidden flex"
       style={{ 
         width: '210mm', 
-        height: '297mm',
+        minHeight: '297mm',
         fontSize: `${Math.max(8, 14 * scaleFactor)}px`
       }}
     >
@@ -765,6 +919,138 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
           </div>
         )}
 
+        {/* Certificates Section - Show on page 2 if moved from page 1 */}
+        {certificates.length > 0 && shouldMoveCertificatesToPage2 && (
+          <div style={{ marginBottom: `${32 * scaleFactor}px` }}>
+            <div className="flex items-center" style={{ marginBottom: `${16 * scaleFactor}px` }}>
+              <Award className="mr-3" style={{ width: `${24 * scaleFactor}px`, height: `${24 * scaleFactor}px`, color: primaryColor }} />
+              <h2 
+                className="font-bold text-gray-800 tracking-wide"
+                style={{ fontSize: `${Math.max(12, 20 * scaleFactor)}px` }}
+              >
+                CERTIFICATES & CERTIFICATIONS
+              </h2>
+            </div>
+            <div className="border-b-2 border-gray-300" style={{ paddingBottom: `${16 * scaleFactor}px` }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: `${16 * scaleFactor}px` }}>
+                {certificates.map((cert, index) => {
+                  // Handle both string and Certificate object formats
+                  const certificate = typeof cert === 'string' ? { name: cert, issuer: '', date: '' } : cert;
+                  return (
+                    <div key={index} className="relative">
+                      <div className="flex items-start">
+                        <div 
+                          className="rounded-full flex items-center justify-center flex-shrink-0"
+                          style={{ 
+                            width: `${24 * scaleFactor}px`, 
+                            height: `${24 * scaleFactor}px`,
+                            marginRight: `${12 * scaleFactor}px`,
+                            marginTop: `${2 * scaleFactor}px`,
+                            backgroundColor: primaryColor
+                          }}
+                        >
+                          <Award className="text-white" style={{ width: `${12 * scaleFactor}px`, height: `${12 * scaleFactor}px` }} />
+                        </div>
+                        <div className="flex-1">
+                          <h3 
+                            className="font-bold text-gray-800"
+                            style={{ 
+                              fontSize: `${Math.max(8, 14 * scaleFactor)}px`,
+                              marginBottom: `${4 * scaleFactor}px`
+                            }}
+                          >
+                            {certificate.name}
+                          </h3>
+                          {certificate.issuer && (
+                            <p 
+                              className="font-medium"
+                              style={{ 
+                                fontSize: `${Math.max(8, 12 * scaleFactor)}px`, 
+                                color: primaryColor,
+                                marginBottom: `${2 * scaleFactor}px`
+                              }}
+                            >
+                              {certificate.issuer}
+                            </p>
+                          )}
+                          {certificate.date && (
+                            <span 
+                              className="text-gray-500 font-medium"
+                              style={{ fontSize: `${Math.max(8, 11 * scaleFactor)}px` }}
+                            >
+                              {certificate.date}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Links Section - Show on page 2 if moved from page 1 */}
+        {links.length > 0 && shouldMoveLinksToPage2 && (
+          <div style={{ marginBottom: `${32 * scaleFactor}px` }}>
+            <div className="flex items-center" style={{ marginBottom: `${16 * scaleFactor}px` }}>
+              <ExternalLink className="mr-3" style={{ width: `${24 * scaleFactor}px`, height: `${24 * scaleFactor}px`, color: primaryColor }} />
+              <h2 
+                className="font-bold text-gray-800 tracking-wide"
+                style={{ fontSize: `${Math.max(12, 20 * scaleFactor)}px` }}
+              >
+                LINKS & SOCIAL MEDIA
+              </h2>
+            </div>
+            <div className="border-b-2 border-gray-300" style={{ paddingBottom: `${16 * scaleFactor}px` }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: `${16 * scaleFactor}px` }}>
+                {links.map((link, index) => {
+                  const IconComponent = getPlatformIcon(link.url);
+                  return (
+                    <div key={index} className="relative">
+                      <div className="flex items-start">
+                        <div 
+                          className="rounded-full flex items-center justify-center flex-shrink-0"
+                          style={{ 
+                            width: `${24 * scaleFactor}px`, 
+                            height: `${24 * scaleFactor}px`,
+                            marginRight: `${12 * scaleFactor}px`,
+                            marginTop: `${2 * scaleFactor}px`,
+                            backgroundColor: primaryColor
+                          }}
+                        >
+                          <IconComponent className="text-white" style={{ width: `${12 * scaleFactor}px`, height: `${12 * scaleFactor}px` }} />
+                        </div>
+                        <div className="flex-1">
+                          <h3 
+                            className="font-bold text-gray-800"
+                            style={{ 
+                              fontSize: `${Math.max(8, 14 * scaleFactor)}px`,
+                              marginBottom: `${4 * scaleFactor}px`
+                            }}
+                          >
+                            {link.name}
+                          </h3>
+                          <p 
+                            className="text-gray-600 break-all"
+                            style={{ 
+                              fontSize: `${Math.max(8, 12 * scaleFactor)}px`,
+                              lineHeight: `${Math.max(12, 16 * scaleFactor)}px`
+                            }}
+                          >
+                            {link.url}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* References Section */}
         <div>
           <div className="flex items-center" style={{ marginBottom: `${16 * scaleFactor}px` }}>
@@ -837,8 +1123,29 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
     </div>
   );
 
-  // Determine if we need a second page
-  const needsSecondPage = workExperience.length > 2 || projects.length > 0 || skills.length > 6;
+  // Determine if we need a second page - now accounting for all sections
+  const needsSecondPage = 
+    workExperience.length > 2 || 
+    projects.length > 0 || 
+    skills.length > 6 ||
+    certificates.length > 2 ||
+    links.length > 3 ||
+    (skills.length > 4 && certificates.length > 0) ||
+    (skills.length > 4 && links.length > 0);
+
+  // Move certificates and links to page 2 if we have a second page
+  const shouldMoveCertificatesToPage2 = needsSecondPage && (certificates.length > 0);
+  const shouldMoveLinksToPage2 = needsSecondPage && (links.length > 0);
+
+  // If in print mode, render all pages in a single container
+  if (printMode && needsSecondPage) {
+    return (
+      <div className="print-container">
+        <div className="page-break-after">{renderPage1()}</div>
+        <div>{renderPage2()}</div>
+      </div>
+    );
+  }
 
   if (currentPage === 2 && needsSecondPage) {
     return renderPage2();

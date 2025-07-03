@@ -175,15 +175,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
             </button>
           </p>
         </div>
-
-        {/* Demo Credentials */}
-        <div className="mt-6 p-4 bg-background rounded-lg border border-border">
-          <h4 className="text-sm font-medium text-primaryText mb-2">Demo Credentials:</h4>
-          <div className="text-sm text-primaryText/60 space-y-1">
-            <p><strong>Admin:</strong> admin@resumeai.com / admin123</p>
-            <p><strong>User:</strong> Create a new account or use admin credentials</p>
-          </div>
-        </div>
       </div>
     </div>
   );

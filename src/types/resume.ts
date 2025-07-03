@@ -135,6 +135,9 @@ export interface ResumeData {
     style: 'dots' | 'pills' | 'bars';
     position: 'left' | 'right';
   };
+  languagesConfig?: {
+    style: 'dots' | 'pills' | 'bars';
+  };
   decoratorSettings?: DecoratorSettings;
 }
 

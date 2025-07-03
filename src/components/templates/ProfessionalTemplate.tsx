@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Mail, MapPin, Calendar, User, Briefcase, GraduationCap, Award } from 'lucide-react';
+import { Phone, Mail, MapPin, Calendar, User, Briefcase, GraduationCap, Award, Globe, Github, Linkedin, Twitter, Instagram, Facebook, Youtube, Link, ExternalLink } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
 
 interface ProfessionalTemplateProps {
@@ -8,7 +8,7 @@ interface ProfessionalTemplateProps {
 
 const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 100 }) => {
   const { state } = useResume();
-  const { personalInfo, workExperience, education, skills, skillsConfig } = state.resumeData;
+  const { personalInfo, workExperience, education, skills, certificates, links, skillsConfig } = state.resumeData;
   const colorTheme = state.resumeData.colorTheme;
 
   const scaleFactor = fontSize / 100;
@@ -17,6 +17,18 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
   const primaryColor = colorTheme?.primary || '#14B8A6';
   const secondaryColor = colorTheme?.secondary || '#0F766E';
   const accentColor = colorTheme?.accent || '#5EEAD4';
+
+  // Helper function to get platform icon
+  const getPlatformIcon = (url: string) => {
+    if (url.includes('linkedin.com')) return Linkedin;
+    if (url.includes('github.com')) return Github;
+    if (url.includes('twitter.com') || url.includes('x.com')) return Twitter;
+    if (url.includes('instagram.com')) return Instagram;
+    if (url.includes('facebook.com')) return Facebook;
+    if (url.includes('youtube.com')) return Youtube;
+    if (url.includes('http')) return Globe;
+    return Link;
+  };
 
   const renderSkillLevel = (level: number, skillStyle: string) => {
     const style = skillStyle || 'dots';
@@ -76,10 +88,10 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
 
   return (
     <div 
-      className="bg-white w-full h-full shadow-2xl overflow-hidden"
+      className="bg-white w-full shadow-2xl overflow-hidden"
       style={{ 
         width: '210mm', 
-        height: '297mm',
+        minHeight: '297mm',
         fontSize: `${Math.max(8, 14 * scaleFactor)}px`
       }}
     >
@@ -577,6 +589,61 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
             </div>
           </div>
 
+          {/* Certificates Section */}
+          {certificates.length > 0 && (
+            <div style={{ marginBottom: `${32 * scaleFactor}px` }}>
+              <h2 
+                className="font-bold tracking-wider border-b-2 pb-2"
+                style={{ 
+                  fontSize: `${Math.max(10, 18 * scaleFactor)}px`,
+                  marginBottom: `${20 * scaleFactor}px`,
+                  borderColor: primaryColor
+                }}
+              >
+                CERTIFICATES
+              </h2>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: `${16 * scaleFactor}px` }}>
+                {certificates.slice(0, 3).map((cert, index) => {
+                  // Handle both string and Certificate object formats
+                  const certificate = typeof cert === 'string' ? { name: cert, issuer: '', date: '' } : cert;
+                  return (
+                    <div key={index}>
+                      <h3 
+                        className="font-bold"
+                        style={{ 
+                          fontSize: `${Math.max(8, 14 * scaleFactor)}px`,
+                          marginBottom: `${4 * scaleFactor}px`
+                        }}
+                      >
+                        {certificate.name}
+                      </h3>
+                      {certificate.issuer && (
+                        <p 
+                          className="text-gray-300"
+                          style={{ 
+                            fontSize: `${Math.max(8, 12 * scaleFactor)}px`,
+                            marginBottom: `${2 * scaleFactor}px`
+                          }}
+                        >
+                          {certificate.issuer}
+                        </p>
+                      )}
+                      {certificate.date && (
+                        <p 
+                          className="text-gray-300"
+                          style={{ fontSize: `${Math.max(8, 12 * scaleFactor)}px` }}
+                        >
+                          {certificate.date}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Skills Section */}
           <div>
             <h2 
@@ -675,6 +742,56 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
               </div>
             </div>
           </div>
+
+          {/* Links Section */}
+          {links.length > 0 && (
+            <div style={{ marginTop: `${32 * scaleFactor}px` }}>
+              <h2 
+                className="font-bold tracking-wider border-b-2 pb-2"
+                style={{ 
+                  fontSize: `${Math.max(10, 18 * scaleFactor)}px`,
+                  marginBottom: `${20 * scaleFactor}px`,
+                  borderColor: primaryColor
+                }}
+              >
+                LINKS & SOCIAL
+              </h2>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: `${12 * scaleFactor}px` }}>
+                {links.slice(0, 4).map((link, index) => {
+                  const IconComponent = getPlatformIcon(link.url);
+                  return (
+                    <div key={index} className="flex items-center">
+                      <IconComponent 
+                        className="text-gray-300 mr-2" 
+                        style={{ 
+                          width: `${16 * scaleFactor}px`, 
+                          height: `${16 * scaleFactor}px` 
+                        }} 
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div 
+                          className="font-bold truncate"
+                          style={{ 
+                            fontSize: `${Math.max(8, 12 * scaleFactor)}px`,
+                            marginBottom: `${2 * scaleFactor}px`
+                          }}
+                        >
+                          {link.name}
+                        </div>
+                        <div 
+                          className="text-gray-300 text-xs truncate"
+                          style={{ fontSize: `${Math.max(7, 10 * scaleFactor)}px` }}
+                        >
+                          {link.url.replace(/^https?:\/\//, '')}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

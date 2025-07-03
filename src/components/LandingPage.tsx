@@ -128,9 +128,6 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           {/* Section Header */}
           <div className="text-center mb-16 animate-fade-in">
-            <div className="inline-block bg-accent/20 text-accent px-4 py-2 rounded-full text-sm font-medium mb-8">
-              Premium Features, Zero Cost
-            </div>
             <h2 className="text-5xl lg:text-6xl font-bold text-primaryText mb-6 leading-tight">
               Why Choose
               <br />

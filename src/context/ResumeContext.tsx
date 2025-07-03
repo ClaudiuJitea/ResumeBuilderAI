@@ -68,6 +68,9 @@ const initialState: ResumeState = {
     skillsConfig: {
       style: 'dots',
       position: 'left'
+    },
+    languagesConfig: {
+      style: 'dots'
     }
   },
 };

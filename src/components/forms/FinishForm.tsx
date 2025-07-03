@@ -23,7 +23,7 @@ const FinishForm = () => {
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [downloadComplete, setDownloadComplete] = useState(false);
 
-  const { personalInfo, workExperience, education, skills, projects } = state.resumeData;
+  const { personalInfo, workExperience, education, skills, projects, interests, certificates, links } = state.resumeData;
 
   // Calculate completion stats
   const totalSections = state.availableBuildSteps.length - 1; // Exclude finish step
@@ -240,6 +240,30 @@ const FinishForm = () => {
               {skills.length} {skills.length === 1 ? 'skill' : 'skills'}
             </span>
           </div>
+          {interests.length > 0 && (
+            <div className="flex justify-between">
+              <span className="text-primaryText/60">Interests:</span>
+              <span className="text-primaryText font-medium">
+                {interests.length} {interests.length === 1 ? 'interest' : 'interests'}
+              </span>
+            </div>
+          )}
+          {certificates.length > 0 && (
+            <div className="flex justify-between">
+              <span className="text-primaryText/60">Certificates:</span>
+              <span className="text-primaryText font-medium">
+                {certificates.length} {certificates.length === 1 ? 'certificate' : 'certificates'}
+              </span>
+            </div>
+          )}
+          {links.length > 0 && (
+            <div className="flex justify-between">
+              <span className="text-primaryText/60">Links:</span>
+              <span className="text-primaryText font-medium">
+                {links.length} {links.length === 1 ? 'link' : 'links'}
+              </span>
+            </div>
+          )}
           {projects.length > 0 && (
             <div className="flex justify-between">
               <span className="text-primaryText/60">Projects:</span>

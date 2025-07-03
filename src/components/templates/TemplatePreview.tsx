@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Phone, Mail, MapPin, Calendar, Briefcase, GraduationCap, Award, Globe } from 'lucide-react';
+import { User, Phone, Mail, MapPin, Calendar, Briefcase, GraduationCap, Award, Globe, Heart, Github, Linkedin, ExternalLink } from 'lucide-react';
 
 interface TemplatePreviewProps {
   templateId: string;
@@ -59,10 +59,31 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ templateId, className
           <div className="font-bold mb-0.5" style={{ fontSize: '2px' }}>LANGUAGE</div>
           <div className="border-t border-white/30 pt-0.5">
             <div className="mb-0.5">
-              <div style={{ fontSize: '1.8px' }}>English</div>
-              <div className="w-full bg-white/20 rounded-full" style={{ height: '1px' }}>
-                <div className="bg-white rounded-full w-4/5" style={{ height: '1px' }}></div>
+              <div className="flex justify-between items-center">
+                <div style={{ fontSize: '1.8px' }}>English</div>
+                <div className="flex space-x-0.5">
+                  {[1, 2, 3, 4, 5].map((dot) => (
+                    <div
+                      key={dot}
+                      className={`w-0.5 h-0.5 rounded-full ${
+                        dot <= 4 ? 'bg-white' : 'bg-white/30'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Interests */}
+        <div>
+          <div className="font-bold mb-0.5" style={{ fontSize: '2px' }}>INTERESTS</div>
+          <div className="border-t border-white/30 pt-0.5">
+            <div className="space-y-0.5">
+              <div style={{ fontSize: '1.8px' }}>Photography</div>
+              <div style={{ fontSize: '1.8px' }}>Travel</div>
+              <div style={{ fontSize: '1.8px' }}>Music</div>
             </div>
           </div>
         </div>
@@ -102,7 +123,7 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ templateId, className
         </div>
         
         {/* Skills */}
-        <div>
+        <div className="mb-1">
           <div className="flex items-center mb-0.5">
             <Award className="w-1 h-1 mr-0.5 text-cyan-500" />
             <div className="font-bold text-gray-800" style={{ fontSize: '2px' }}>SKILLS</div>
@@ -119,6 +140,41 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ templateId, className
               <div className="w-full bg-gray-200 rounded-full" style={{ height: '1px' }}>
                 <div className="bg-gradient-to-r from-cyan-400 to-cyan-600 rounded-full w-3/4" style={{ height: '1px' }}></div>
               </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Certificates */}
+        <div className="mb-1">
+          <div className="flex items-center mb-0.5">
+            <Award className="w-1 h-1 mr-0.5 text-cyan-500" />
+            <div className="font-bold text-gray-800" style={{ fontSize: '2px' }}>CERTIFICATES</div>
+          </div>
+          <div className="space-y-0.5">
+            <div className="flex items-start">
+              <div className="w-0.5 h-0.5 bg-cyan-500 rounded-full mr-0.5 mt-0.5 flex-shrink-0"></div>
+              <div>
+                <div className="font-bold text-gray-800" style={{ fontSize: '1.5px' }}>AWS Certified</div>
+                <div className="text-cyan-600" style={{ fontSize: '1.3px' }}>Amazon Web Services</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Links */}
+        <div>
+          <div className="flex items-center mb-0.5">
+            <ExternalLink className="w-1 h-1 mr-0.5 text-cyan-500" />
+            <div className="font-bold text-gray-800" style={{ fontSize: '2px' }}>LINKS</div>
+          </div>
+          <div className="space-y-0.5">
+            <div className="flex items-center">
+              <Linkedin className="w-0.5 h-0.5 mr-0.5 text-cyan-500" />
+              <div style={{ fontSize: '1.5px' }}>LinkedIn</div>
+            </div>
+            <div className="flex items-center">
+              <Github className="w-0.5 h-0.5 mr-0.5 text-cyan-500" />
+              <div style={{ fontSize: '1.5px' }}>GitHub</div>
             </div>
           </div>
         </div>
@@ -172,6 +228,26 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ templateId, className
               </div>
             </div>
           </div>
+
+          {/* Education */}
+          <div className="mb-1">
+            <h2 className="font-bold border-b-2 border-teal-400 pb-0.5 mb-1" style={{ fontSize: '1.8px' }}>EDUCATION</h2>
+            <div>
+              <h3 className="font-bold" style={{ fontSize: '1.5px' }}>Your Degree</h3>
+              <p className="text-gray-300" style={{ fontSize: '1.3px' }}>Year</p>
+              <p className="text-gray-300" style={{ fontSize: '1.3px' }}>University</p>
+            </div>
+          </div>
+
+          {/* Certificates */}
+          <div className="mb-1">
+            <h2 className="font-bold border-b-2 border-teal-400 pb-0.5 mb-1" style={{ fontSize: '1.8px' }}>CERTIFICATES</h2>
+            <div>
+              <h3 className="font-bold" style={{ fontSize: '1.5px' }}>AWS Certified</h3>
+              <p className="text-gray-300" style={{ fontSize: '1.3px' }}>Amazon Web Services</p>
+              <p className="text-gray-300" style={{ fontSize: '1.3px' }}>2023</p>
+            </div>
+          </div>
         </div>
 
         {/* Right Sidebar */}
@@ -195,16 +271,6 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ templateId, className
             </div>
           </div>
 
-          {/* Education */}
-          <div className="mb-1">
-            <h2 className="font-bold border-b-2 border-teal-400 pb-0.5 mb-1" style={{ fontSize: '1.8px' }}>EDUCATION</h2>
-            <div>
-              <h3 className="font-bold" style={{ fontSize: '1.5px' }}>Your Degree</h3>
-              <p className="text-gray-300" style={{ fontSize: '1.3px' }}>Year</p>
-              <p className="text-gray-300" style={{ fontSize: '1.3px' }}>University</p>
-            </div>
-          </div>
-
           {/* Skills */}
           <div>
             <h2 className="font-bold border-b-2 border-teal-400 pb-0.5 mb-1" style={{ fontSize: '1.8px' }}>SKILLS</h2>
@@ -214,6 +280,21 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ templateId, className
                 <div style={{ fontSize: '1.3px' }}>Problem Solving</div>
                 <div style={{ fontSize: '1.3px' }}>Creative Thinking</div>
                 <div style={{ fontSize: '1.3px' }}>Leadership</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Links */}
+          <div className="mt-1">
+            <h2 className="font-bold border-b-2 border-teal-400 pb-0.5 mb-1" style={{ fontSize: '1.8px' }}>LINKS</h2>
+            <div className="space-y-0.5">
+              <div className="flex items-center">
+                <Linkedin className="w-0.5 h-0.5 mr-0.5 text-teal-400" />
+                <div style={{ fontSize: '1.3px' }}>LinkedIn</div>
+              </div>
+              <div className="flex items-center">
+                <Github className="w-0.5 h-0.5 mr-0.5 text-teal-400" />
+                <div style={{ fontSize: '1.3px' }}>GitHub</div>
               </div>
             </div>
           </div>

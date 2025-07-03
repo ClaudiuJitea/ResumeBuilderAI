@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin, Calendar, User, Briefcase, GraduationCap, Award, Globe, Code, ExternalLink, Heart, Github, Linkedin, Twitter, Instagram, Facebook, Youtube, Link } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
 
@@ -12,6 +12,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
   const { state } = useResume();
   const { personalInfo, workExperience, education, skills, languages, projects, interests, certificates, links, skillsConfig, languagesConfig } = state.resumeData;
   const colorTheme = state.resumeData.colorTheme;
+  
+  const [isPrintMode, setIsPrintMode] = useState(printMode);
 
   const scaleFactor = fontSize / 100;
 
@@ -130,7 +132,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
               <img 
                 src={personalInfo.photo} 
                 alt="Profile" 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover profile-image"
               />
             ) : (
               <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -1137,14 +1139,29 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
   const shouldMoveCertificatesToPage2 = needsSecondPage && (certificates.length > 0);
   const shouldMoveLinksToPage2 = needsSecondPage && (links.length > 0);
 
-  // If in print mode, render all pages in a single container
-  if (printMode && needsSecondPage) {
-    return (
-      <div className="print-container">
-        <div className="page-break-after">{renderPage1()}</div>
-        <div>{renderPage2()}</div>
-      </div>
-    );
+  // If in print mode, render all pages in a single container with proper page breaks
+  if (isPrintMode || printMode) {
+    if (needsSecondPage) {
+      return (
+        <div className="print-container" style={{ width: '210mm' }}>
+          <div 
+            className="page-break-after" 
+            style={{ 
+              pageBreakAfter: 'always',
+              breakAfter: 'page',
+              marginBottom: '20mm'
+            }}
+          >
+            {renderPage1()}
+          </div>
+          <div style={{ pageBreakBefore: 'always', breakBefore: 'page' }}>
+            {renderPage2()}
+          </div>
+        </div>
+      );
+    } else {
+      return renderPage1();
+    }
   }
 
   if (currentPage === 2 && needsSecondPage) {

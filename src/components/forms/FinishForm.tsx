@@ -43,74 +43,141 @@ const FinishForm = () => {
         throw new Error('Resume preview not found');
       }
 
-      // Update progress
       setDownloadProgress(25);
 
-      // Temporarily remove the transform scale to capture at full size
-      const originalTransform = resumeElement.style.transform;
-      const originalTransformOrigin = resumeElement.style.transformOrigin;
-      
-      // Reset transform to capture at actual A4 size
-      resumeElement.style.transform = 'none';
-      resumeElement.style.transformOrigin = 'initial';
+      // Store original styles
+      const originalStyles = {
+        transform: resumeElement.style.transform,
+        transformOrigin: resumeElement.style.transformOrigin,
+        width: resumeElement.style.width,
+        height: resumeElement.style.height,
+        maxHeight: resumeElement.style.maxHeight,
+        overflow: resumeElement.style.overflow
+      };
 
-      // Wait a moment for the DOM to update
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Temporarily modify the preview to show all content
+      resumeElement.style.transform = 'scale(1)';
+      resumeElement.style.transformOrigin = 'top left';
+      resumeElement.style.width = '210mm';
+      resumeElement.style.height = 'auto';
+      resumeElement.style.maxHeight = 'none';
+      resumeElement.style.overflow = 'visible';
+
+      // Find page navigation and hide it temporarily
+      const pageNavigation = document.querySelector('[data-page-navigation]') as HTMLElement;
+      const originalPageNavDisplay = pageNavigation ? pageNavigation.style.display : '';
+      if (pageNavigation) {
+        pageNavigation.style.display = 'none';
+      }
+
+      // Get the template content and determine if we need multiple pages
+      const { workExperience, projects, skills, certificates, links } = state.resumeData;
+      const needsSecondPage = 
+        workExperience.length > 2 || 
+        projects.length > 0 || 
+        skills.length > 6 ||
+        certificates.length > 2 ||
+        links.length > 3 ||
+        (skills.length > 4 && certificates.length > 0) ||
+        (skills.length > 4 && links.length > 0);
 
       setDownloadProgress(40);
 
-      // Configure html2canvas options for A4 dimensions
-      // A4 at 300 DPI: 2480 x 3508 pixels
-      const canvas = await html2canvas(resumeElement, {
-        scale: 1, // Use actual size, no scaling
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: 794, // A4 width in pixels at 96 DPI (210mm)
-        height: 1123, // A4 height in pixels at 96 DPI (297mm)
-        scrollX: 0,
-        scrollY: 0,
-        windowWidth: 794,
-        windowHeight: 1123
-      });
-
-      setDownloadProgress(70);
-
-      // Restore original transform
-      resumeElement.style.transform = originalTransform;
-      resumeElement.style.transformOrigin = originalTransformOrigin;
-
-      // Create PDF with exact A4 dimensions
+      // Create PDF
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4'
+        format: 'a4',
+        compress: true
       });
 
-      // A4 dimensions in mm
       const pdfWidth = 210;
       const pdfHeight = 297;
 
-      setDownloadProgress(85);
+      // Capture page 1
+      const canvas1 = await html2canvas(resumeElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: resumeElement.offsetWidth,
+        height: resumeElement.offsetHeight
+      });
 
-      // Convert canvas to image and add to PDF at full A4 size
-      const imgData = canvas.toDataURL('image/png', 1.0);
+      setDownloadProgress(60);
+
+      // Add page 1 to PDF
+      const imgData1 = canvas1.toDataURL('image/jpeg', 0.95);
       
-      // Add image to PDF covering the entire page
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      // Calculate scaling to fit A4
+      const scale = Math.min(pdfWidth / (canvas1.width * 0.352778), pdfHeight / (canvas1.height * 0.352778));
+      const scaledWidth = (canvas1.width * 0.352778) * scale;
+      const scaledHeight = (canvas1.height * 0.352778) * scale;
+      
+      // Center on page
+      const xOffset = (pdfWidth - scaledWidth) / 2;
+      const yOffset = (pdfHeight - scaledHeight) / 2;
+      
+      pdf.addImage(imgData1, 'JPEG', xOffset, yOffset, scaledWidth, scaledHeight);
 
-      setDownloadProgress(95);
+      // If we need a second page, capture it
+      if (needsSecondPage && state.selectedTemplate === 'modern') {
+        setDownloadProgress(75);
 
-      // Generate filename
+        // Temporarily change to page 2 by dispatching a custom event
+        const changePageEvent = new CustomEvent('changePage', { detail: { page: 2 } });
+        window.dispatchEvent(changePageEvent);
+
+        // Wait for page change
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Capture page 2
+        const canvas2 = await html2canvas(resumeElement, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          width: resumeElement.offsetWidth,
+          height: resumeElement.offsetHeight
+        });
+
+        // Add page 2 to PDF
+        pdf.addPage();
+        const imgData2 = canvas2.toDataURL('image/jpeg', 0.95);
+        
+        const scale2 = Math.min(pdfWidth / (canvas2.width * 0.352778), pdfHeight / (canvas2.height * 0.352778));
+        const scaledWidth2 = (canvas2.width * 0.352778) * scale2;
+        const scaledHeight2 = (canvas2.height * 0.352778) * scale2;
+        
+        const xOffset2 = (pdfWidth - scaledWidth2) / 2;
+        const yOffset2 = (pdfHeight - scaledHeight2) / 2;
+        
+        pdf.addImage(imgData2, 'JPEG', xOffset2, yOffset2, scaledWidth2, scaledHeight2);
+
+        // Change back to page 1
+        const changeBackEvent = new CustomEvent('changePage', { detail: { page: 1 } });
+        window.dispatchEvent(changeBackEvent);
+      }
+
+      setDownloadProgress(90);
+
+      // Restore original styles
+      Object.assign(resumeElement.style, originalStyles);
+      
+      // Restore page navigation
+      if (pageNavigation) {
+        pageNavigation.style.display = originalPageNavDisplay;
+      }
+
+      // Generate filename and download
       const fileName = `${personalInfo.firstName}_${personalInfo.lastName}_Resume.pdf`.replace(/\s+/g, '_');
-
-      // Download the PDF
       pdf.save(fileName);
 
       setDownloadProgress(100);
       setDownloadComplete(true);
 
-      // Reset after 3 seconds
       setTimeout(() => {
         setIsDownloading(false);
         setDownloadProgress(0);
@@ -119,6 +186,24 @@ const FinishForm = () => {
 
     } catch (error) {
       console.error('Error generating PDF:', error);
+      
+      // Restore styles in case of error
+      const resumeElement = document.querySelector('[data-resume-preview]') as HTMLElement;
+      if (resumeElement) {
+        resumeElement.style.transform = '';
+        resumeElement.style.transformOrigin = '';
+        resumeElement.style.width = '';
+        resumeElement.style.height = '';
+        resumeElement.style.maxHeight = '';
+        resumeElement.style.overflow = '';
+      }
+
+      // Restore page navigation
+      const pageNavigation = document.querySelector('[data-page-navigation]') as HTMLElement;
+      if (pageNavigation) {
+        pageNavigation.style.display = '';
+      }
+
       setIsDownloading(false);
       setDownloadProgress(0);
       alert('There was an error generating your PDF. Please try again.');

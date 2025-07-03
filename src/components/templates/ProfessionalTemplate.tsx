@@ -126,7 +126,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
               <img 
                 src={personalInfo.photo} 
                 alt="Profile" 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover profile-image"
               />
             ) : (
               <div className="w-full h-full bg-gray-200 flex items-center justify-center">

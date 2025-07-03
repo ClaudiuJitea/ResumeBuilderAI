@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Edit, Palette, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
 import { useResume } from '../context/ResumeContext';
 import ModernTemplate from './templates/ModernTemplate';
@@ -12,6 +12,19 @@ const ResumePreview = () => {
   const [zoomLevel, setZoomLevel] = useState(60); // Default zoom level for preview
   const [showColorSelector, setShowColorSelector] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Listen for page change events from PDF generation
+  useEffect(() => {
+    const handlePageChange = (event: CustomEvent) => {
+      setCurrentPage(event.detail.page);
+    };
+
+    window.addEventListener('changePage', handlePageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('changePage', handlePageChange as EventListener);
+    };
+  }, []);
 
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFontSize(parseInt(e.target.value));
@@ -31,8 +44,15 @@ const ResumePreview = () => {
   };
 
   // Determine if we need multiple pages based on content
-  const { workExperience, projects, skills } = state.resumeData;
-  const needsSecondPage = workExperience.length > 2 || projects.length > 0 || skills.length > 6;
+  const { workExperience, projects, skills, certificates, links } = state.resumeData;
+  const needsSecondPage = 
+    workExperience.length > 2 || 
+    projects.length > 0 || 
+    skills.length > 6 ||
+    certificates.length > 2 ||
+    links.length > 3 ||
+    (skills.length > 4 && certificates.length > 0) ||
+    (skills.length > 4 && links.length > 0);
   const totalPages = needsSecondPage ? 2 : 1;
 
   const renderTemplate = () => {
@@ -62,7 +82,7 @@ const ResumePreview = () => {
             <div className="flex items-center space-x-2">
               {/* Page Navigation */}
               {totalPages > 1 && (
-                <div className="flex items-center space-x-2 mr-4">
+                <div className="flex items-center space-x-2 mr-4" data-page-navigation>
                   <button
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}

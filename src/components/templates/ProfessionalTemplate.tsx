@@ -1,6 +1,8 @@
 import React from 'react';
 import { Phone, Mail, MapPin, Calendar, User, Briefcase, GraduationCap, Award, Globe, Github, Linkedin, Twitter, Instagram, Facebook, Youtube, Link, ExternalLink } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
+import { getPhotoClasses, getPhotoContainerClasses } from '../../utils/photoUtils';
+import { useFont } from '../../hooks/useFont';
 
 interface ProfessionalTemplateProps {
   fontSize?: number;
@@ -10,6 +12,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
   const { state } = useResume();
   const { personalInfo, workExperience, education, skills, certificates, links, skillsConfig } = state.resumeData;
   const colorTheme = state.resumeData.colorTheme;
+  const { getFontStyle } = useFont();
 
   const scaleFactor = fontSize / 100;
 
@@ -92,7 +95,8 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
       style={{ 
         width: '210mm', 
         minHeight: '297mm',
-        fontSize: `${Math.max(8, 14 * scaleFactor)}px`
+        fontSize: `${Math.max(8, 14 * scaleFactor)}px`,
+        ...getFontStyle()
       }}
     >
       {/* Header Section */}
@@ -114,25 +118,28 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
           </div>
           
           {/* Profile Photo */}
-          <div 
-            className="rounded-full overflow-hidden border-4 shadow-lg ml-8"
-            style={{ 
-              width: `${120 * scaleFactor}px`, 
-              height: `${120 * scaleFactor}px`,
-              borderColor: primaryColor
-            }}
-          >
-            {personalInfo.photo ? (
-              <img 
-                src={personalInfo.photo} 
-                alt="Profile" 
-                className="w-full h-full object-cover profile-image"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <User className="text-gray-400" style={{ width: `${60 * scaleFactor}px`, height: `${60 * scaleFactor}px` }} />
-              </div>
-            )}
+          <div className={`${getPhotoContainerClasses(personalInfo)} ml-8`}>
+            <div 
+              className="overflow-hidden border-4 shadow-lg"
+              style={{ 
+                ...getPhotoClasses(personalInfo, scaleFactor).style,
+                borderColor: primaryColor,
+                borderRadius: personalInfo.photoStyle === 'circle' ? '50%' : 
+                           personalInfo.photoStyle === 'rounded' ? '8px' : '0'
+              }}
+            >
+              {personalInfo.photo ? (
+                <img 
+                  src={personalInfo.photo} 
+                  alt="Profile" 
+                  className={`w-full h-full ${getPhotoClasses(personalInfo, scaleFactor).className}`}
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <User className="text-gray-400" style={{ width: `${60 * scaleFactor}px`, height: `${60 * scaleFactor}px` }} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

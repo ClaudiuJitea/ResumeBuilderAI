@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin, Calendar, User, Briefcase, GraduationCap, Award, Globe, Code, ExternalLink, Heart, Github, Linkedin, Twitter, Instagram, Facebook, Youtube, Link } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
+import { getPhotoClasses, getPhotoContainerClasses } from '../../utils/photoUtils';
+import { useFont } from '../../hooks/useFont';
 
 interface ModernTemplateProps {
   fontSize?: number;
@@ -12,6 +14,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
   const { state } = useResume();
   const { personalInfo, workExperience, education, skills, languages, projects, interests, certificates, links, skillsConfig, languagesConfig } = state.resumeData;
   const colorTheme = state.resumeData.colorTheme;
+  const { getFontStyle } = useFont();
   
   const [isPrintMode, setIsPrintMode] = useState(printMode);
 
@@ -107,7 +110,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
       style={{ 
         width: '210mm', 
         minHeight: '297mm',
-        fontSize: `${Math.max(8, 14 * scaleFactor)}px`
+        fontSize: `${Math.max(8, 14 * scaleFactor)}px`,
+        ...getFontStyle()
       }}
     >
       {/* Left Sidebar */}
@@ -120,25 +124,28 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
       >
         {/* Profile Section */}
         <div className="text-center" style={{ marginBottom: `${32 * scaleFactor}px` }}>
-          <div 
-            className="bg-white rounded-full mx-auto overflow-hidden border-4 border-white shadow-lg"
-            style={{ 
-              width: `${128 * scaleFactor}px`, 
-              height: `${128 * scaleFactor}px`,
-              marginBottom: `${24 * scaleFactor}px`
-            }}
-          >
-            {personalInfo.photo ? (
-              <img 
-                src={personalInfo.photo} 
-                alt="Profile" 
-                className="w-full h-full object-cover profile-image"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <User className="text-gray-400" style={{ width: `${64 * scaleFactor}px`, height: `${64 * scaleFactor}px` }} />
-              </div>
-            )}
+          <div className={`${getPhotoContainerClasses(personalInfo)} mb-6`}>
+            <div 
+              className="bg-white overflow-hidden border-4 border-white shadow-lg"
+              style={{ 
+                ...getPhotoClasses(personalInfo, scaleFactor).style,
+                marginBottom: `${24 * scaleFactor}px`,
+                borderRadius: personalInfo.photoStyle === 'circle' ? '50%' : 
+                           personalInfo.photoStyle === 'rounded' ? '8px' : '0'
+              }}
+            >
+              {personalInfo.photo ? (
+                <img 
+                  src={personalInfo.photo} 
+                  alt="Profile" 
+                  className={`w-full h-full ${getPhotoClasses(personalInfo, scaleFactor).className}`}
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <User className="text-gray-400" style={{ width: `${64 * scaleFactor}px`, height: `${64 * scaleFactor}px` }} />
+                </div>
+              )}
+            </div>
           </div>
           <h1 
             className="font-bold tracking-wide"
@@ -670,7 +677,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
       style={{ 
         width: '210mm', 
         minHeight: '297mm',
-        fontSize: `${Math.max(8, 14 * scaleFactor)}px`
+        fontSize: `${Math.max(8, 14 * scaleFactor)}px`,
+        ...getFontStyle()
       }}
     >
       {/* Left Sidebar - Same as Page 1 but with different content */}

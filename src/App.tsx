@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ResumeProvider, useResume } from './context/ResumeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navigation from './components/Navigation';
@@ -10,6 +10,7 @@ import ResumeBuilder from './components/ResumeBuilder';
 import AuthPage from './components/auth/AuthPage';
 import AdminDashboard from './components/admin/AdminDashboard';
 import YourCVs from './components/YourCVs';
+import { loadGoogleFont, PROFESSIONAL_FONTS } from './utils/fonts';
 
 const AppContent = () => {
   const { state } = useResume();
@@ -70,6 +71,18 @@ const AppContent = () => {
 };
 
 function App() {
+  // Load essential fonts on app startup
+  useEffect(() => {
+    // Load the most commonly used professional fonts
+    const essentialFonts = ['Inter', 'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Poppins'];
+    essentialFonts.forEach(fontFamily => {
+      const font = PROFESSIONAL_FONTS.find(f => f.family === fontFamily);
+      if (font) {
+        loadGoogleFont(font.family, font.variants);
+      }
+    });
+  }, []);
+
   return (
     <AuthProvider>
       <ResumeProvider>

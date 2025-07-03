@@ -19,9 +19,9 @@ const PhotoForm = () => {
   const { state, dispatch } = useResume();
   const { personalInfo } = state.resumeData;
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(personalInfo.photo || null);
-  const [photoStyle, setPhotoStyle] = useState<'circle' | 'square' | 'rounded'>('circle');
-  const [photoSize, setPhotoSize] = useState<'small' | 'medium' | 'large'>('medium');
-  const [photoPosition, setPhotoPosition] = useState<'left' | 'right' | 'center'>('center');
+  const [photoStyle, setPhotoStyle] = useState<'circle' | 'square' | 'rounded'>(personalInfo.photoStyle || 'circle');
+  const [photoSize, setPhotoSize] = useState<'small' | 'medium' | 'large'>(personalInfo.photoSize || 'medium');
+  const [photoPosition, setPhotoPosition] = useState<'left' | 'center' | 'right'>(personalInfo.photoPosition || 'center');
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -68,7 +68,12 @@ const PhotoForm = () => {
 
   const removePhoto = () => {
     setSelectedPhoto(null);
-    updatePersonalInfo({ photo: undefined });
+    updatePersonalInfo({ 
+      photo: undefined,
+      photoStyle: undefined,
+      photoSize: undefined,
+      photoPosition: undefined
+    });
   };
 
   const updatePersonalInfo = (updates: Partial<typeof personalInfo>) => {
@@ -76,6 +81,21 @@ const PhotoForm = () => {
       type: 'UPDATE_PERSONAL_INFO',
       payload: updates
     });
+  };
+
+  const handlePhotoStyleChange = (style: 'circle' | 'square' | 'rounded') => {
+    setPhotoStyle(style);
+    updatePersonalInfo({ photoStyle: style });
+  };
+
+  const handlePhotoSizeChange = (size: 'small' | 'medium' | 'large') => {
+    setPhotoSize(size);
+    updatePersonalInfo({ photoSize: size });
+  };
+
+  const handlePhotoPositionChange = (position: 'left' | 'center' | 'right') => {
+    setPhotoPosition(position);
+    updatePersonalInfo({ photoPosition: position });
   };
 
   const handleNext = () => {
@@ -230,7 +250,7 @@ const PhotoForm = () => {
               ].map((style) => (
                 <button
                   key={style.id}
-                  onClick={() => setPhotoStyle(style.id as 'circle' | 'square' | 'rounded')}
+                  onClick={() => handlePhotoStyleChange(style.id as 'circle' | 'square' | 'rounded')}
                   className={`p-4 rounded-lg border-2 transition-all duration-200 text-center ${
                     photoStyle === style.id
                       ? 'border-accent bg-accent/10 text-accent'
@@ -254,7 +274,7 @@ const PhotoForm = () => {
               ].map((size) => (
                 <button
                   key={size.id}
-                  onClick={() => setPhotoSize(size.id as 'small' | 'medium' | 'large')}
+                  onClick={() => handlePhotoSizeChange(size.id as 'small' | 'medium' | 'large')}
                   className={`p-4 rounded-lg border-2 transition-all duration-200 text-center ${
                     photoSize === size.id
                       ? 'border-accent bg-accent/10 text-accent'
@@ -280,7 +300,7 @@ const PhotoForm = () => {
               ].map((position) => (
                 <button
                   key={position.id}
-                  onClick={() => setPhotoPosition(position.id as 'left' | 'right' | 'center')}
+                  onClick={() => handlePhotoPositionChange(position.id as 'left' | 'center' | 'right')}
                   className={`p-4 rounded-lg border-2 transition-all duration-200 text-center ${
                     photoPosition === position.id
                       ? 'border-accent bg-accent/10 text-accent'

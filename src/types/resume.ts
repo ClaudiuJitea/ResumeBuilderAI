@@ -7,6 +7,9 @@ export interface PersonalInfo {
   location: string;
   contactStyle: 'symbols' | 'none';
   photo?: string;
+  photoStyle?: 'circle' | 'square' | 'rounded';
+  photoSize?: 'small' | 'medium' | 'large';
+  photoPosition?: 'left' | 'center' | 'right';
 }
 
 export interface WorkExperience {

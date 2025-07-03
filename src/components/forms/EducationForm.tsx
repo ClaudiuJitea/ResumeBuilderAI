@@ -298,9 +298,9 @@ const EducationForm = () => {
               >
                 <div className="flex items-center space-x-3">
                   <GripVertical className="w-5 h-5 text-primaryText/50 cursor-grab" />
-                  <EntryIcon className="w-5 h-5 text-accent" />
-                  <div>
-                    <div className="text-primaryText font-medium">
+                  <EntryIcon className="w-5 h-5 text-accent flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-primaryText font-medium truncate">
                       {getEntryDisplayName(entry)} {entry.institution && `- ${entry.institution}`}
                     </div>
                     <div className="text-primaryText/60 text-sm">

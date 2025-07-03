@@ -8,16 +8,29 @@ import {
   Palette,
   Copy,
   Trash2,
-  Plus
+  Plus,
+  Type,
+  Check,
+  X
 } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
+import { 
+  ALL_FONTS, 
+  PROFESSIONAL_FONTS, 
+  searchFonts, 
+  getFontsByPopularity,
+  loadGoogleFont,
+  DEFAULT_FONT
+} from '../../utils/fonts';
 
 const DecoratorForm = () => {
   const { state, dispatch } = useResume();
   const decoratorSettings = state.resumeData.decoratorSettings;
   
-  const [selectedFont, setSelectedFont] = useState(decoratorSettings?.selectedFont || 'Roboto');
+  const [selectedFont, setSelectedFont] = useState(decoratorSettings?.selectedFont || DEFAULT_FONT);
   const [fontSearch, setFontSearch] = useState('');
+
+  const [showFontDropdown, setShowFontDropdown] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(decoratorSettings?.selectedTemplate || 'Classic');
   const [selectedColorScheme, setSelectedColorScheme] = useState(decoratorSettings?.selectedColorScheme || '#2563eb');
   const [selectedDecorations, setSelectedDecorations] = useState<string[]>(decoratorSettings?.selectedDecorations || []);
@@ -43,6 +56,43 @@ const DecoratorForm = () => {
       setSeparatorColor(separatorDecoration.properties.color);
     }
   }, [decoratorSettings?.decorations]);
+
+  // Load the selected font when it changes
+  useEffect(() => {
+    if (selectedFont && selectedFont !== 'Inter') {
+      const font = ALL_FONTS.find(f => f.family === selectedFont);
+      if (font) {
+        loadGoogleFont(font.family, font.variants);
+      }
+    }
+  }, [selectedFont]);
+
+  // Get filtered and searched fonts
+  const getFilteredFonts = () => {
+    let fonts = ALL_FONTS;
+    
+    if (fontSearch.trim()) {
+      fonts = searchFonts(fontSearch, fonts);
+    }
+    
+    return getFontsByPopularity(fonts);
+  };
+
+  const handleFontSelect = (fontFamily: string) => {
+    setSelectedFont(fontFamily);
+    // Don't close dropdown here - let user preview multiple fonts
+    
+    // Load the font
+    const font = ALL_FONTS.find(f => f.family === fontFamily);
+    if (font) {
+      loadGoogleFont(font.family, font.variants);
+    }
+  };
+
+  const handleApplyFont = () => {
+    setShowFontDropdown(false);
+    setFontSearch('');
+  };
 
   const handleSeparatorColorChange = (newColor: string) => {
     setSeparatorColor(newColor);
@@ -219,24 +269,140 @@ const DecoratorForm = () => {
       <div className="space-y-8">
         {/* Font Selection */}
         <div>
-          <label className="block text-primaryText font-semibold mb-4">Font:</label>
-          <div className="flex space-x-4">
-            <div className="flex items-center space-x-2 bg-card border border-border rounded-xl px-4 py-3">
-              <ArrowLeft className="w-4 h-4 text-primaryText/50" />
-              <span className="font-medium text-primaryText">{selectedFont}</span>
-              <ArrowRight className="w-4 h-4 text-primaryText/50" />
-            </div>
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-primaryText/50" />
-              <input
-                type="text"
-                placeholder="Search from 1600+ fonts..."
-                value={fontSearch}
-                onChange={(e) => setFontSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-card border border-border rounded-xl text-primaryText placeholder-primaryText/50 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-              />
+          <label className="block text-primaryText font-semibold mb-4 flex items-center">
+            <Type className="w-5 h-5 mr-2 text-accent" />
+            Font Selection:
+          </label>
+          
+          {/* Current Font Display */}
+          <div className="mb-4">
+            <div 
+              className="flex items-center justify-between bg-card border border-border rounded-xl px-4 py-3 cursor-pointer hover:border-accent transition-colors"
+              onClick={() => setShowFontDropdown(!showFontDropdown)}
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-accent/20 rounded flex items-center justify-center">
+                  <Type className="w-4 h-4 text-accent" />
+                </div>
+                <div>
+                  <span 
+                    className="font-medium text-primaryText"
+                    style={{ fontFamily: `'${selectedFont}', sans-serif` }}
+                  >
+                    {selectedFont}
+                  </span>
+                  <div className="text-xs text-primaryText/60">
+                    {ALL_FONTS.find(f => f.family === selectedFont)?.description || 'Professional font'}
+                  </div>
+                </div>
+              </div>
+              <ArrowRight className={`w-5 h-5 text-primaryText/50 transition-transform ${showFontDropdown ? 'rotate-90' : ''}`} />
             </div>
           </div>
+
+          {/* Font Selection Dropdown */}
+          {showFontDropdown && (
+            <div className="bg-card border border-border rounded-xl p-4 mb-4 relative">
+              {/* Close Button */}
+              <button
+                onClick={() => setShowFontDropdown(false)}
+                className="absolute top-3 right-3 text-primaryText/50 hover:text-primaryText transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              {/* Search Bar */}
+              <div className="relative mb-4 pr-8">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-primaryText/50" />
+                <input
+                  type="text"
+                  placeholder="Search fonts..."
+                  value={fontSearch}
+                  onChange={(e) => setFontSearch(e.target.value)}
+                  className="w-full pl-10 pr-10 py-2 bg-background border border-border rounded-lg text-primaryText placeholder-primaryText/50 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                />
+                {fontSearch && (
+                  <button
+                    onClick={() => setFontSearch('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primaryText/50 hover:text-primaryText"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+
+
+              {/* Font List */}
+              <div className="max-h-80 overflow-y-auto space-y-2">
+                {getFilteredFonts().slice(0, 35).map((font) => (
+                  <div
+                    key={font.family}
+                    className={`p-3 rounded-lg cursor-pointer transition-colors border ${
+                      selectedFont === font.family
+                        ? 'bg-accent/10 border-accent'
+                        : 'bg-background border-border hover:border-accent/50'
+                    }`}
+                    onClick={() => handleFontSelect(font.family)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div 
+                          className="font-medium text-primaryText text-lg"
+                          style={{ fontFamily: `'${font.family}', ${font.category === 'serif' ? 'serif' : 'sans-serif'}` }}
+                        >
+                          {font.family}
+                        </div>
+                        <div className="text-xs text-primaryText/60 mt-1">
+                          {font.description}
+                        </div>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <span className="text-xs px-2 py-0.5 bg-accent/20 text-accent rounded">
+                            {font.category}
+                          </span>
+                          <span className="text-xs text-primaryText/50">
+                            {font.variants.length} styles
+                          </span>
+                        </div>
+                      </div>
+                      {selectedFont === font.family && (
+                        <Check className="w-5 h-5 text-accent ml-2" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+                
+                {getFilteredFonts().length === 0 && (
+                  <div className="text-center py-8 text-primaryText/60">
+                    No fonts found matching your search.
+                  </div>
+                )}
+              </div>
+
+              {/* Font Preview */}
+              <div className="mt-4 p-3 bg-background rounded-lg border border-border">
+                <div className="text-sm text-primaryText/60 mb-2">Preview:</div>
+                <div 
+                  className="text-primaryText"
+                  style={{ fontFamily: `'${selectedFont}', sans-serif` }}
+                >
+                  <div className="text-2xl font-bold mb-1">John Doe</div>
+                  <div className="text-lg">Software Engineer</div>
+                  <div className="text-base mt-2 text-primaryText/80">
+                    Experienced developer with expertise in React, TypeScript, and modern web technologies.
+                  </div>
+                </div>
+              </div>
+
+              {/* Apply Font Button */}
+              <button
+                onClick={handleApplyFont}
+                className="w-full mt-4 bg-accent hover:bg-accent/90 text-background py-2 rounded-lg font-medium transition-colors"
+              >
+                Apply Font
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Template Selection */}

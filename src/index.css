@@ -23,7 +23,20 @@ html, body {
   padding: 0;
   width: 100%;
   overflow-x: hidden;
-  @apply scrollbar-thin scrollbar-track-background scrollbar-thumb-accent/30 hover:scrollbar-thumb-accent/50;
+  overflow-y: auto; /* Force scrollbar to be always visible */
+  /* Enhanced scrollbar for consistency - Dark theme */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 204, 0.6) rgba(48, 54, 61, 0.3);
+}
+
+/* Better zoom handling for layout stability */
+html {
+  box-sizing: border-box;
+  color-scheme: dark; /* Tell browser this is a dark theme */
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
 }
 
 /* Ensure root element takes full width */
@@ -156,22 +169,70 @@ img {
   transition: all 0.2s ease-in-out;
 }
 
-/* Custom scrollbar */
+/* ========================================
+   DARK THEMED SCROLLBAR - GLOBAL DEFAULT
+   ========================================
+   Beautiful teal/cyan scrollbar optimized for dark theme
+   Applied universally across the entire application
+   Features:
+   - Visible dark track: rgba(48, 54, 61, 0.3)
+   - Bright teal thumb: rgba(0, 255, 204, 0.6)
+   - Enhanced hover: rgba(0, 255, 204, 0.8)
+   - Subtle borders for definition
+   - Smooth transitions
+   ======================================== */
+
+/* Custom scrollbar - Global beautiful scrollbar for dark theme */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: rgba(48, 54, 61, 0.3); /* Dark track for visibility */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+  background-color: rgba(0, 255, 204, 0.6); /* Brighter for dark theme */
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+  border: 1px solid rgba(0, 255, 204, 0.1); /* Subtle border for definition */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background-color: rgba(0, 255, 204, 0.8); /* Even brighter on hover */
+  border-color: rgba(0, 255, 204, 0.2);
+}
+
+/* Firefox support - Dark theme colors */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 204, 0.6) rgba(48, 54, 61, 0.3);
+}
+
+/* Force beautiful scrollbar on all main containers - Dark theme */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 204, 0.6) rgba(48, 54, 61, 0.3);
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(48, 54, 61, 0.3); /* Dark track for visibility */
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 255, 204, 0.6); /* Brighter for dark theme */
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+  border: 1px solid rgba(0, 255, 204, 0.1); /* Subtle border for definition */
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 255, 204, 0.8); /* Even brighter on hover */
+  border-color: rgba(0, 255, 204, 0.2);
 }
 
 /* Range slider styles */
@@ -232,10 +293,10 @@ input[type="range"]:hover::-moz-range-thumb {
   transform: scale(1.1);
 }
 
-/* Custom Scrollbar Styles */
+/* Custom Scrollbar Styles - Dark theme consistency */
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 255, 204, 0.3) transparent;
+  scrollbar-color: rgba(0, 255, 204, 0.6) rgba(48, 54, 61, 0.3);
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -243,27 +304,156 @@ input[type="range"]:hover::-moz-range-thumb {
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(48, 54, 61, 0.3);
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 255, 204, 0.3);
+  background-color: rgba(0, 255, 204, 0.6);
   border-radius: 3px;
   transition: background-color 0.2s ease;
+  border: 1px solid rgba(0, 255, 204, 0.1);
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 255, 204, 0.5);
+  background-color: rgba(0, 255, 204, 0.8);
+  border-color: rgba(0, 255, 204, 0.2);
 }
 
 .scrollbar-track-background::-webkit-scrollbar-track {
-  background: var(--color-background);
+  background: rgba(48, 54, 61, 0.3);
 }
 
 .scrollbar-thumb-accent\/30::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 255, 204, 0.3);
+  background-color: rgba(0, 255, 204, 0.6);
+  border: 1px solid rgba(0, 255, 204, 0.1);
 }
 
 .hover\:scrollbar-thumb-accent\/50:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 255, 204, 0.5);
+  background-color: rgba(0, 255, 204, 0.8);
+  border-color: rgba(0, 255, 204, 0.2);
 }
+
+/* Ensure body and main containers have consistent scrollbar - Dark theme */
+body, #root {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 204, 0.6) rgba(48, 54, 61, 0.3);
+}
+
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar {
+  width: 6px;
+}
+
+body::-webkit-scrollbar-track,
+#root::-webkit-scrollbar-track {
+  background: rgba(48, 54, 61, 0.3); /* Dark track for visibility */
+}
+
+body::-webkit-scrollbar-thumb,
+#root::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 255, 204, 0.6); /* Brighter for dark theme */
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+  border: 1px solid rgba(0, 255, 204, 0.1); /* Subtle border for definition */
+}
+
+body::-webkit-scrollbar-thumb:hover,
+#root::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 255, 204, 0.8); /* Even brighter on hover */
+  border-color: rgba(0, 255, 204, 0.2);
+}
+
+/* Apply beautiful dark themed scrollbar to all scrollable containers */
+div[class*="overflow-y-auto"]::-webkit-scrollbar,
+div[class*="overflow-auto"]::-webkit-scrollbar {
+  width: 6px;
+}
+
+div[class*="overflow-y-auto"]::-webkit-scrollbar-track,
+div[class*="overflow-auto"]::-webkit-scrollbar-track {
+  background: rgba(48, 54, 61, 0.3);
+}
+
+div[class*="overflow-y-auto"]::-webkit-scrollbar-thumb,
+div[class*="overflow-auto"]::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 255, 204, 0.6);
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+  border: 1px solid rgba(0, 255, 204, 0.1);
+}
+
+div[class*="overflow-y-auto"]::-webkit-scrollbar-thumb:hover,
+div[class*="overflow-auto"]::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 255, 204, 0.8);
+  border-color: rgba(0, 255, 204, 0.2);
+}
+
+/* Ensure main content containers also get the beautiful dark themed scrollbar */
+.min-h-screen {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 204, 0.6) rgba(48, 54, 61, 0.3);
+}
+
+.min-h-screen::-webkit-scrollbar {
+  width: 6px;
+}
+
+.min-h-screen::-webkit-scrollbar-track {
+  background: rgba(48, 54, 61, 0.3);
+}
+
+.min-h-screen::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 255, 204, 0.6);
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+  border: 1px solid rgba(0, 255, 204, 0.1);
+}
+
+.min-h-screen::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 255, 204, 0.8);
+  border-color: rgba(0, 255, 204, 0.2);
+}
+
+/* Specific targeting for main page and navigation containers - Dark theme */
+nav, main, section, article, div[class*="bg-background"] {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(0, 255, 204, 0.6) rgba(48, 54, 61, 0.3) !important;
+}
+
+nav::-webkit-scrollbar, 
+main::-webkit-scrollbar, 
+section::-webkit-scrollbar, 
+article::-webkit-scrollbar, 
+div[class*="bg-background"]::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+nav::-webkit-scrollbar-track, 
+main::-webkit-scrollbar-track, 
+section::-webkit-scrollbar-track, 
+article::-webkit-scrollbar-track, 
+div[class*="bg-background"]::-webkit-scrollbar-track {
+  background: rgba(48, 54, 61, 0.3) !important;
+}
+
+nav::-webkit-scrollbar-thumb, 
+main::-webkit-scrollbar-thumb, 
+section::-webkit-scrollbar-thumb, 
+article::-webkit-scrollbar-thumb, 
+div[class*="bg-background"]::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 255, 204, 0.6) !important;
+  border-radius: 3px !important;
+  transition: background-color 0.2s ease !important;
+  border: 1px solid rgba(0, 255, 204, 0.1) !important;
+}
+
+nav::-webkit-scrollbar-thumb:hover, 
+main::-webkit-scrollbar-thumb:hover, 
+section::-webkit-scrollbar-thumb:hover, 
+article::-webkit-scrollbar-thumb:hover, 
+div[class*="bg-background"]::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 255, 204, 0.8) !important;
+  border-color: rgba(0, 255, 204, 0.2) !important;
+}
+
+/* Beautiful dark themed scrollbar is now the default everywhere */

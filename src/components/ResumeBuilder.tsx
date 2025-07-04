@@ -59,8 +59,8 @@ const ResumeBuilder = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col lg:flex-row">
       {/* Left Panel - Form */}
-      <div className="w-full lg:w-1/2 h-screen overflow-y-auto scrollbar-thin scrollbar-track-background scrollbar-thumb-accent/30 hover:scrollbar-thumb-accent/50">
-        <div className="p-6 lg:p-8">
+      <div className="w-full lg:w-1/2 lg:max-w-[50vw] h-screen overflow-y-auto scrollbar-thin scrollbar-track-background scrollbar-thumb-accent/30 hover:scrollbar-thumb-accent/50">
+        <div className="p-6 lg:p-8 max-w-full">
           {/* Back Button - Hide on finish step */}
           {state.builderStep !== 'finish' && (
             <button
@@ -86,7 +86,7 @@ const ResumeBuilder = () => {
       <div className="hidden lg:block w-px bg-border"></div>
 
       {/* Right Panel - Resume Preview */}
-      <div className="w-full lg:w-1/2 h-screen bg-card overflow-hidden">
+      <div className="w-full lg:w-1/2 lg:max-w-[50vw] h-screen bg-card overflow-hidden">
         <ResumePreview />
       </div>
     </div>

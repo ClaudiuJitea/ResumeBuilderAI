@@ -147,7 +147,8 @@ const ResumePreview = () => {
           className="mx-auto bg-white shadow-2xl transition-transform duration-300 relative" 
           data-resume-preview
           style={{ 
-            width: '210mm', 
+            width: 'min(210mm, 100%)', 
+            maxWidth: '210mm',
             minHeight: '297mm',
             transform: state.builderStep === 'finish' 
               ? `scale(${0.8 * (zoomLevel / 100)})` 

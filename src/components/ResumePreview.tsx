@@ -4,6 +4,7 @@ import { useResume } from '../context/ResumeContext';
 import ModernTemplate from './templates/ModernTemplate';
 import ProfessionalTemplate from './templates/ProfessionalTemplate';
 import ColorThemeSelector from './ColorThemeSelector';
+import InteractiveDecoration from './InteractiveDecoration';
 import InteractiveSeparator from './InteractiveSeparator';
 
 const ResumePreview = () => {
@@ -170,7 +171,12 @@ const ResumePreview = () => {
                       />
                     );
                   }
-                  return null;
+                  return (
+                    <InteractiveDecoration
+                      key={decoration.id}
+                      decoration={decoration}
+                    />
+                  );
                 })}
               </div>
             </div>

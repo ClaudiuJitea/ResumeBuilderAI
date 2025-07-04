@@ -20,7 +20,8 @@ const InteractiveSeparator: React.FC<InteractiveSeparatorProps> = ({ decoration 
     const rect = separatorRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const isNearRightEdge = e.clientX > rect.right - 10;
+    // Check if click is on the resize handle (last 8px of the separator)
+    const isNearRightEdge = e.clientX > rect.right - 8;
     
     if (isNearRightEdge) {
       setIsResizing(true);
@@ -92,10 +93,11 @@ const InteractiveSeparator: React.FC<InteractiveSeparatorProps> = ({ decoration 
     height: `${decoration.size.height}px`,
     backgroundColor: decoration.properties?.color || '#000000',
     opacity: decoration.properties?.opacity || 1,
-    cursor: isDragging ? 'grabbing' : 'grab',
+    cursor: isDragging ? 'grabbing' : (isResizing ? 'ew-resize' : 'move'),
     border: isDragging || isResizing ? '2px dashed #3b82f6' : 'none',
     borderRadius: '2px',
     zIndex: isDragging || isResizing ? 1000 : 1,
+    userSelect: 'none',
   };
 
   return (
@@ -107,9 +109,17 @@ const InteractiveSeparator: React.FC<InteractiveSeparatorProps> = ({ decoration 
     >
       {/* Resize handles */}
       <div
-        className="absolute -right-1 top-0 w-2 h-full cursor-ew-resize opacity-0 group-hover:opacity-100 bg-blue-500 rounded-r"
-        style={{ backgroundColor: '#3b82f6' }}
+        className="absolute right-0 top-0 w-3 h-full cursor-ew-resize opacity-0 group-hover:opacity-100 bg-blue-500 rounded-r transition-opacity duration-200"
+        style={{ backgroundColor: '#3b82f6', zIndex: 10 }}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsResizing(true);
+        }}
       />
+      
+      {/* Hover indicator for main body */}
+      <div className="absolute inset-0 border-2 border-transparent group-hover:border-blue-300 rounded transition-colors duration-200 pointer-events-none" />
       
       {/* Visual feedback when selected */}
       {(isDragging || isResizing) && (
@@ -121,4 +131,4 @@ const InteractiveSeparator: React.FC<InteractiveSeparatorProps> = ({ decoration 
   );
 };
 
-export default InteractiveSeparator; 
+export default InteractiveSeparator;

@@ -94,7 +94,7 @@ export interface ColorTheme {
 
 export interface Decoration {
   id: string;
-  type: 'separator' | 'indicator' | 'fog' | 'mist' | 'gray-fullness' | '3-circles' | 'setting-planet' | 'beam' | 'pyramid' | 'dust' | 'business-card' | 'sharp-thread';
+  type: 'separator' | 'accent-line' | 'corner-frame' | 'skill-badge' | 'geometric-shape' | 'progress-indicator' | 'section-divider' | 'highlight-box' | 'decorative-border' | 'visual-element';
   position: {
     x: number;
     y: number;
@@ -107,6 +107,9 @@ export interface Decoration {
     color?: string;
     thickness?: number;
     opacity?: number;
+    shape?: 'triangle' | 'circle' | 'diamond' | 'hexagon' | 'rectangle';
+    style?: 'solid' | 'dashed' | 'dotted' | 'gradient';
+    borderRadius?: number;
   };
 }
 

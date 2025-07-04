@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Sparkles, 
   ArrowRight, 
@@ -16,7 +16,6 @@ import {
 import { useResume } from '../../context/ResumeContext';
 import { 
   ALL_FONTS, 
-  PROFESSIONAL_FONTS, 
   searchFonts, 
   getFontsByPopularity,
   loadGoogleFont,
@@ -31,22 +30,14 @@ const DecoratorForm = () => {
   const [fontSearch, setFontSearch] = useState('');
 
   const [showFontDropdown, setShowFontDropdown] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState(decoratorSettings?.selectedTemplate || 'Classic');
-  const [selectedColorScheme, setSelectedColorScheme] = useState(decoratorSettings?.selectedColorScheme || '#2563eb');
   const [selectedDecorations, setSelectedDecorations] = useState<string[]>(decoratorSettings?.selectedDecorations || []);
   const [gdprContent, setGdprContent] = useState(decoratorSettings?.gdprContent || '');
   const [separatorColor, setSeparatorColor] = useState('#000000');
 
-  const colorSchemes = [
-    '#2563eb', '#6366f1', '#6b7280', '#7c2d12', 
-    '#2563eb', '#e11d48', '#7c3aed', '#dc2626', 
-    '#374151', '#c084fc'
-  ];
-
   const availableDecorations = [
-    'Indicator', 'Fog', 'Mist', 'Gray Fullness',
-    '3 Circles', 'Setting Planet', 'Separator', 'Beam',
-    'Pyramid', 'Dust', 'Business Card', 'Sharp Thread'
+    'Separator', 'Accent Line', 'Corner Frame', 'Skill Badge',
+    'Geometric Shape', 'Progress Indicator', 'Section Divider', 'Highlight Box',
+    'Decorative Border', 'Visual Element'
   ];
 
   // Initialize separator color from existing decorations
@@ -94,26 +85,7 @@ const DecoratorForm = () => {
     setFontSearch('');
   };
 
-  const handleSeparatorColorChange = (newColor: string) => {
-    setSeparatorColor(newColor);
-    
-    // Update all separator decorations with the new color
-    const separatorDecorations = decoratorSettings?.decorations?.filter(d => d.type === 'separator') || [];
-    separatorDecorations.forEach(separator => {
-      dispatch({
-        type: 'UPDATE_DECORATION',
-        payload: {
-          id: separator.id,
-          updates: {
-            properties: {
-              ...separator.properties,
-              color: newColor
-            }
-          }
-        }
-      });
-    });
-  };
+
 
   const handleDecorationToggle = (decoration: string) => {
     const newSelectedDecorations = selectedDecorations.includes(decoration) 
@@ -128,32 +100,111 @@ const DecoratorForm = () => {
       payload: { selectedDecorations: newSelectedDecorations }
     });
 
-    // If it's a separator and we're adding it, create the decoration
-    if (decoration === 'Separator' && !selectedDecorations.includes(decoration)) {
-      const separatorId = `separator-${Date.now()}`;
+    // Create decoration based on type when adding
+    if (!selectedDecorations.includes(decoration)) {
+      const decorationId = `${decoration.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+      let decorationConfig;
+
+      switch (decoration) {
+        case 'Separator':
+          decorationConfig = {
+            type: 'separator' as const,
+            position: { x: 50, y: 200 },
+            size: { width: 200, height: 4 },
+            properties: { color: separatorColor, thickness: 4, opacity: 1 }
+          };
+          break;
+        case 'Accent Line':
+          decorationConfig = {
+            type: 'accent-line' as const,
+            position: { x: 30, y: 150 },
+            size: { width: 150, height: 2 },
+            properties: { color: '#3B82F6', thickness: 2, opacity: 0.8, style: 'solid' as const }
+          };
+          break;
+        case 'Corner Frame':
+          decorationConfig = {
+            type: 'corner-frame' as const,
+            position: { x: 20, y: 20 },
+            size: { width: 60, height: 60 },
+            properties: { color: '#10B981', thickness: 3, opacity: 0.7, style: 'solid' as const }
+          };
+          break;
+        case 'Skill Badge':
+          decorationConfig = {
+            type: 'skill-badge' as const,
+            position: { x: 100, y: 300 },
+            size: { width: 80, height: 25 },
+            properties: { color: '#8B5CF6', opacity: 0.9, borderRadius: 12, style: 'solid' as const }
+          };
+          break;
+        case 'Geometric Shape':
+          decorationConfig = {
+            type: 'geometric-shape' as const,
+            position: { x: 250, y: 100 },
+            size: { width: 40, height: 40 },
+            properties: { color: '#F59E0B', opacity: 0.6, shape: 'triangle' as const, style: 'solid' as const }
+          };
+          break;
+        case 'Progress Indicator':
+          decorationConfig = {
+            type: 'progress-indicator' as const,
+            position: { x: 80, y: 400 },
+            size: { width: 120, height: 8 },
+            properties: { color: '#EF4444', opacity: 0.8, borderRadius: 4, style: 'gradient' as const }
+          };
+          break;
+        case 'Section Divider':
+          decorationConfig = {
+            type: 'section-divider' as const,
+            position: { x: 40, y: 250 },
+            size: { width: 180, height: 1 },
+            properties: { color: '#6B7280', opacity: 0.5, style: 'dashed' as const }
+          };
+          break;
+        case 'Highlight Box':
+          decorationConfig = {
+            type: 'highlight-box' as const,
+            position: { x: 60, y: 180 },
+            size: { width: 100, height: 30 },
+            properties: { color: '#06B6D4', opacity: 0.2, borderRadius: 6, style: 'solid' as const }
+          };
+          break;
+        case 'Decorative Border':
+          decorationConfig = {
+            type: 'decorative-border' as const,
+            position: { x: 10, y: 10 },
+            size: { width: 280, height: 200 },
+            properties: { color: '#EC4899', thickness: 2, opacity: 0.4, style: 'dotted' as const }
+          };
+          break;
+        case 'Visual Element':
+          decorationConfig = {
+            type: 'visual-element' as const,
+            position: { x: 200, y: 350 },
+            size: { width: 50, height: 50 },
+            properties: { color: '#14B8A6', opacity: 0.7, shape: 'circle' as const, style: 'solid' as const }
+          };
+          break;
+        default:
+          return;
+      }
+
       dispatch({
         type: 'ADD_DECORATION',
         payload: {
-          id: separatorId,
-          type: 'separator',
-          position: { x: 50, y: 200 }, // Default position
-          size: { width: 200, height: 4 }, // Default size
-          properties: {
-            color: separatorColor,
-            thickness: 4,
-            opacity: 1
-          }
+          id: decorationId,
+          ...decorationConfig
         }
       });
-    }
-    
-    // If we're removing a separator, remove the decoration
-    if (decoration === 'Separator' && selectedDecorations.includes(decoration)) {
-      const separatorDecorations = decoratorSettings?.decorations?.filter(d => d.type === 'separator') || [];
-      separatorDecorations.forEach(sep => {
+    } else {
+      // Remove decorations of this type when unchecking
+      const decorationType = decoration.toLowerCase().replace(/\s+/g, '-');
+      const decorationsToRemove = decoratorSettings?.decorations?.filter(d => d.type === decorationType) || [];
+      decorationsToRemove.forEach(dec => {
         dispatch({
           type: 'REMOVE_DECORATION',
-          payload: sep.id
+          payload: dec.id
         });
       });
     }
@@ -165,64 +216,21 @@ const DecoratorForm = () => {
       type: 'UPDATE_DECORATOR_SETTINGS',
       payload: {
         selectedFont,
-        selectedTemplate,
-        selectedColorScheme,
         gdprContent
       }
     });
-  }, [selectedFont, selectedTemplate, selectedColorScheme, gdprContent, dispatch]);
+  }, [selectedFont, gdprContent, dispatch]);
 
-  // Get current separators
-  const currentSeparators = decoratorSettings?.decorations?.filter(d => d.type === 'separator') || [];
+  
 
   // Duplicate separator function
-  const handleDuplicateSeparator = () => {
-    const separatorId = `separator-${Date.now()}`;
-    const offsetX = 20 + Math.random() * 50; // Random offset to avoid overlap
-    const offsetY = 20 + Math.random() * 50;
-    
-    dispatch({
-      type: 'ADD_DECORATION',
-      payload: {
-        id: separatorId,
-        type: 'separator',
-        position: { x: 50 + offsetX, y: 200 + offsetY },
-        size: { width: 200, height: 4 },
-        properties: {
-          color: separatorColor,
-          thickness: 4,
-          opacity: 1
-        }
-      }
-    });
-  };
+
 
   // Add new separator function
-  const handleAddSeparator = () => {
-    const separatorId = `separator-${Date.now()}`;
-    dispatch({
-      type: 'ADD_DECORATION',
-      payload: {
-        id: separatorId,
-        type: 'separator',
-        position: { x: 50, y: 200 + (currentSeparators.length * 50) }, // Stack them vertically
-        size: { width: 200, height: 4 },
-        properties: {
-          color: separatorColor,
-          thickness: 4,
-          opacity: 1
-        }
-      }
-    });
-  };
+
 
   // Remove specific separator function
-  const handleRemoveSeparator = (separatorId: string) => {
-    dispatch({
-      type: 'REMOVE_DECORATION',
-      payload: separatorId
-    });
-  };
+
 
   const handleNext = () => {
     const nextStepIndex = state.availableBuildSteps.findIndex(step => step === 'decorator') + 1;
@@ -405,54 +413,7 @@ const DecoratorForm = () => {
           )}
         </div>
 
-        {/* Template Selection */}
-        <div>
-          <label className="block text-primaryText font-semibold mb-4">Template:</label>
-          <div className="flex space-x-4">
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="radio"
-                name="template"
-                value="Modern"
-                checked={selectedTemplate === 'Modern'}
-                onChange={(e) => setSelectedTemplate(e.target.value)}
-                className="w-4 h-4 text-accent focus:ring-accent"
-              />
-              <span className="text-primaryText">Modern</span>
-            </label>
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="radio"
-                name="template"
-                value="Classic"
-                checked={selectedTemplate === 'Classic'}
-                onChange={(e) => setSelectedTemplate(e.target.value)}
-                className="w-4 h-4 text-accent focus:ring-accent"
-              />
-              <span className="text-primaryText">Classic</span>
-            </label>
-          </div>
-        </div>
 
-        {/* Color Scheme Selection */}
-        <div>
-          <label className="block text-primaryText font-semibold mb-4">Choose a different Resume color scheme:</label>
-          <div className="flex flex-wrap gap-2">
-            {colorSchemes.map((color, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedColorScheme(color)}
-                className={`w-8 h-8 rounded-md border-2 transition-all duration-200 hover:scale-110 ${
-                  selectedColorScheme === color 
-                    ? 'border-primaryText scale-110 shadow-lg' 
-                    : 'border-border hover:border-primaryText/50'
-                }`}
-                style={{ backgroundColor: color }}
-                title={`Color ${index + 1}`}
-              />
-            ))}
-          </div>
-        </div>
 
         {/* Available Decorations */}
         <div>
@@ -472,111 +433,299 @@ const DecoratorForm = () => {
           </div>
         </div>
 
-        {/* Separator Management - Only show when Separator is selected */}
-        {selectedDecorations.includes('Separator') && (
+        {/* Decoration Customization - Show when any decoration is selected */}
+        {selectedDecorations.length > 0 && (
           <div className="bg-card rounded-xl p-6 border border-border">
             <h3 className="text-lg font-bold text-primaryText mb-6 flex items-center">
               <Palette className="w-5 h-5 mr-2 text-primaryText" />
-              Separator Management
+              Decoration Customization
             </h3>
             
-            {/* Separator Count and Actions */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <span className="text-primaryText font-medium">
-                    Active Separators: {currentSeparators.length}
-                  </span>
-                  <div className="h-6 w-px bg-border"></div>
-                  <span className="text-primaryText/60 text-sm">
-                    Drag to move, resize from right edge
-                  </span>
-                </div>
-              </div>
+            {selectedDecorations.map((decorationType) => {
+              const decorations = decoratorSettings?.decorations?.filter(d => {
+                const typeMap: Record<string, string> = {
+                  'Separator': 'separator',
+                  'Accent Line': 'accent-line',
+                  'Corner Frame': 'corner-frame',
+                  'Geometric Shape': 'geometric-shape',
+                  'Skill Badge': 'skill-badge',
+                  'Progress Indicator': 'progress-indicator',
+                  'Section Divider': 'section-divider',
+                  'Highlight Box': 'highlight-box',
+                  'Decorative Border': 'decorative-border',
+                  'Visual Element': 'visual-element'
+                };
+                return d.type === typeMap[decorationType];
+              }) || [];
               
-              {/* Action Buttons */}
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={handleAddSeparator}
-                  className="flex items-center space-x-2 px-4 py-2 bg-accent hover:bg-accent/90 text-background rounded-lg font-medium transition-all duration-200 hover:scale-105"
-                  title="Add new separator"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Separator</span>
-                </button>
-                
-                {currentSeparators.length > 0 && (
-                  <button
-                    onClick={handleDuplicateSeparator}
-                    className="flex items-center space-x-2 px-4 py-2 bg-primaryText hover:bg-primaryText/90 text-background rounded-lg font-medium transition-all duration-200 hover:scale-105"
-                    title="Duplicate last separator"
-                  >
-                    <Copy className="w-4 h-4" />
-                    <span>Duplicate</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Color Picker */}
-            <div className="mb-6">
-              <div className="flex items-center space-x-4 mb-2">
-                <label className="block text-primaryText font-medium">Separator Color:</label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="color"
-                    value={separatorColor}
-                    onChange={(e) => handleSeparatorColorChange(e.target.value)}
-                    className="w-10 h-10 rounded-lg border border-border cursor-pointer"
-                    title="Pick separator color"
-                  />
-                  <input
-                    type="text"
-                    value={separatorColor}
-                    onChange={(e) => handleSeparatorColorChange(e.target.value)}
-                    className="px-3 py-2 bg-background border border-border rounded-lg text-primaryText font-mono text-sm w-24"
-                    placeholder="#000000"
-                  />
-                </div>
-              </div>
-              <p className="text-primaryText/60 text-sm">
-                This color will be applied to all separator elements on your resume.
-              </p>
-            </div>
-
-            {/* Individual Separator List */}
-            {currentSeparators.length > 0 && (
-              <div>
-                <h4 className="text-primaryText font-medium mb-3">Individual Separators:</h4>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {currentSeparators.map((separator, index) => (
-                    <div
-                      key={separator.id}
-                      className="flex items-center justify-between p-3 bg-background rounded-lg border border-border"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-2 h-2 rounded-full bg-primaryText"></div>
-                        <span className="text-primaryText text-sm">
-                          Separator {index + 1}
-                        </span>
-                        <span className="text-primaryText/60 text-xs">
-                          ({Math.round(separator.position.x)}, {Math.round(separator.position.y)})
-                        </span>
-                      </div>
+              if (decorations.length === 0) return null;
+              
+              const firstDecoration = decorations[0];
+              const currentColor = firstDecoration.properties?.color || '#000000';
+              const currentOpacity = firstDecoration.properties?.opacity || 1;
+              
+              return (
+                <div key={decorationType} className="mb-6 p-4 bg-background rounded-lg border border-border">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-primaryText font-medium flex items-center">
+                      <span className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: currentColor, opacity: currentOpacity }}></span>
+                      {decorationType} ({decorations.length})
+                    </h4>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => handleRemoveSeparator(separator.id)}
-                        className="flex items-center justify-center w-8 h-8 text-primaryText/60 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
-                        title="Remove this separator"
+                        onClick={() => {
+                          const decorationId = `${decorationType.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+                          let decorationConfig;
+                          
+                          const typeMap: Record<string, string> = {
+                            'Separator': 'separator',
+                            'Accent Line': 'accent-line',
+                            'Corner Frame': 'corner-frame',
+                            'Geometric Shape': 'geometric-shape',
+                            'Skill Badge': 'skill-badge',
+                            'Progress Indicator': 'progress-indicator',
+                            'Section Divider': 'section-divider',
+                            'Highlight Box': 'highlight-box',
+                            'Decorative Border': 'decorative-border',
+                            'Visual Element': 'visual-element'
+                          };
+                          
+                          const decorationType_mapped = typeMap[decorationType] as 'separator' | 'accent-line' | 'corner-frame' | 'geometric-shape' | 'skill-badge' | 'progress-indicator' | 'section-divider' | 'highlight-box' | 'decorative-border' | 'visual-element';
+                          
+                          switch (decorationType) {
+                            case 'Separator':
+                              decorationConfig = {
+                                id: decorationId,
+                                type: decorationType_mapped,
+                                position: { x: 50, y: 200 + (decorations.length * 50) },
+                                size: { width: 200, height: 4 },
+                                properties: { color: currentColor, thickness: 4, opacity: currentOpacity }
+                              };
+                              break;
+                            case 'Accent Line':
+                              decorationConfig = {
+                                id: decorationId,
+                                type: decorationType_mapped,
+                                position: { x: 100, y: 150 + (decorations.length * 40) },
+                                size: { width: 150, height: 3 },
+                                properties: { color: currentColor, style: 'solid' as const, opacity: currentOpacity }
+                              };
+                              break;
+                            case 'Corner Frame':
+                              decorationConfig = {
+                                id: decorationId,
+                                type: decorationType_mapped,
+                                position: { x: 50, y: 100 + (decorations.length * 60) },
+                                size: { width: 100, height: 100 },
+                                properties: { color: currentColor, thickness: 2, borderRadius: 8, opacity: currentOpacity }
+                              };
+                              break;
+                            case 'Geometric Shape':
+                              decorationConfig = {
+                                id: decorationId,
+                                type: decorationType_mapped,
+                                position: { x: 80, y: 120 + (decorations.length * 50) },
+                                size: { width: 60, height: 60 },
+                                properties: { color: currentColor, shape: 'circle' as const, opacity: currentOpacity }
+                              };
+                              break;
+                            default:
+                              decorationConfig = {
+                                id: decorationId,
+                                type: decorationType_mapped,
+                                position: { x: 70, y: 180 + (decorations.length * 45) },
+                                size: { width: 80, height: 20 },
+                                properties: { color: currentColor, opacity: currentOpacity }
+                              };
+                          }
+                          
+                          dispatch({
+                            type: 'ADD_DECORATION',
+                            payload: decorationConfig
+                          });
+                        }}
+                        className="flex items-center space-x-1 px-3 py-1 bg-accent hover:bg-accent/90 text-background rounded-lg text-sm font-medium transition-all duration-200"
+                        title={`Add new ${decorationType.toLowerCase()}`}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Plus className="w-3 h-3" />
+                        <span>Add</span>
                       </button>
+                      
+                      {decorations.length > 0 && (
+                        <button
+                          onClick={() => {
+                            const lastDecoration = decorations[decorations.length - 1];
+                            const decorationId = `${decorationType.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+                            const offsetX = 20 + Math.random() * 50;
+                            const offsetY = 20 + Math.random() * 50;
+                            
+                            dispatch({
+                              type: 'ADD_DECORATION',
+                              payload: {
+                                id: decorationId,
+                                type: lastDecoration.type,
+                                position: { 
+                                  x: lastDecoration.position.x + offsetX, 
+                                  y: lastDecoration.position.y + offsetY 
+                                },
+                                size: { ...lastDecoration.size },
+                                properties: { ...lastDecoration.properties }
+                              }
+                            });
+                          }}
+                          className="flex items-center space-x-1 px-3 py-1 bg-primaryText hover:bg-primaryText/90 text-background rounded-lg text-sm font-medium transition-all duration-200"
+                          title={`Duplicate last ${decorationType.toLowerCase()}`}
+                        >
+                          <Copy className="w-3 h-3" />
+                          <span>Duplicate</span>
+                        </button>
+                      )}
                     </div>
-                  ))}
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Color Picker */}
+                    <div>
+                      <label className="block text-primaryText/80 text-sm font-medium mb-2">Color:</label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="color"
+                          value={currentColor}
+                          onChange={(e) => {
+                            decorations.forEach(decoration => {
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: decoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...decoration.properties,
+                                      color: e.target.value
+                                    }
+                                  }
+                                }
+                              });
+                            });
+                          }}
+                          className="w-12 h-10 rounded-lg border border-border cursor-pointer"
+                          title="Pick color"
+                        />
+                        <input
+                          type="text"
+                          value={currentColor}
+                          onChange={(e) => {
+                            decorations.forEach(decoration => {
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: decoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...decoration.properties,
+                                      color: e.target.value
+                                    }
+                                  }
+                                }
+                              });
+                            });
+                          }}
+                          className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-primaryText font-mono text-sm"
+                          placeholder="#000000"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Transparency Slider */}
+                    <div>
+                      <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                        Transparency: {Math.round((1 - currentOpacity) * 100)}%
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs text-primaryText/60">Solid</span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.1"
+                          value={currentOpacity}
+                          onChange={(e) => {
+                            const newOpacity = parseFloat(e.target.value);
+                            decorations.forEach(decoration => {
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: decoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...decoration.properties,
+                                      opacity: newOpacity
+                                    }
+                                  }
+                                }
+                              });
+                            });
+                          }}
+                          className="flex-1 h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
+                        />
+                        <span className="text-xs text-primaryText/60">Transparent</span>
+                      </div>
+                      <div className="text-xs text-primaryText/50 mt-1">
+                        Opacity: {Math.round(currentOpacity * 100)}%
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Individual Decoration List */}
+                  {decorations.length > 1 && (
+                    <div className="mt-4">
+                      <h5 className="text-primaryText/80 text-sm font-medium mb-2">Individual Elements:</h5>
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                        {decorations.map((decoration, index) => (
+                          <div
+                            key={decoration.id}
+                            className="flex items-center justify-between p-2 bg-card rounded border border-border/50"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <div 
+                                className="w-2 h-2 rounded-full" 
+                                style={{ 
+                                  backgroundColor: decoration.properties?.color || '#000000',
+                                  opacity: decoration.properties?.opacity || 1
+                                }}
+                              ></div>
+                              <span className="text-primaryText/80 text-xs">
+                                {decorationType} {index + 1}
+                              </span>
+                              <span className="text-primaryText/50 text-xs">
+                                ({Math.round(decoration.position.x)}, {Math.round(decoration.position.y)})
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                dispatch({
+                                  type: 'REMOVE_DECORATION',
+                                  payload: decoration.id
+                                });
+                              }}
+                              className="flex items-center justify-center w-6 h-6 text-primaryText/40 hover:text-red-500 hover:bg-red-50 rounded transition-all duration-200"
+                              title="Remove this decoration"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })}
           </div>
         )}
+
+
 
         {/* GDPR Content */}
         <div>
@@ -613,4 +762,4 @@ const DecoratorForm = () => {
   );
 };
 
-export default DecoratorForm; 
+export default DecoratorForm;

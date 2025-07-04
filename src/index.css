@@ -17,13 +17,19 @@
   -webkit-text-size-adjust: 100%;
 }
 
-/* Apply custom scrollbar theme to the main page */
-body {
+/* Reset default margins and padding, apply custom scrollbar theme */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
   @apply scrollbar-thin scrollbar-track-background scrollbar-thumb-accent/30 hover:scrollbar-thumb-accent/50;
 }
 
-html {
-  @apply scrollbar-thin scrollbar-track-background scrollbar-thumb-accent/30 hover:scrollbar-thumb-accent/50;
+/* Ensure root element takes full width */
+#root {
+  width: 100%;
+  min-height: 100vh;
 }
 
 /* Print styles for PDF generation */

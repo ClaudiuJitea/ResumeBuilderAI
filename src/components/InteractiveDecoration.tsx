@@ -533,6 +533,110 @@ const InteractiveDecoration: React.FC<InteractiveDecorationProps> = ({ decoratio
            </div>
          );
        
+      case 'svg-graphic':
+        const { svgContent, svgColors, preserveAspectRatio = true } = decoration.properties || {};
+        
+        if (!svgContent) {
+          return (
+            <div
+              style={{
+                ...baseStyle,
+                backgroundColor: '#f3f4f6',
+                border: '2px dashed #d1d5db',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '12px',
+                color: '#6b7280'
+              }}
+            >
+              SVG
+            </div>
+          );
+        }
+        
+        // Apply color replacements and size constraints
+        let processedSvg = svgContent;
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(processedSvg, 'image/svg+xml');
+        const svgElement = svgDoc.querySelector('svg');
+        
+        if (svgElement) {
+          // Remove any fixed width/height attributes that might cause overflow
+          svgElement.removeAttribute('width');
+          svgElement.removeAttribute('height');
+          
+          // Set responsive width and height
+          svgElement.setAttribute('width', '100%');
+          svgElement.setAttribute('height', '100%');
+          
+          // Ensure proper viewBox for scaling
+          if (!svgElement.getAttribute('viewBox')) {
+            const width = svgElement.getAttribute('width') || '100';
+            const height = svgElement.getAttribute('height') || '100';
+            svgElement.setAttribute('viewBox', `0 0 ${width} ${height}`);
+          }
+          
+          // Set preserveAspectRatio
+          if (preserveAspectRatio) {
+            svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+          } else {
+            svgElement.setAttribute('preserveAspectRatio', 'none');
+          }
+          
+          // Add containment styles
+          svgElement.style.maxWidth = '100%';
+          svgElement.style.maxHeight = '100%';
+          svgElement.style.width = 'auto';
+          svgElement.style.height = 'auto';
+          svgElement.style.display = 'block';
+          
+          processedSvg = new XMLSerializer().serializeToString(svgDoc);
+        }
+        
+        // Apply color replacements if any
+        if (svgColors) {
+          Object.entries(svgColors).forEach(([key, newColor]) => {
+            const [type, index] = key.split('-');
+            const colorParser = new DOMParser();
+            const colorSvgDoc = colorParser.parseFromString(processedSvg, 'image/svg+xml');
+            const elements = colorSvgDoc.querySelectorAll(`[${type}]`);
+            if (elements[parseInt(index)]) {
+              elements[parseInt(index)].setAttribute(type, newColor);
+              processedSvg = new XMLSerializer().serializeToString(colorSvgDoc);
+            }
+          });
+        }
+        
+        return (
+          <div
+            className="svg-container"
+            style={{
+              ...baseStyle,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transform: `rotate(${rotation}deg)`,
+              opacity,
+              overflow: 'hidden'
+            }}
+          >
+            <div
+              dangerouslySetInnerHTML={{ __html: processedSvg }}
+              className="svg-content"
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+            />
+          </div>
+        );
+       
        default:
         return (
           <div

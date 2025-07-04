@@ -94,7 +94,7 @@ export interface ColorTheme {
 
 export interface Decoration {
   id: string;
-  type: 'separator' | 'corner-frame' | 'circle-frame' | 'triangle-frame' | 'geometric-shape' | 'section-divider' | 'highlight-box' | 'decorative-border' | 'visual-element' | 'dust-overlay' | 'hexagonal-overlay';
+  type: 'separator' | 'corner-frame' | 'circle-frame' | 'triangle-frame' | 'geometric-shape' | 'section-divider' | 'highlight-box' | 'decorative-border' | 'visual-element' | 'dust-overlay' | 'hexagonal-overlay' | 'svg-graphic';
   position: {
     x: number;
     y: number;
@@ -113,6 +113,9 @@ export interface Decoration {
     particleCount?: number;
     particleSize?: number;
     rotation?: number;
+    svgContent?: string;
+    svgColors?: { [key: string]: string };
+    preserveAspectRatio?: boolean;
   };
 }
 

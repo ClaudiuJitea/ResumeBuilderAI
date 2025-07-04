@@ -11,8 +11,11 @@ import {
   Plus,
   Type,
   Check,
-  X
+  X,
+  Image,
+  Upload
 } from 'lucide-react';
+import SvgUploadForm from './SvgUploadForm';
 import { useResume } from '../../context/ResumeContext';
 import { 
   ALL_FONTS, 
@@ -33,11 +36,12 @@ const DecoratorForm = () => {
   const [selectedDecorations, setSelectedDecorations] = useState<string[]>(decoratorSettings?.selectedDecorations || []);
   const [gdprContent, setGdprContent] = useState(decoratorSettings?.gdprContent || '');
   const [separatorColor, setSeparatorColor] = useState('#14B8A6');
+  const [showSvgUpload, setShowSvgUpload] = useState(false);
 
   const availableDecorations = [
     'Separator', 'Corner Frame', 'Circle Frame', 'Triangle Frame',
     'Triangle Shape', 'Square Shape',
-    'Circle Shape', 'Dust Overlay', 'Gradient Shapes'
+    'Circle Shape', 'Dust Overlay', 'Gradient Shapes', 'SVG Graphics'
   ];
 
   // Initialize separator color from existing decorations
@@ -182,6 +186,10 @@ const DecoratorForm = () => {
             properties: { color: '#14B8A6', opacity: 0.2, shape: 'flowing' as const }
           };
           break;
+        case 'SVG Graphics':
+          // Show SVG upload form instead of creating decoration immediately
+          setShowSvgUpload(true);
+          return;
         default:
           return;
       }
@@ -227,6 +235,9 @@ const DecoratorForm = () => {
           break;
         case 'Gradient Shapes':
           decorationType = 'hexagonal-overlay';
+          break;
+        case 'SVG Graphics':
+          decorationType = 'svg-graphic';
           break;
         default:
           decorationType = decoration.toLowerCase().replace(/\s+/g, '-');
@@ -465,6 +476,31 @@ const DecoratorForm = () => {
           </div>
         </div>
 
+        {/* SVG Upload Form */}
+        {showSvgUpload && (
+          <div className="bg-card rounded-xl p-6 border border-border">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-primaryText flex items-center">
+                <Image className="w-5 h-5 mr-2 text-accent" />
+                Upload SVG Graphics
+              </h3>
+              <button
+                onClick={() => setShowSvgUpload(false)}
+                className="p-2 text-primaryText/60 hover:text-primaryText hover:bg-background rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <SvgUploadForm onSvgUploaded={() => {
+              setShowSvgUpload(false);
+              // Add SVG Graphics to selected decorations if not already present
+              if (!selectedDecorations.includes('SVG Graphics')) {
+                setSelectedDecorations(prev => [...prev, 'SVG Graphics']);
+              }
+            }} />
+          </div>
+        )}
+
         {/* Decoration Customization - Show when any decoration is selected */}
         {selectedDecorations.length > 0 && (
           <div className="bg-card rounded-xl p-6 border border-border">
@@ -486,7 +522,8 @@ const DecoratorForm = () => {
                   'Decorative Border': 'decorative-border',
                   'Circle Shape': 'visual-element',
                   'Dust Overlay': 'dust-overlay',
-                  'Gradient Shapes': 'hexagonal-overlay'
+                  'Gradient Shapes': 'hexagonal-overlay',
+                  'SVG Graphics': 'svg-graphic'
                 };
                 return d.type === typeMap[decorationType];
               }) || [];
@@ -497,11 +534,15 @@ const DecoratorForm = () => {
               const currentColor = firstDecoration.properties?.color || '#000000';
               const currentOpacity = firstDecoration.properties?.opacity || 1;
               
+              // Special handling for SVG Graphics
+              const isSvgGraphic = decorationType === 'SVG Graphics';
+              const svgColor = isSvgGraphic ? '#00FFCC' : currentColor; // Use accent color for SVG graphics
+              
               return (
                 <div key={decorationType} className="mb-6 p-4 bg-background rounded-lg border border-border">
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-primaryText font-medium flex items-center">
-                      <span className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: currentColor, opacity: currentOpacity }}></span>
+                      <span className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: svgColor, opacity: currentOpacity }}></span>
                       {decorationType} ({decorations.length})
                     </h4>
                     
@@ -523,10 +564,11 @@ const DecoratorForm = () => {
                             'Decorative Border': 'decorative-border',
                             'Circle Shape': 'visual-element',
                             'Dust Overlay': 'dust-overlay',
-                            'Gradient Shapes': 'hexagonal-overlay'
+                            'Gradient Shapes': 'hexagonal-overlay',
+                            'SVG Graphics': 'svg-graphic'
                           };
                           
-                          const decorationType_mapped = typeMap[decorationType] as 'separator' | 'corner-frame' | 'geometric-shape' | 'section-divider' | 'highlight-box' | 'decorative-border' | 'visual-element' | 'dust-overlay' | 'hexagonal-overlay';
+                          const decorationType_mapped = typeMap[decorationType] as 'separator' | 'corner-frame' | 'geometric-shape' | 'section-divider' | 'highlight-box' | 'decorative-border' | 'visual-element' | 'dust-overlay' | 'hexagonal-overlay' | 'svg-graphic';
                           
                           switch (decorationType) {
                             case 'Separator':
@@ -592,6 +634,20 @@ const DecoratorForm = () => {
                                 properties: { color: currentColor, opacity: currentOpacity, shape: 'hexagon' as const }
                               };
                               break;
+                            case 'SVG Graphics':
+                              decorationConfig = {
+                                id: decorationId,
+                                type: decorationType_mapped,
+                                position: { x: 100, y: 100 + (decorations.length * 70) },
+                                size: { width: 100, height: 100 },
+                                properties: { 
+                                  svgContent: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="currentColor"/></svg>',
+                                  opacity: currentOpacity,
+                                  rotation: 0,
+                                  preserveAspectRatio: true
+                                }
+                              };
+                              break;
                             default:
                               decorationConfig = {
                                 id: decorationId,
@@ -647,56 +703,70 @@ const DecoratorForm = () => {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Color Picker */}
-                    <div>
-                      <label className="block text-primaryText/80 text-sm font-medium mb-2">Color:</label>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="color"
-                          value={currentColor}
-                          onChange={(e) => {
-                            decorations.forEach(decoration => {
-                              dispatch({
-                                type: 'UPDATE_DECORATION',
-                                payload: {
-                                  id: decoration.id,
-                                  updates: {
-                                    properties: {
-                                      ...decoration.properties,
-                                      color: e.target.value
+                    {/* Color Picker - Hide for SVG Graphics */}
+                    {!isSvgGraphic && (
+                      <div>
+                        <label className="block text-primaryText/80 text-sm font-medium mb-2">Color:</label>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="color"
+                            value={currentColor}
+                            onChange={(e) => {
+                              decorations.forEach(decoration => {
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: decoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...decoration.properties,
+                                        color: e.target.value
+                                      }
                                     }
                                   }
-                                }
+                                });
                               });
-                            });
-                          }}
-                          className="w-12 h-10 rounded-lg border border-border cursor-pointer"
-                          title="Pick color"
-                        />
-                        <input
-                          type="text"
-                          value={currentColor}
-                          onChange={(e) => {
-                            decorations.forEach(decoration => {
-                              dispatch({
-                                type: 'UPDATE_DECORATION',
-                                payload: {
-                                  id: decoration.id,
-                                  updates: {
-                                    properties: {
-                                      ...decoration.properties,
-                                      color: e.target.value
+                            }}
+                            className="w-12 h-10 rounded-lg border border-border cursor-pointer"
+                            title="Pick color"
+                          />
+                          <input
+                            type="text"
+                            value={currentColor}
+                            onChange={(e) => {
+                              decorations.forEach(decoration => {
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: decoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...decoration.properties,
+                                        color: e.target.value
+                                      }
                                     }
                                   }
-                                }
+                                });
                               });
-                            });
-                          }}
-                          className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-primaryText font-mono text-sm"
-                          placeholder="#000000"
-                        />
+                            }}
+                            className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-primaryText font-mono text-sm"
+                            placeholder="#000000"
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
+                    
+                    {/* SVG Color Note - Show for SVG Graphics */}
+                    {isSvgGraphic && (
+                      <div>
+                        <label className="block text-primaryText/80 text-sm font-medium mb-2">SVG Colors:</label>
+                        <div className="p-3 bg-accent/10 border border-accent/30 rounded-lg">
+                          <p className="text-accent text-sm">
+                            📎 To change SVG colors, upload a new SVG with desired colors or use the SVG upload form color customization.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Transparency Slider */}
                     <div>
@@ -736,6 +806,84 @@ const DecoratorForm = () => {
                         Opacity: {Math.round(currentOpacity * 100)}%
                       </div>
                     </div>
+                    
+                    {/* SVG Graphics Controls */}
+                    {isSvgGraphic && (
+                      <>
+                        {/* Rotation Control */}
+                        <div>
+                          <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                            Rotation: {firstDecoration.properties?.rotation || 0}°
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="360"
+                            step="15"
+                            value={firstDecoration.properties?.rotation || 0}
+                            onChange={(e) => {
+                              const newRotation = parseInt(e.target.value);
+                              decorations.forEach(decoration => {
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: decoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...decoration.properties,
+                                        rotation: newRotation
+                                      }
+                                    }
+                                  }
+                                });
+                              });
+                            }}
+                            className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
+                          />
+                        </div>
+                        
+                                                 {/* Aspect Ratio Control */}
+                         <div>
+                           <label className="block text-primaryText/80 text-sm font-medium mb-2">Aspect Ratio:</label>
+                           <label className="flex items-center space-x-2 cursor-pointer">
+                             <input
+                               type="checkbox"
+                               checked={firstDecoration.properties?.preserveAspectRatio !== false}
+                               onChange={(e) => {
+                                 const preserve = e.target.checked;
+                                 decorations.forEach(decoration => {
+                                   dispatch({
+                                     type: 'UPDATE_DECORATION',
+                                     payload: {
+                                       id: decoration.id,
+                                       updates: {
+                                         properties: {
+                                           ...decoration.properties,
+                                           preserveAspectRatio: preserve
+                                         }
+                                       }
+                                     }
+                                   });
+                                 });
+                               }}
+                               className="w-4 h-4 text-accent rounded border-border"
+                             />
+                             <span className="text-sm text-primaryText/70">Preserve aspect ratio</span>
+                           </label>
+                         </div>
+                         
+                         {/* Upload New SVG Button */}
+                         <div className="md:col-span-2">
+                           <button
+                             onClick={() => setShowSvgUpload(true)}
+                             className="w-full py-2 px-4 bg-accent hover:bg-accent/90 text-background rounded-lg transition-colors flex items-center justify-center space-x-2"
+                           >
+                             <Upload className="w-4 h-4" />
+                             <span>Upload New SVG</span>
+                           </button>
+                         </div>
+                      </>
+                    )}
                     
                     {/* Specific Controls for Different Decoration Types */}
                     {decorationType === 'Dust Overlay' && (

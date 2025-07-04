@@ -32,12 +32,12 @@ const DecoratorForm = () => {
   const [showFontDropdown, setShowFontDropdown] = useState(false);
   const [selectedDecorations, setSelectedDecorations] = useState<string[]>(decoratorSettings?.selectedDecorations || []);
   const [gdprContent, setGdprContent] = useState(decoratorSettings?.gdprContent || '');
-  const [separatorColor, setSeparatorColor] = useState('#000000');
+  const [separatorColor, setSeparatorColor] = useState('#14B8A6');
 
   const availableDecorations = [
-    'Separator', 'Accent Line', 'Corner Frame', 'Skill Badge',
-    'Geometric Shape', 'Progress Indicator', 'Section Divider', 'Highlight Box',
-    'Decorative Border', 'Visual Element'
+    'Separator', 'Corner Frame', 'Circle Frame', 'Triangle Frame',
+    'Triangle Shape', 'Square Shape',
+    'Circle Shape', 'Dust Overlay', 'Gradient Shapes'
   ];
 
   // Initialize separator color from existing decorations
@@ -45,6 +45,8 @@ const DecoratorForm = () => {
     const separatorDecoration = decoratorSettings?.decorations?.find(d => d.type === 'separator');
     if (separatorDecoration?.properties?.color) {
       setSeparatorColor(separatorDecoration.properties.color);
+    } else {
+      setSeparatorColor('#14B8A6');
     }
   }, [decoratorSettings?.decorations]);
 
@@ -111,15 +113,7 @@ const DecoratorForm = () => {
             type: 'separator' as const,
             position: { x: 50, y: 200 },
             size: { width: 200, height: 4 },
-            properties: { color: separatorColor, thickness: 4, opacity: 1 }
-          };
-          break;
-        case 'Accent Line':
-          decorationConfig = {
-            type: 'accent-line' as const,
-            position: { x: 30, y: 150 },
-            size: { width: 150, height: 2 },
-            properties: { color: '#3B82F6', thickness: 2, opacity: 0.8, style: 'solid' as const }
+            properties: { color: separatorColor, thickness: 4, opacity: 1, rotation: 0 }
           };
           break;
         case 'Corner Frame':
@@ -127,63 +121,65 @@ const DecoratorForm = () => {
             type: 'corner-frame' as const,
             position: { x: 20, y: 20 },
             size: { width: 60, height: 60 },
-            properties: { color: '#10B981', thickness: 3, opacity: 0.7, style: 'solid' as const }
+            properties: { color: '#14B8A6', thickness: 3, opacity: 0.7, style: 'solid' as const }
           };
           break;
-        case 'Skill Badge':
+        case 'Circle Frame':
           decorationConfig = {
-            type: 'skill-badge' as const,
-            position: { x: 100, y: 300 },
-            size: { width: 80, height: 25 },
-            properties: { color: '#8B5CF6', opacity: 0.9, borderRadius: 12, style: 'solid' as const }
+            type: 'circle-frame' as const,
+            position: { x: 20, y: 20 },
+            size: { width: 60, height: 60 },
+            properties: { color: '#14B8A6', thickness: 3, opacity: 0.7, style: 'solid' as const }
           };
           break;
-        case 'Geometric Shape':
+        case 'Triangle Frame':
+          decorationConfig = {
+            type: 'triangle-frame' as const,
+            position: { x: 20, y: 20 },
+            size: { width: 60, height: 60 },
+            properties: { color: '#14B8A6', thickness: 3, opacity: 0.7, style: 'solid' as const }
+          };
+          break;
+        case 'Triangle Shape':
           decorationConfig = {
             type: 'geometric-shape' as const,
             position: { x: 250, y: 100 },
             size: { width: 40, height: 40 },
-            properties: { color: '#F59E0B', opacity: 0.6, shape: 'triangle' as const, style: 'solid' as const }
+            properties: { color: '#14B8A6', opacity: 0.6, shape: 'triangle' as const, style: 'solid' as const, rotation: 0 }
           };
           break;
-        case 'Progress Indicator':
-          decorationConfig = {
-            type: 'progress-indicator' as const,
-            position: { x: 80, y: 400 },
-            size: { width: 120, height: 8 },
-            properties: { color: '#EF4444', opacity: 0.8, borderRadius: 4, style: 'gradient' as const }
-          };
-          break;
-        case 'Section Divider':
-          decorationConfig = {
-            type: 'section-divider' as const,
-            position: { x: 40, y: 250 },
-            size: { width: 180, height: 1 },
-            properties: { color: '#6B7280', opacity: 0.5, style: 'dashed' as const }
-          };
-          break;
-        case 'Highlight Box':
+
+        case 'Square Shape':
           decorationConfig = {
             type: 'highlight-box' as const,
             position: { x: 60, y: 180 },
             size: { width: 100, height: 30 },
-            properties: { color: '#06B6D4', opacity: 0.2, borderRadius: 6, style: 'solid' as const }
+            properties: { color: '#14B8A6', opacity: 0.2, borderRadius: 6, style: 'solid' as const, rotation: 0 }
           };
           break;
-        case 'Decorative Border':
-          decorationConfig = {
-            type: 'decorative-border' as const,
-            position: { x: 10, y: 10 },
-            size: { width: 280, height: 200 },
-            properties: { color: '#EC4899', thickness: 2, opacity: 0.4, style: 'dotted' as const }
-          };
-          break;
-        case 'Visual Element':
+
+        case 'Circle Shape':
           decorationConfig = {
             type: 'visual-element' as const,
             position: { x: 200, y: 350 },
             size: { width: 50, height: 50 },
             properties: { color: '#14B8A6', opacity: 0.7, shape: 'circle' as const, style: 'solid' as const }
+          };
+          break;
+        case 'Dust Overlay':
+          decorationConfig = {
+            type: 'dust-overlay' as const,
+            position: { x: 50, y: 100 },
+            size: { width: 200, height: 150 },
+            properties: { color: '#14B8A6', opacity: 0.3, particleCount: 50, particleSize: 3 }
+          };
+          break;
+        case 'Gradient Shapes':
+          decorationConfig = {
+            type: 'hexagonal-overlay' as const,
+            position: { x: 150, y: 200 },
+            size: { width: 120, height: 120 },
+            properties: { color: '#14B8A6', opacity: 0.2, shape: 'flowing' as const }
           };
           break;
         default:
@@ -199,7 +195,43 @@ const DecoratorForm = () => {
       });
     } else {
       // Remove decorations of this type when unchecking
-      const decorationType = decoration.toLowerCase().replace(/\s+/g, '-');
+      let decorationType: string;
+      
+      // Map UI names to actual decoration types
+      switch (decoration) {
+        case 'Separator':
+          decorationType = 'separator';
+          break;
+        case 'Corner Frame':
+           decorationType = 'corner-frame';
+           break;
+         case 'Circle Frame':
+           decorationType = 'circle-frame';
+           break;
+         case 'Triangle Frame':
+           decorationType = 'triangle-frame';
+           break;
+        case 'Triangle Shape':
+          decorationType = 'geometric-shape';
+          break;
+        
+        case 'Square Shape':
+          decorationType = 'highlight-box';
+          break;
+        
+        case 'Circle Shape':
+          decorationType = 'visual-element';
+          break;
+        case 'Dust Overlay':
+          decorationType = 'dust-overlay';
+          break;
+        case 'Gradient Shapes':
+          decorationType = 'hexagonal-overlay';
+          break;
+        default:
+          decorationType = decoration.toLowerCase().replace(/\s+/g, '-');
+      }
+      
       const decorationsToRemove = decoratorSettings?.decorations?.filter(d => d.type === decorationType) || [];
       decorationsToRemove.forEach(dec => {
         dispatch({
@@ -342,7 +374,7 @@ const DecoratorForm = () => {
 
 
               {/* Font List */}
-              <div className="max-h-80 overflow-y-auto space-y-2">
+              <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-track-background scrollbar-thumb-accent/30 hover:scrollbar-thumb-accent/50 space-y-2">
                 {getFilteredFonts().slice(0, 35).map((font) => (
                   <div
                     key={font.family}
@@ -445,15 +477,16 @@ const DecoratorForm = () => {
               const decorations = decoratorSettings?.decorations?.filter(d => {
                 const typeMap: Record<string, string> = {
                   'Separator': 'separator',
-                  'Accent Line': 'accent-line',
                   'Corner Frame': 'corner-frame',
-                  'Geometric Shape': 'geometric-shape',
-                  'Skill Badge': 'skill-badge',
-                  'Progress Indicator': 'progress-indicator',
+                  'Circle Frame': 'circle-frame',
+                  'Triangle Frame': 'triangle-frame',
+                  'Triangle Shape': 'geometric-shape',
                   'Section Divider': 'section-divider',
-                  'Highlight Box': 'highlight-box',
+                  'Square Shape': 'highlight-box',
                   'Decorative Border': 'decorative-border',
-                  'Visual Element': 'visual-element'
+                  'Circle Shape': 'visual-element',
+                  'Dust Overlay': 'dust-overlay',
+                  'Gradient Shapes': 'hexagonal-overlay'
                 };
                 return d.type === typeMap[decorationType];
               }) || [];
@@ -481,18 +514,19 @@ const DecoratorForm = () => {
                           
                           const typeMap: Record<string, string> = {
                             'Separator': 'separator',
-                            'Accent Line': 'accent-line',
                             'Corner Frame': 'corner-frame',
-                            'Geometric Shape': 'geometric-shape',
-                            'Skill Badge': 'skill-badge',
-                            'Progress Indicator': 'progress-indicator',
+                            'Circle Frame': 'circle-frame',
+                            'Triangle Frame': 'triangle-frame',
+                            'Triangle Shape': 'geometric-shape',
                             'Section Divider': 'section-divider',
-                            'Highlight Box': 'highlight-box',
+                            'Square Shape': 'highlight-box',
                             'Decorative Border': 'decorative-border',
-                            'Visual Element': 'visual-element'
+                            'Circle Shape': 'visual-element',
+                            'Dust Overlay': 'dust-overlay',
+                            'Gradient Shapes': 'hexagonal-overlay'
                           };
                           
-                          const decorationType_mapped = typeMap[decorationType] as 'separator' | 'accent-line' | 'corner-frame' | 'geometric-shape' | 'skill-badge' | 'progress-indicator' | 'section-divider' | 'highlight-box' | 'decorative-border' | 'visual-element';
+                          const decorationType_mapped = typeMap[decorationType] as 'separator' | 'corner-frame' | 'geometric-shape' | 'section-divider' | 'highlight-box' | 'decorative-border' | 'visual-element' | 'dust-overlay' | 'hexagonal-overlay';
                           
                           switch (decorationType) {
                             case 'Separator':
@@ -504,15 +538,6 @@ const DecoratorForm = () => {
                                 properties: { color: currentColor, thickness: 4, opacity: currentOpacity }
                               };
                               break;
-                            case 'Accent Line':
-                              decorationConfig = {
-                                id: decorationId,
-                                type: decorationType_mapped,
-                                position: { x: 100, y: 150 + (decorations.length * 40) },
-                                size: { width: 150, height: 3 },
-                                properties: { color: currentColor, style: 'solid' as const, opacity: currentOpacity }
-                              };
-                              break;
                             case 'Corner Frame':
                               decorationConfig = {
                                 id: decorationId,
@@ -522,13 +547,49 @@ const DecoratorForm = () => {
                                 properties: { color: currentColor, thickness: 2, borderRadius: 8, opacity: currentOpacity }
                               };
                               break;
-                            case 'Geometric Shape':
+                            case 'Circle Frame':
+                              decorationConfig = {
+                                id: decorationId,
+                                type: decorationType_mapped,
+                                position: { x: 50, y: 100 + (decorations.length * 60) },
+                                size: { width: 100, height: 100 },
+                                properties: { color: currentColor, thickness: 2, opacity: currentOpacity, style: 'solid' as const }
+                              };
+                              break;
+                            case 'Triangle Frame':
+                              decorationConfig = {
+                                id: decorationId,
+                                type: decorationType_mapped,
+                                position: { x: 50, y: 100 + (decorations.length * 60) },
+                                size: { width: 100, height: 100 },
+                                properties: { color: currentColor, thickness: 2, opacity: currentOpacity, style: 'solid' as const }
+                              };
+                              break;
+                            case 'Triangle Shape':
                               decorationConfig = {
                                 id: decorationId,
                                 type: decorationType_mapped,
                                 position: { x: 80, y: 120 + (decorations.length * 50) },
                                 size: { width: 60, height: 60 },
                                 properties: { color: currentColor, shape: 'circle' as const, opacity: currentOpacity }
+                              };
+                              break;
+                            case 'Dust Overlay':
+                              decorationConfig = {
+                                id: decorationId,
+                                type: decorationType_mapped,
+                                position: { x: 50, y: 50 + (decorations.length * 30) },
+                                size: { width: 300, height: 200 },
+                                properties: { color: currentColor, opacity: currentOpacity, particleCount: 85, particleSize: 3 }
+                              };
+                              break;
+                            case 'Gradient Shapes':
+                              decorationConfig = {
+                                id: decorationId,
+                                type: decorationType_mapped,
+                                position: { x: 100, y: 80 + (decorations.length * 40) },
+                                size: { width: 250, height: 180 },
+                                properties: { color: currentColor, opacity: currentOpacity, shape: 'hexagon' as const }
                               };
                               break;
                             default:
@@ -675,13 +736,291 @@ const DecoratorForm = () => {
                         Opacity: {Math.round(currentOpacity * 100)}%
                       </div>
                     </div>
+                    
+                    {/* Specific Controls for Different Decoration Types */}
+                    {decorationType === 'Dust Overlay' && (
+                      <>
+                        {/* Particle Count Slider */}
+                        <div>
+                          <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                             Particle Count: {firstDecoration.properties?.particleCount || 85}
+                           </label>
+                           <input
+                             type="range"
+                             min="10"
+                             max="200"
+                             step="10"
+                             value={firstDecoration.properties?.particleCount || 85}
+                            onChange={(e) => {
+                              const newCount = parseInt(e.target.value);
+                              decorations.forEach(decoration => {
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: decoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...decoration.properties,
+                                        particleCount: newCount
+                                      }
+                                    }
+                                  }
+                                });
+                              });
+                            }}
+                            className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
+                          />
+                        </div>
+                        
+                        {/* Particle Size Slider */}
+                        <div>
+                          <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                            Particle Size: {firstDecoration.properties?.particleSize || 3}px
+                          </label>
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            step="0.5"
+                            value={firstDecoration.properties?.particleSize || 3}
+                            onChange={(e) => {
+                              const newSize = parseFloat(e.target.value);
+                              decorations.forEach(decoration => {
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: decoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...decoration.properties,
+                                        particleSize: newSize
+                                      }
+                                    }
+                                  }
+                                });
+                              });
+                            }}
+                            className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
+                          />
+                        </div>
+                      </>
+                    )}
+                    
+                    {/* Gradient Shapes Controls */}
+                    {firstDecoration.type === 'hexagonal-overlay' && (
+                      <>
+                        {/* Shape Style Selector */}
+                        <div>
+                          <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                            Shape Style: {firstDecoration.properties?.shape || 'flowing'}
+                          </label>
+                          <select
+                            value={firstDecoration.properties?.shape || 'flowing'}
+                            onChange={(e) => {
+                              const newShape = e.target.value as 'triangle' | 'circle' | 'diamond' | 'hexagon' | 'rectangle' | 'flowing' | 'geometric' | 'organic' | 'crystalline' | 'waves' | 'spiral';
+                              decorations.forEach(decoration => {
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: decoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...decoration.properties,
+                                        shape: newShape
+                                      }
+                                    }
+                                  }
+                                });
+                              });
+                            }}
+                            className="w-full px-3 py-2 bg-card border border-border rounded-md text-primaryText focus:outline-none focus:ring-2 focus:ring-primary/50"
+                          >
+                            <option value="flowing">Flowing Gradients</option>
+                            <option value="geometric">Geometric Shapes</option>
+                            <option value="organic">Organic Forms</option>
+                            <option value="crystalline">Crystalline Patterns</option>
+                            <option value="waves">Wave Patterns</option>
+                            <option value="spiral">Spiral Forms</option>
+                          </select>
+                        </div>
+                        
+                        {/* Rotation Control */}
+                        <div>
+                          <label className="block text-primaryText/80 text-sm font-medium mb-1">
+                            Rotation: {firstDecoration.properties?.rotation || 0}°
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="360"
+                            step="15"
+                            value={firstDecoration.properties?.rotation || 0}
+                            onChange={(e) => {
+                              const newRotation = parseInt(e.target.value);
+                              decorations.forEach(decoration => {
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: decoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...decoration.properties,
+                                        rotation: newRotation
+                                      }
+                                    }
+                                  }
+                                });
+                              });
+                            }}
+                            className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
+                          />
+                        </div>
+                      </>
+                    )}
+                    
+                    {/* Frame Controls (Separator, Corner Frame, Circle Frame, Triangle Frame) */}
+                    {(firstDecoration.type === 'separator' || firstDecoration.type === 'corner-frame' || firstDecoration.type === 'circle-frame' || firstDecoration.type === 'triangle-frame') && (
+                      <>
+                        {/* Thickness Slider */}
+                        <div>
+                          <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                            Thickness: {firstDecoration.properties?.thickness || 2}px
+                          </label>
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            step="1"
+                            value={firstDecoration.properties?.thickness || 2}
+                            onChange={(e) => {
+                              const newThickness = parseInt(e.target.value);
+                              decorations.forEach(decoration => {
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: decoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...decoration.properties,
+                                        thickness: newThickness
+                                      }
+                                    }
+                                  }
+                                });
+                              });
+                            }}
+                            className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
+                          />
+                        </div>
+                        
+                        {/* Style Selector */}
+                        <div>
+                          <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                            Border Style: {firstDecoration.properties?.style || 'solid'}
+                          </label>
+                          <select
+                            value={firstDecoration.properties?.style || 'solid'}
+                            onChange={(e) => {
+                              const newStyle = e.target.value as 'solid' | 'dashed' | 'dotted';
+                              decorations.forEach(decoration => {
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: decoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...decoration.properties,
+                                        style: newStyle
+                                      }
+                                    }
+                                  }
+                                });
+                              });
+                            }}
+                            className="w-full px-3 py-2 bg-card border border-border rounded-md text-primaryText focus:outline-none focus:ring-2 focus:ring-primary/50"
+                          >
+                            <option value="solid">Solid</option>
+                            <option value="dashed">Dashed</option>
+                            <option value="dotted">Dotted</option>
+                          </select>
+                        </div>
+                        
+                        {/* Border Radius Slider (only for Corner Frame) */}
+                         {firstDecoration.type === 'corner-frame' && (
+                           <div>
+                             <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                               Corner Radius: {firstDecoration.properties?.borderRadius || 8}px
+                             </label>
+                             <input
+                               type="range"
+                               min="0"
+                               max="50"
+                               step="2"
+                               value={firstDecoration.properties?.borderRadius || 8}
+                               onChange={(e) => {
+                                 const newBorderRadius = parseInt(e.target.value);
+                                 decorations.forEach(decoration => {
+                                   dispatch({
+                                     type: 'UPDATE_DECORATION',
+                                     payload: {
+                                       id: decoration.id,
+                                       updates: {
+                                         properties: {
+                                           ...decoration.properties,
+                                           borderRadius: newBorderRadius
+                                         }
+                                       }
+                                     }
+                                   });
+                                 });
+                               }}
+                               className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
+                             />
+                           </div>
+                         )}
+                         
+                         {/* Rotation Control (for Separator, Corner Frame, Circle Frame, Triangle Frame, Triangle Shape, and Square Shape) */}
+                          {(firstDecoration.type === 'separator' || firstDecoration.type === 'corner-frame' || firstDecoration.type === 'circle-frame' || firstDecoration.type === 'triangle-frame' || firstDecoration.type === 'geometric-shape' || firstDecoration.type === 'highlight-box') && (
+                            <div>
+                              <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                                Rotation: {firstDecoration.properties?.rotation || 0}°
+                              </label>
+                              <input
+                                type="range"
+                                min="0"
+                                max="360"
+                                step="15"
+                                value={firstDecoration.properties?.rotation || 0}
+                                onChange={(e) => {
+                                  const newRotation = parseInt(e.target.value);
+                                  decorations.forEach(decoration => {
+                                    dispatch({
+                                      type: 'UPDATE_DECORATION',
+                                      payload: {
+                                        id: decoration.id,
+                                        updates: {
+                                          properties: {
+                                            ...decoration.properties,
+                                            rotation: newRotation
+                                          }
+                                        }
+                                      }
+                                    });
+                                  });
+                                }}
+                                className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
+                              />
+                            </div>
+                          )}
+                      </>
+                    )}
                   </div>
                   
                   {/* Individual Decoration List */}
                   {decorations.length > 1 && (
                     <div className="mt-4">
                       <h5 className="text-primaryText/80 text-sm font-medium mb-2">Individual Elements:</h5>
-                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                      <div className="space-y-1 max-h-32 overflow-y-auto scrollbar-thin scrollbar-track-background scrollbar-thumb-accent/30 hover:scrollbar-thumb-accent/50">
                         {decorations.map((decoration, index) => (
                           <div
                             key={decoration.id}

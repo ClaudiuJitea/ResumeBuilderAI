@@ -10,7 +10,7 @@ import InteractiveSeparator from './InteractiveSeparator';
 const ResumePreview = () => {
   const { state } = useResume();
   const [fontSize, setFontSize] = useState(100);
-  const [zoomLevel, setZoomLevel] = useState(60); // Default zoom level for preview
+  const [zoomLevel, setZoomLevel] = useState(100); // Default zoom level for preview
   const [showColorSelector, setShowColorSelector] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -71,7 +71,7 @@ const ResumePreview = () => {
   const decorations = state.resumeData.decoratorSettings?.decorations || [];
 
   return (
-    <div className="h-screen overflow-y-auto relative">
+    <div className="h-screen overflow-y-auto scrollbar-thin scrollbar-track-background scrollbar-thumb-accent/30 hover:scrollbar-thumb-accent/50 relative">
       {/* Top Controls - Hide on finish step */}
       {state.builderStep !== 'finish' && (
         <div className="sticky top-0 bg-card border-b border-border p-4 z-10">
@@ -158,8 +158,8 @@ const ResumePreview = () => {
         >
           {renderTemplate()}
           
-          {/* Decorations Overlay - Only show in decorator step */}
-          {state.builderStep === 'decorator' && decorations.length > 0 && (
+          {/* Decorations Overlay - Show in all steps */}
+          {decorations.length > 0 && (
             <div className="absolute inset-0 pointer-events-none">
               <div className="relative w-full h-full pointer-events-auto">
                 {decorations.map((decoration) => {

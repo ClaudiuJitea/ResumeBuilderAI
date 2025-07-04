@@ -94,7 +94,7 @@ export interface ColorTheme {
 
 export interface Decoration {
   id: string;
-  type: 'separator' | 'accent-line' | 'corner-frame' | 'skill-badge' | 'geometric-shape' | 'progress-indicator' | 'section-divider' | 'highlight-box' | 'decorative-border' | 'visual-element';
+  type: 'separator' | 'corner-frame' | 'circle-frame' | 'triangle-frame' | 'geometric-shape' | 'section-divider' | 'highlight-box' | 'decorative-border' | 'visual-element' | 'dust-overlay' | 'hexagonal-overlay';
   position: {
     x: number;
     y: number;
@@ -107,9 +107,12 @@ export interface Decoration {
     color?: string;
     thickness?: number;
     opacity?: number;
-    shape?: 'triangle' | 'circle' | 'diamond' | 'hexagon' | 'rectangle';
+    shape?: 'triangle' | 'circle' | 'diamond' | 'hexagon' | 'rectangle' | 'flowing' | 'geometric' | 'organic' | 'crystalline' | 'waves' | 'spiral';
     style?: 'solid' | 'dashed' | 'dotted' | 'gradient';
     borderRadius?: number;
+    particleCount?: number;
+    particleSize?: number;
+    rotation?: number;
   };
 }
 

@@ -29,6 +29,9 @@ const DecoratorForm = () => {
   const { state, dispatch } = useResume();
   const decoratorSettings = state.resumeData.decoratorSettings;
   
+  // Default GDPR statement
+  const defaultGdprStatement = "I hereby give consent for my personal data included in my application to be processed for the purposes of the recruitment process in accordance with Regulation (EU) 2016/679 (General Data Protection Regulation).";
+  
   const [selectedFont, setSelectedFont] = useState(decoratorSettings?.selectedFont || DEFAULT_FONT);
   const [fontSearch, setFontSearch] = useState('');
 
@@ -237,6 +240,8 @@ const DecoratorForm = () => {
           break;
         case 'SVG Graphics':
           decorationType = 'svg-graphic';
+          // Close SVG upload modal when unchecking SVG Graphics
+          setShowSvgUpload(false);
           break;
         default:
           decorationType = decoration.toLowerCase().replace(/\s+/g, '-');
@@ -254,6 +259,7 @@ const DecoratorForm = () => {
 
   // Update context when other settings change
   useEffect(() => {
+    console.log('useEffect triggered - gdprContent:', gdprContent, 'selectedFont:', selectedFont);
     dispatch({
       type: 'UPDATE_DECORATOR_SETTINGS',
       payload: {
@@ -261,7 +267,13 @@ const DecoratorForm = () => {
         gdprContent
       }
     });
+    console.log('Dispatched UPDATE_DECORATOR_SETTINGS with gdprContent:', gdprContent);
   }, [selectedFont, gdprContent, dispatch]);
+
+  // Additional useEffect to debug gdprContent changes specifically
+  useEffect(() => {
+    console.log('gdprContent changed to:', gdprContent);
+  }, [gdprContent]);
 
   const handleNext = () => {
     const nextStepIndex = state.availableBuildSteps.findIndex(step => step === 'decorator') + 1;
@@ -280,6 +292,25 @@ const DecoratorForm = () => {
       dispatch({ type: 'SET_BUILDER_STEP', payload: prevStep });
     }
   };
+
+  const handleAddGdprStatement = () => {
+    const statementToAdd = gdprContent.trim() || defaultGdprStatement;
+    console.log('Button clicked - current gdprContent:', gdprContent);
+    console.log('Button clicked - statementToAdd:', statementToAdd);
+    console.log('Are they the same?', gdprContent === statementToAdd);
+    setGdprContent(statementToAdd);
+    console.log('After setGdprContent, gdprContent should be:', statementToAdd);
+    
+    // Also dispatch directly to ensure context is updated
+    dispatch({
+      type: 'UPDATE_DECORATOR_SETTINGS',
+      payload: { gdprContent: statementToAdd }
+    });
+    console.log('Direct dispatch sent with gdprContent:', statementToAdd);
+  };
+
+  // Check if the current content is different from default
+  const isCustomGdprContent = gdprContent.trim() !== '' && gdprContent.trim() !== defaultGdprStatement;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -469,10 +500,22 @@ const DecoratorForm = () => {
                 Upload SVG Graphics
               </h3>
               <button
-                onClick={() => setShowSvgUpload(false)}
-                className="p-2 text-primaryText/60 hover:text-primaryText hover:bg-background rounded-lg transition-colors"
+                onClick={() => {
+                  setShowSvgUpload(false);
+                  // Uncheck SVG Graphics checkbox
+                  const newSelectedDecorations = selectedDecorations.filter(d => d !== 'SVG Graphics');
+                  setSelectedDecorations(newSelectedDecorations);
+                  
+                  // Update the context
+                  dispatch({
+                    type: 'UPDATE_DECORATOR_SETTINGS',
+                    payload: { selectedDecorations: newSelectedDecorations }
+                  });
+                }}
+                className="flex items-center space-x-1 px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-all duration-200"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3 h-3" />
+                <span>Close</span>
               </button>
             </div>
             <SvgUploadForm onSvgUploaded={() => {
@@ -519,12 +562,34 @@ const DecoratorForm = () => {
                 ? decorations.find(d => d.id === selectedElementId) || decorations[0]
                 : decorations[0];
               
-              const currentColor = currentDecoration.properties?.color || '#000000';
-              const currentOpacity = currentDecoration.properties?.opacity || 1;
-              
               // Special handling for SVG Graphics
               const isSvgGraphic = decorationType === 'SVG Graphics';
-              const svgColor = isSvgGraphic ? '#00FFCC' : currentColor; // Use accent color for SVG graphics
+              
+              // Extract color from SVG content if it's an SVG graphic
+              let currentColor = currentDecoration.properties?.color || '#000000';
+              if (isSvgGraphic && currentDecoration.properties?.svgContent) {
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(currentDecoration.properties.svgContent, 'image/svg+xml');
+                
+                // Try to find the first fill or stroke color
+                const elementWithFill = svgDoc.querySelector('[fill]');
+                const elementWithStroke = svgDoc.querySelector('[stroke]');
+                
+                if (elementWithFill) {
+                  const fill = elementWithFill.getAttribute('fill');
+                  if (fill && fill !== 'none' && !fill.startsWith('url(')) {
+                    currentColor = fill;
+                  }
+                } else if (elementWithStroke) {
+                  const stroke = elementWithStroke.getAttribute('stroke');
+                  if (stroke && stroke !== 'none' && !stroke.startsWith('url(')) {
+                    currentColor = stroke;
+                  }
+                }
+              }
+              
+              const currentOpacity = currentDecoration.properties?.opacity || 1;
+              const svgColor = isSvgGraphic ? currentColor : currentColor;
               
               return (
                 <div key={decorationType} className="mb-6 p-4 bg-background rounded-lg border border-border">
@@ -649,33 +714,67 @@ const DecoratorForm = () => {
                       </button>
                       
                       {decorations.length > 0 && (
-                        <button
-                          onClick={() => {
-                            const lastDecoration = decorations[decorations.length - 1];
-                            const decorationId = `${decorationType.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
-                            const offsetX = 20 + Math.random() * 50;
-                            const offsetY = 20 + Math.random() * 50;
-                            
-                            dispatch({
-                              type: 'ADD_DECORATION',
-                              payload: {
-                                id: decorationId,
-                                type: lastDecoration.type,
-                                position: { 
-                                  x: lastDecoration.position.x + offsetX, 
-                                  y: lastDecoration.position.y + offsetY 
-                                },
-                                size: { ...lastDecoration.size },
-                                properties: { ...lastDecoration.properties }
+                        <>
+                          <button
+                            onClick={() => {
+                              const lastDecoration = decorations[decorations.length - 1];
+                              const decorationId = `${decorationType.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+                              const offsetX = 20 + Math.random() * 50;
+                              const offsetY = 20 + Math.random() * 50;
+                              
+                              dispatch({
+                                type: 'ADD_DECORATION',
+                                payload: {
+                                  id: decorationId,
+                                  type: lastDecoration.type,
+                                  position: { 
+                                    x: lastDecoration.position.x + offsetX, 
+                                    y: lastDecoration.position.y + offsetY 
+                                  },
+                                  size: { ...lastDecoration.size },
+                                  properties: { ...lastDecoration.properties }
+                                }
+                              });
+                            }}
+                            className="flex items-center space-x-1 px-3 py-1 bg-primaryText hover:bg-primaryText/90 text-background rounded-lg text-sm font-medium transition-all duration-200"
+                            title={`Duplicate last ${decorationType.toLowerCase()}`}
+                          >
+                            <Copy className="w-3 h-3" />
+                            <span>Duplicate</span>
+                          </button>
+                          
+                          <button
+                            onClick={() => {
+                              // Remove the current decoration
+                              dispatch({
+                                type: 'REMOVE_DECORATION',
+                                payload: currentDecoration.id
+                              });
+                              
+                              // If this was the last decoration of this type, uncheck the decoration type
+                              if (decorations.length === 1) {
+                                const newSelectedDecorations = selectedDecorations.filter(d => d !== decorationType);
+                                setSelectedDecorations(newSelectedDecorations);
+                                
+                                // Update the context
+                                dispatch({
+                                  type: 'UPDATE_DECORATOR_SETTINGS',
+                                  payload: { selectedDecorations: newSelectedDecorations }
+                                });
                               }
-                            });
-                          }}
-                          className="flex items-center space-x-1 px-3 py-1 bg-primaryText hover:bg-primaryText/90 text-background rounded-lg text-sm font-medium transition-all duration-200"
-                          title={`Duplicate last ${decorationType.toLowerCase()}`}
-                        >
-                          <Copy className="w-3 h-3" />
-                          <span>Duplicate</span>
-                        </button>
+                              
+                              // Reset selected element if it was the one being removed
+                              if (selectedElementId === currentDecoration.id) {
+                                setSelectedElementId(null);
+                              }
+                            }}
+                            className="flex items-center space-x-1 px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-all duration-200"
+                            title={`Remove this ${decorationType.toLowerCase()}`}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            <span>Remove</span>
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -689,18 +788,64 @@ const DecoratorForm = () => {
                           type="color"
                           value={currentColor}
                           onChange={(e) => {
-                            dispatch({
-                              type: 'UPDATE_DECORATION',
-                              payload: {
-                                id: currentDecoration.id,
-                                updates: {
-                                  properties: {
-                                    ...currentDecoration.properties,
-                                    color: e.target.value
+                            if (isSvgGraphic) {
+                              // For SVG graphics, we need to extract and modify colors in the SVG content
+                              const svgContent = currentDecoration.properties?.svgContent;
+                              if (svgContent) {
+                                const parser = new DOMParser();
+                                const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
+                                
+                                // Find all elements with fill or stroke attributes
+                                const elementsWithFill = svgDoc.querySelectorAll('[fill]');
+                                const elementsWithStroke = svgDoc.querySelectorAll('[stroke]');
+                                
+                                // Update fill colors
+                                elementsWithFill.forEach((element) => {
+                                  const fill = element.getAttribute('fill');
+                                  if (fill && fill !== 'none' && !fill.startsWith('url(')) {
+                                    element.setAttribute('fill', e.target.value);
+                                  }
+                                });
+                                
+                                // Update stroke colors
+                                elementsWithStroke.forEach((element) => {
+                                  const stroke = element.getAttribute('stroke');
+                                  if (stroke && stroke !== 'none' && !stroke.startsWith('url(')) {
+                                    element.setAttribute('stroke', e.target.value);
+                                  }
+                                });
+                                
+                                const updatedSvgContent = new XMLSerializer().serializeToString(svgDoc);
+                                
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: currentDecoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...currentDecoration.properties,
+                                        svgContent: updatedSvgContent,
+                                        color: e.target.value
+                                      }
+                                    }
+                                  }
+                                });
+                              }
+                            } else {
+                              // For non-SVG decorations, just update the color property
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: currentDecoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...currentDecoration.properties,
+                                      color: e.target.value
+                                    }
                                   }
                                 }
-                              }
-                            });
+                              });
+                            }
                           }}
                           className="w-12 h-10 rounded-lg border border-border cursor-pointer"
                           title="Pick color"
@@ -709,18 +854,64 @@ const DecoratorForm = () => {
                           type="text"
                           value={currentColor}
                           onChange={(e) => {
-                            dispatch({
-                              type: 'UPDATE_DECORATION',
-                              payload: {
-                                id: currentDecoration.id,
-                                updates: {
-                                  properties: {
-                                    ...currentDecoration.properties,
-                                    color: e.target.value
+                            if (isSvgGraphic) {
+                              // For SVG graphics, we need to extract and modify colors in the SVG content
+                              const svgContent = currentDecoration.properties?.svgContent;
+                              if (svgContent) {
+                                const parser = new DOMParser();
+                                const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
+                                
+                                // Find all elements with fill or stroke attributes
+                                const elementsWithFill = svgDoc.querySelectorAll('[fill]');
+                                const elementsWithStroke = svgDoc.querySelectorAll('[stroke]');
+                                
+                                // Update fill colors
+                                elementsWithFill.forEach((element) => {
+                                  const fill = element.getAttribute('fill');
+                                  if (fill && fill !== 'none' && !fill.startsWith('url(')) {
+                                    element.setAttribute('fill', e.target.value);
+                                  }
+                                });
+                                
+                                // Update stroke colors
+                                elementsWithStroke.forEach((element) => {
+                                  const stroke = element.getAttribute('stroke');
+                                  if (stroke && stroke !== 'none' && !stroke.startsWith('url(')) {
+                                    element.setAttribute('stroke', e.target.value);
+                                  }
+                                });
+                                
+                                const updatedSvgContent = new XMLSerializer().serializeToString(svgDoc);
+                                
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: currentDecoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...currentDecoration.properties,
+                                        svgContent: updatedSvgContent,
+                                        color: e.target.value
+                                      }
+                                    }
+                                  }
+                                });
+                              }
+                            } else {
+                              // For non-SVG decorations, just update the color property
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: currentDecoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...currentDecoration.properties,
+                                      color: e.target.value
+                                    }
                                   }
                                 }
-                              }
-                            });
+                              });
+                            }
                           }}
                           className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-primaryText font-mono text-sm"
                           placeholder="#000000"
@@ -892,6 +1083,36 @@ const DecoratorForm = () => {
                             className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
                           />
                         </div>
+                        
+                        {/* Rotation Control for Dust Overlay */}
+                        <div>
+                          <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                            Rotation: {currentDecoration.properties?.rotation || 0}°
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="360"
+                            step="15"
+                            value={currentDecoration.properties?.rotation || 0}
+                            onChange={(e) => {
+                              const newRotation = parseInt(e.target.value);
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: currentDecoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...currentDecoration.properties,
+                                      rotation: newRotation
+                                    }
+                                  }
+                                }
+                              });
+                            }}
+                            className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
+                          />
+                        </div>
                       </>
                     )}
                     
@@ -960,6 +1181,106 @@ const DecoratorForm = () => {
                             className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
                           />
                         </div>
+                      </>
+                    )}
+                    
+                    {/* Shape Controls (Triangle Shape, Square Shape, Circle Shape) */}
+                    {(currentDecoration.type === 'geometric-shape' || currentDecoration.type === 'highlight-box' || currentDecoration.type === 'visual-element') && (
+                      <>
+                        {/* Rotation Control for Shapes */}
+                        <div>
+                          <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                            Rotation: {currentDecoration.properties?.rotation || 0}°
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="360"
+                            step="15"
+                            value={currentDecoration.properties?.rotation || 0}
+                            onChange={(e) => {
+                              const newRotation = parseInt(e.target.value);
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: currentDecoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...currentDecoration.properties,
+                                      rotation: newRotation
+                                    }
+                                  }
+                                }
+                              });
+                            }}
+                            className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
+                          />
+                        </div>
+                        
+                        {/* Shape Style Selector (only for Triangle Shape) */}
+                        {currentDecoration.type === 'geometric-shape' && (
+                          <div>
+                            <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                              Shape: {currentDecoration.properties?.shape || 'triangle'}
+                            </label>
+                            <select
+                              value={currentDecoration.properties?.shape || 'triangle'}
+                              onChange={(e) => {
+                                const newShape = e.target.value as 'triangle' | 'circle' | 'diamond' | 'hexagon';
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: currentDecoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...currentDecoration.properties,
+                                        shape: newShape
+                                      }
+                                    }
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 bg-card border border-border rounded-md text-primaryText focus:outline-none focus:ring-2 focus:ring-primary/50"
+                            >
+                              <option value="triangle">Triangle</option>
+                              <option value="circle">Circle</option>
+                              <option value="diamond">Diamond</option>
+                              <option value="hexagon">Hexagon</option>
+                            </select>
+                          </div>
+                        )}
+                        
+                        {/* Border Radius Slider (only for Square Shape) */}
+                        {currentDecoration.type === 'highlight-box' && (
+                          <div>
+                            <label className="block text-primaryText/80 text-sm font-medium mb-2">
+                              Corner Radius: {currentDecoration.properties?.borderRadius || 0}px
+                            </label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              step="2"
+                              value={currentDecoration.properties?.borderRadius || 0}
+                              onChange={(e) => {
+                                const newBorderRadius = parseInt(e.target.value);
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: currentDecoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...currentDecoration.properties,
+                                        borderRadius: newBorderRadius
+                                      }
+                                    }
+                                  }
+                                });
+                              }}
+                              className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
+                            />
+                          </div>
+                        )}
                       </>
                     )}
                     
@@ -1058,8 +1379,8 @@ const DecoratorForm = () => {
                            </div>
                          )}
                          
-                         {/* Rotation Control (for Separator, Corner Frame, Circle Frame, Triangle Frame, Triangle Shape, and Square Shape) */}
-                          {(currentDecoration.type === 'separator' || currentDecoration.type === 'corner-frame' || currentDecoration.type === 'circle-frame' || currentDecoration.type === 'triangle-frame' || currentDecoration.type === 'geometric-shape' || currentDecoration.type === 'highlight-box') && (
+                         {/* Rotation Control (for Separator, Corner Frame, Circle Frame, Triangle Frame, Decorative Border, and Section Divider) */}
+                          {(currentDecoration.type === 'separator' || currentDecoration.type === 'corner-frame' || currentDecoration.type === 'circle-frame' || currentDecoration.type === 'triangle-frame' || currentDecoration.type === 'decorative-border' || currentDecoration.type === 'section-divider') && (
                             <div>
                               <label className="block text-primaryText/80 text-sm font-medium mb-2">
                                 Rotation: {currentDecoration.properties?.rotation || 0}°
@@ -1162,10 +1483,20 @@ const DecoratorForm = () => {
           <textarea
             value={gdprContent}
             onChange={(e) => setGdprContent(e.target.value)}
-            placeholder="Enter GDPR compliance text..."
+            placeholder={defaultGdprStatement}
             rows={4}
             className="w-full px-4 py-3 bg-card border border-border rounded-xl text-primaryText placeholder-primaryText/50 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none"
           />
+          <div className="mt-3">
+            <button
+              onClick={handleAddGdprStatement}
+              className="px-4 py-2 bg-accent hover:bg-accent/90 text-background rounded-lg font-medium transition-all duration-200 flex items-center space-x-2"
+            >
+              <span>
+                Add {isCustomGdprContent ? '(Edited Statement)' : '(Default Statement)'}
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Action Buttons */}

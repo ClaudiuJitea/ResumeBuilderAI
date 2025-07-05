@@ -191,7 +191,8 @@ const InteractiveDecoration: React.FC<InteractiveDecorationProps> = ({ decoratio
               ...baseStyle,
               border: `${thickness}px ${style} ${color}`,
               backgroundColor: 'transparent',
-              borderRadius: '50%'
+              borderRadius: '50%',
+              transform: `rotate(${rotation}deg)`
             }}
           />
         );
@@ -208,7 +209,7 @@ const InteractiveDecoration: React.FC<InteractiveDecorationProps> = ({ decoratio
               width="100%"
               height="100%"
               viewBox="0 0 100 100"
-              style={{ overflow: 'visible', transform: `rotate(${rotation}deg)` }}
+              style={{ overflow: 'visible', transform: `rotate(${rotation}deg)`, opacity }}
             >
               <polygon
                 points="50,10 10,90 90,90"
@@ -216,6 +217,7 @@ const InteractiveDecoration: React.FC<InteractiveDecorationProps> = ({ decoratio
                 stroke={color}
                 strokeWidth={thickness}
                 strokeDasharray={style === 'dashed' ? '5,5' : style === 'dotted' ? '2,2' : 'none'}
+                opacity={opacity}
               />
             </svg>
           </div>
@@ -288,7 +290,8 @@ const InteractiveDecoration: React.FC<InteractiveDecorationProps> = ({ decoratio
             style={{
               ...baseStyle,
               borderTop: `1px ${style} ${color}`,
-              height: '1px'
+              height: '1px',
+              transform: `rotate(${rotation}deg)`
             }}
           />
         );
@@ -311,7 +314,8 @@ const InteractiveDecoration: React.FC<InteractiveDecorationProps> = ({ decoratio
             style={{
               ...baseStyle,
               border: `${thickness}px ${style} ${color}`,
-              backgroundColor: 'transparent'
+              backgroundColor: 'transparent',
+              transform: `rotate(${rotation}deg)`
             }}
           />
         );
@@ -324,7 +328,8 @@ const InteractiveDecoration: React.FC<InteractiveDecorationProps> = ({ decoratio
               style={{
                 ...baseStyle,
                 backgroundColor: color,
-                borderRadius: '50%'
+                borderRadius: '50%',
+                transform: `rotate(${rotation}deg)`
               }}
             />
           );
@@ -333,7 +338,8 @@ const InteractiveDecoration: React.FC<InteractiveDecorationProps> = ({ decoratio
           <div
             style={{
               ...baseStyle,
-              backgroundColor: color
+              backgroundColor: color,
+              transform: `rotate(${rotation}deg)`
             }}
           />
         );
@@ -371,7 +377,7 @@ const InteractiveDecoration: React.FC<InteractiveDecorationProps> = ({ decoratio
         });
         
         return (
-          <div style={{ ...baseStyle, position: 'relative' }}>
+          <div style={{ ...baseStyle, position: 'relative', transform: `rotate(${rotation}deg)` }}>
             {particles}
           </div>
         );
@@ -534,7 +540,7 @@ const InteractiveDecoration: React.FC<InteractiveDecorationProps> = ({ decoratio
          );
        
       case 'svg-graphic':
-        const { svgContent, svgColors, preserveAspectRatio = true } = decoration.properties || {};
+        const { svgContent, preserveAspectRatio = true } = decoration.properties || {};
         
         if (!svgContent) {
           return (
@@ -555,7 +561,7 @@ const InteractiveDecoration: React.FC<InteractiveDecorationProps> = ({ decoratio
           );
         }
         
-        // Apply color replacements and size constraints
+        // Process SVG for responsive sizing
         let processedSvg = svgContent;
         const parser = new DOMParser();
         const svgDoc = parser.parseFromString(processedSvg, 'image/svg+xml');
@@ -592,20 +598,6 @@ const InteractiveDecoration: React.FC<InteractiveDecorationProps> = ({ decoratio
           svgElement.style.display = 'block';
           
           processedSvg = new XMLSerializer().serializeToString(svgDoc);
-        }
-        
-        // Apply color replacements if any
-        if (svgColors) {
-          Object.entries(svgColors).forEach(([key, newColor]) => {
-            const [type, index] = key.split('-');
-            const colorParser = new DOMParser();
-            const colorSvgDoc = colorParser.parseFromString(processedSvg, 'image/svg+xml');
-            const elements = colorSvgDoc.querySelectorAll(`[${type}]`);
-            if (elements[parseInt(index)]) {
-              elements[parseInt(index)].setAttribute(type, newColor);
-              processedSvg = new XMLSerializer().serializeToString(colorSvgDoc);
-            }
-          });
         }
         
         return (

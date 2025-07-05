@@ -14,6 +14,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
   const { state } = useResume();
   const { personalInfo, workExperience, education, skills, languages, projects, interests, certificates, links, skillsConfig, languagesConfig } = state.resumeData;
   const colorTheme = state.resumeData.colorTheme;
+  const decoratorSettings = state.resumeData.decoratorSettings;
   const { getFontStyle } = useFont();
   
   const [isPrintMode, setIsPrintMode] = useState(printMode);
@@ -667,6 +668,24 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
             </div>
           </div>
         )}
+        
+        {/* GDPR Content - Page 1 */}
+        {decoratorSettings?.gdprContent && (
+          <div className="text-center" style={{ padding: `${16 * scaleFactor}px` }}>
+            <p 
+              className="text-gray-700"
+              style={{ 
+                fontSize: `${Math.max(8, 12 * scaleFactor)}px`,
+                lineHeight: `${Math.max(12, 16 * scaleFactor)}px`,
+                fontWeight: 'bold',
+                fontStyle: 'italic'
+              }}
+            >
+              {decoratorSettings.gdprContent}
+            </p>
+          </div>
+        )}
+
       </div>
     </div>
   );
@@ -1062,7 +1081,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
         )}
 
         {/* References Section */}
-        <div>
+        <div style={{ marginBottom: decoratorSettings?.gdprContent ? `${32 * scaleFactor}px` : '0' }}>
           <div className="flex items-center" style={{ marginBottom: `${16 * scaleFactor}px` }}>
             <User className="mr-3" style={{ width: `${24 * scaleFactor}px`, height: `${24 * scaleFactor}px`, color: primaryColor }} />
             <h2 
@@ -1129,6 +1148,24 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ fontSize = 100, current
             </div>
           </div>
         </div>
+
+        {/* GDPR Content */}
+        {decoratorSettings?.gdprContent && (
+          <div className="text-center">
+            <p 
+              className="text-gray-700"
+              style={{ 
+                fontSize: `${Math.max(8, 12 * scaleFactor)}px`,
+                lineHeight: `${Math.max(12, 16 * scaleFactor)}px`,
+                fontWeight: 'bold',
+                fontStyle: 'italic'
+              }}
+            >
+              {decoratorSettings.gdprContent}
+            </p>
+          </div>
+        )}
+
       </div>
     </div>
   );

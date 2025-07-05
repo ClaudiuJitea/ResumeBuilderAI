@@ -71,6 +71,14 @@ const initialState: ResumeState = {
     },
     languagesConfig: {
       style: 'dots'
+    },
+    decoratorSettings: {
+      selectedFont: 'Roboto',
+      selectedTemplate: 'Classic',
+      selectedColorScheme: '#2563eb',
+      selectedDecorations: [],
+      gdprContent: '',
+      decorations: []
     }
   },
 };
@@ -147,15 +155,17 @@ const resumeReducer = (state: ResumeState, action: ResumeAction): ResumeState =>
         decorations: []
       };
       
+      const newDecoratorSettings = {
+        ...defaultDecoratorSettings,
+        ...state.resumeData.decoratorSettings,
+        ...action.payload
+      };
+      
       return {
         ...state,
         resumeData: {
           ...state.resumeData,
-          decoratorSettings: {
-            ...defaultDecoratorSettings,
-            ...state.resumeData.decoratorSettings,
-            ...action.payload
-          }
+          decoratorSettings: newDecoratorSettings
         }
       };
     case 'ADD_DECORATION':

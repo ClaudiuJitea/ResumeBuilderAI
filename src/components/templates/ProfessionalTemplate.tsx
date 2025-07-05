@@ -12,6 +12,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
   const { state } = useResume();
   const { personalInfo, workExperience, education, skills, certificates, links, skillsConfig } = state.resumeData;
   const colorTheme = state.resumeData.colorTheme;
+  const decoratorSettings = state.resumeData.decoratorSettings;
   const { getFontStyle } = useFont();
 
   const scaleFactor = fontSize / 100;
@@ -801,6 +802,24 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ fontSize = 
           )}
         </div>
       </div>
+      
+      {/* GDPR Content */}
+      {decoratorSettings?.gdprContent && (
+        <div className="text-center" style={{ padding: `${16 * scaleFactor}px ${32 * scaleFactor}px` }}>
+          <p 
+            className="text-gray-700"
+            style={{ 
+              fontSize: `${Math.max(8, 12 * scaleFactor)}px`,
+              lineHeight: `${Math.max(12, 16 * scaleFactor)}px`,
+              fontWeight: 'bold',
+              fontStyle: 'italic'
+            }}
+          >
+            {decoratorSettings.gdprContent}
+          </p>
+        </div>
+      )}
+
     </div>
   );
 };

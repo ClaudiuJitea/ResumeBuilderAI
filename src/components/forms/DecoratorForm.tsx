@@ -37,6 +37,7 @@ const DecoratorForm = () => {
   const [gdprContent, setGdprContent] = useState(decoratorSettings?.gdprContent || '');
   const [separatorColor, setSeparatorColor] = useState('#14B8A6');
   const [showSvgUpload, setShowSvgUpload] = useState(false);
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
 
   const availableDecorations = [
     'Separator', 'Corner Frame', 'Circle Frame', 'Triangle Frame',
@@ -90,8 +91,6 @@ const DecoratorForm = () => {
     setShowFontDropdown(false);
     setFontSearch('');
   };
-
-
 
   const handleDecorationToggle = (decoration: string) => {
     const newSelectedDecorations = selectedDecorations.includes(decoration) 
@@ -264,17 +263,6 @@ const DecoratorForm = () => {
     });
   }, [selectedFont, gdprContent, dispatch]);
 
-  
-
-  // Duplicate separator function
-
-
-  // Add new separator function
-
-
-  // Remove specific separator function
-
-
   const handleNext = () => {
     const nextStepIndex = state.availableBuildSteps.findIndex(step => step === 'decorator') + 1;
     const nextStep = state.availableBuildSteps[nextStepIndex];
@@ -382,8 +370,6 @@ const DecoratorForm = () => {
                 )}
               </div>
 
-
-
               {/* Font List */}
               <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-track-background scrollbar-thumb-accent/30 hover:scrollbar-thumb-accent/50 space-y-2">
                 {getFilteredFonts().slice(0, 35).map((font) => (
@@ -455,8 +441,6 @@ const DecoratorForm = () => {
             </div>
           )}
         </div>
-
-
 
         {/* Available Decorations */}
         <div>
@@ -530,9 +514,13 @@ const DecoratorForm = () => {
               
               if (decorations.length === 0) return null;
               
-              const firstDecoration = decorations[0];
-              const currentColor = firstDecoration.properties?.color || '#000000';
-              const currentOpacity = firstDecoration.properties?.opacity || 1;
+              // If no element is selected, select the first one
+              const currentDecoration = selectedElementId 
+                ? decorations.find(d => d.id === selectedElementId) || decorations[0]
+                : decorations[0];
+              
+              const currentColor = currentDecoration.properties?.color || '#000000';
+              const currentOpacity = currentDecoration.properties?.opacity || 1;
               
               // Special handling for SVG Graphics
               const isSvgGraphic = decorationType === 'SVG Graphics';
@@ -635,19 +623,9 @@ const DecoratorForm = () => {
                               };
                               break;
                             case 'SVG Graphics':
-                              decorationConfig = {
-                                id: decorationId,
-                                type: decorationType_mapped,
-                                position: { x: 100, y: 100 + (decorations.length * 70) },
-                                size: { width: 100, height: 100 },
-                                properties: { 
-                                  svgContent: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="currentColor"/></svg>',
-                                  opacity: currentOpacity,
-                                  rotation: 0,
-                                  preserveAspectRatio: true
-                                }
-                              };
-                              break;
+                              // Show SVG upload form instead of creating default SVG
+                              setShowSvgUpload(true);
+                              return;
                             default:
                               decorationConfig = {
                                 id: decorationId,
@@ -703,70 +681,52 @@ const DecoratorForm = () => {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Color Picker - Hide for SVG Graphics */}
-                    {!isSvgGraphic && (
-                      <div>
-                        <label className="block text-primaryText/80 text-sm font-medium mb-2">Color:</label>
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="color"
-                            value={currentColor}
-                            onChange={(e) => {
-                              decorations.forEach(decoration => {
-                                dispatch({
-                                  type: 'UPDATE_DECORATION',
-                                  payload: {
-                                    id: decoration.id,
-                                    updates: {
-                                      properties: {
-                                        ...decoration.properties,
-                                        color: e.target.value
-                                      }
-                                    }
+                    {/* Color Picker - Show for all decoration types */}
+                    <div>
+                      <label className="block text-primaryText/80 text-sm font-medium mb-2">Color:</label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="color"
+                          value={currentColor}
+                          onChange={(e) => {
+                            dispatch({
+                              type: 'UPDATE_DECORATION',
+                              payload: {
+                                id: currentDecoration.id,
+                                updates: {
+                                  properties: {
+                                    ...currentDecoration.properties,
+                                    color: e.target.value
                                   }
-                                });
-                              });
-                            }}
-                            className="w-12 h-10 rounded-lg border border-border cursor-pointer"
-                            title="Pick color"
-                          />
-                          <input
-                            type="text"
-                            value={currentColor}
-                            onChange={(e) => {
-                              decorations.forEach(decoration => {
-                                dispatch({
-                                  type: 'UPDATE_DECORATION',
-                                  payload: {
-                                    id: decoration.id,
-                                    updates: {
-                                      properties: {
-                                        ...decoration.properties,
-                                        color: e.target.value
-                                      }
-                                    }
+                                }
+                              }
+                            });
+                          }}
+                          className="w-12 h-10 rounded-lg border border-border cursor-pointer"
+                          title="Pick color"
+                        />
+                        <input
+                          type="text"
+                          value={currentColor}
+                          onChange={(e) => {
+                            dispatch({
+                              type: 'UPDATE_DECORATION',
+                              payload: {
+                                id: currentDecoration.id,
+                                updates: {
+                                  properties: {
+                                    ...currentDecoration.properties,
+                                    color: e.target.value
                                   }
-                                });
-                              });
-                            }}
-                            className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-primaryText font-mono text-sm"
-                            placeholder="#000000"
-                          />
-                        </div>
+                                }
+                              }
+                            });
+                          }}
+                          className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-primaryText font-mono text-sm"
+                          placeholder="#000000"
+                        />
                       </div>
-                    )}
-                    
-                    {/* SVG Color Note - Show for SVG Graphics */}
-                    {isSvgGraphic && (
-                      <div>
-                        <label className="block text-primaryText/80 text-sm font-medium mb-2">SVG Colors:</label>
-                        <div className="p-3 bg-accent/10 border border-accent/30 rounded-lg">
-                          <p className="text-accent text-sm">
-                            📎 To change SVG colors, upload a new SVG with desired colors or use the SVG upload form color customization.
-                          </p>
-                        </div>
-                      </div>
-                    )}
+                    </div>
                     
                     {/* Transparency Slider */}
                     <div>
@@ -783,19 +743,17 @@ const DecoratorForm = () => {
                           value={currentOpacity}
                           onChange={(e) => {
                             const newOpacity = parseFloat(e.target.value);
-                            decorations.forEach(decoration => {
-                              dispatch({
-                                type: 'UPDATE_DECORATION',
-                                payload: {
-                                  id: decoration.id,
-                                  updates: {
-                                    properties: {
-                                      ...decoration.properties,
-                                      opacity: newOpacity
-                                    }
+                            dispatch({
+                              type: 'UPDATE_DECORATION',
+                              payload: {
+                                id: currentDecoration.id,
+                                updates: {
+                                  properties: {
+                                    ...currentDecoration.properties,
+                                    opacity: newOpacity
                                   }
                                 }
-                              });
+                              }
                             });
                           }}
                           className="flex-1 h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
@@ -813,75 +771,62 @@ const DecoratorForm = () => {
                         {/* Rotation Control */}
                         <div>
                           <label className="block text-primaryText/80 text-sm font-medium mb-2">
-                            Rotation: {firstDecoration.properties?.rotation || 0}°
+                            Rotation: {currentDecoration.properties?.rotation || 0}°
                           </label>
                           <input
                             type="range"
                             min="0"
                             max="360"
                             step="15"
-                            value={firstDecoration.properties?.rotation || 0}
+                            value={currentDecoration.properties?.rotation || 0}
                             onChange={(e) => {
                               const newRotation = parseInt(e.target.value);
-                              decorations.forEach(decoration => {
-                                dispatch({
-                                  type: 'UPDATE_DECORATION',
-                                  payload: {
-                                    id: decoration.id,
-                                    updates: {
-                                      properties: {
-                                        ...decoration.properties,
-                                        rotation: newRotation
-                                      }
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: currentDecoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...currentDecoration.properties,
+                                      rotation: newRotation
                                     }
                                   }
-                                });
+                                }
                               });
                             }}
                             className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
                           />
                         </div>
                         
-                                                 {/* Aspect Ratio Control */}
-                         <div>
-                           <label className="block text-primaryText/80 text-sm font-medium mb-2">Aspect Ratio:</label>
-                           <label className="flex items-center space-x-2 cursor-pointer">
-                             <input
-                               type="checkbox"
-                               checked={firstDecoration.properties?.preserveAspectRatio !== false}
-                               onChange={(e) => {
-                                 const preserve = e.target.checked;
-                                 decorations.forEach(decoration => {
-                                   dispatch({
-                                     type: 'UPDATE_DECORATION',
-                                     payload: {
-                                       id: decoration.id,
-                                       updates: {
-                                         properties: {
-                                           ...decoration.properties,
-                                           preserveAspectRatio: preserve
-                                         }
-                                       }
-                                     }
-                                   });
-                                 });
-                               }}
-                               className="w-4 h-4 text-accent rounded border-border"
-                             />
-                             <span className="text-sm text-primaryText/70">Preserve aspect ratio</span>
-                           </label>
-                         </div>
-                         
-                         {/* Upload New SVG Button */}
-                         <div className="md:col-span-2">
-                           <button
-                             onClick={() => setShowSvgUpload(true)}
-                             className="w-full py-2 px-4 bg-accent hover:bg-accent/90 text-background rounded-lg transition-colors flex items-center justify-center space-x-2"
-                           >
-                             <Upload className="w-4 h-4" />
-                             <span>Upload New SVG</span>
-                           </button>
-                         </div>
+                        {/* Aspect Ratio Control */}
+                        <div>
+                          <label className="block text-primaryText/80 text-sm font-medium mb-2">Aspect Ratio:</label>
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={currentDecoration.properties?.preserveAspectRatio !== false}
+                              onChange={(e) => {
+                                const preserve = e.target.checked;
+                                dispatch({
+                                  type: 'UPDATE_DECORATION',
+                                  payload: {
+                                    id: currentDecoration.id,
+                                    updates: {
+                                      properties: {
+                                        ...currentDecoration.properties,
+                                        preserveAspectRatio: preserve
+                                      }
+                                    }
+                                  }
+                                });
+                              }}
+                              className="w-4 h-4 text-accent rounded border-border"
+                            />
+                            <span className="text-sm text-primaryText/70">Preserve aspect ratio</span>
+                          </label>
+                        </div>
+                        
+
                       </>
                     )}
                     
@@ -891,29 +836,27 @@ const DecoratorForm = () => {
                         {/* Particle Count Slider */}
                         <div>
                           <label className="block text-primaryText/80 text-sm font-medium mb-2">
-                             Particle Count: {firstDecoration.properties?.particleCount || 85}
+                             Particle Count: {currentDecoration.properties?.particleCount || 85}
                            </label>
                            <input
                              type="range"
                              min="10"
                              max="200"
                              step="10"
-                             value={firstDecoration.properties?.particleCount || 85}
+                             value={currentDecoration.properties?.particleCount || 85}
                             onChange={(e) => {
                               const newCount = parseInt(e.target.value);
-                              decorations.forEach(decoration => {
-                                dispatch({
-                                  type: 'UPDATE_DECORATION',
-                                  payload: {
-                                    id: decoration.id,
-                                    updates: {
-                                      properties: {
-                                        ...decoration.properties,
-                                        particleCount: newCount
-                                      }
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: currentDecoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...currentDecoration.properties,
+                                      particleCount: newCount
                                     }
                                   }
-                                });
+                                }
                               });
                             }}
                             className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
@@ -923,29 +866,27 @@ const DecoratorForm = () => {
                         {/* Particle Size Slider */}
                         <div>
                           <label className="block text-primaryText/80 text-sm font-medium mb-2">
-                            Particle Size: {firstDecoration.properties?.particleSize || 3}px
+                            Particle Size: {currentDecoration.properties?.particleSize || 3}px
                           </label>
                           <input
                             type="range"
                             min="1"
                             max="10"
                             step="0.5"
-                            value={firstDecoration.properties?.particleSize || 3}
+                            value={currentDecoration.properties?.particleSize || 3}
                             onChange={(e) => {
                               const newSize = parseFloat(e.target.value);
-                              decorations.forEach(decoration => {
-                                dispatch({
-                                  type: 'UPDATE_DECORATION',
-                                  payload: {
-                                    id: decoration.id,
-                                    updates: {
-                                      properties: {
-                                        ...decoration.properties,
-                                        particleSize: newSize
-                                      }
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: currentDecoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...currentDecoration.properties,
+                                      particleSize: newSize
                                     }
                                   }
-                                });
+                                }
                               });
                             }}
                             className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
@@ -955,30 +896,28 @@ const DecoratorForm = () => {
                     )}
                     
                     {/* Gradient Shapes Controls */}
-                    {firstDecoration.type === 'hexagonal-overlay' && (
+                    {currentDecoration.type === 'hexagonal-overlay' && (
                       <>
                         {/* Shape Style Selector */}
                         <div>
                           <label className="block text-primaryText/80 text-sm font-medium mb-2">
-                            Shape Style: {firstDecoration.properties?.shape || 'flowing'}
+                            Shape Style: {currentDecoration.properties?.shape || 'flowing'}
                           </label>
                           <select
-                            value={firstDecoration.properties?.shape || 'flowing'}
+                            value={currentDecoration.properties?.shape || 'flowing'}
                             onChange={(e) => {
                               const newShape = e.target.value as 'triangle' | 'circle' | 'diamond' | 'hexagon' | 'rectangle' | 'flowing' | 'geometric' | 'organic' | 'crystalline' | 'waves' | 'spiral';
-                              decorations.forEach(decoration => {
-                                dispatch({
-                                  type: 'UPDATE_DECORATION',
-                                  payload: {
-                                    id: decoration.id,
-                                    updates: {
-                                      properties: {
-                                        ...decoration.properties,
-                                        shape: newShape
-                                      }
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: currentDecoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...currentDecoration.properties,
+                                      shape: newShape
                                     }
                                   }
-                                });
+                                }
                               });
                             }}
                             className="w-full px-3 py-2 bg-card border border-border rounded-md text-primaryText focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -995,29 +934,27 @@ const DecoratorForm = () => {
                         {/* Rotation Control */}
                         <div>
                           <label className="block text-primaryText/80 text-sm font-medium mb-1">
-                            Rotation: {firstDecoration.properties?.rotation || 0}°
+                            Rotation: {currentDecoration.properties?.rotation || 0}°
                           </label>
                           <input
                             type="range"
                             min="0"
                             max="360"
                             step="15"
-                            value={firstDecoration.properties?.rotation || 0}
+                            value={currentDecoration.properties?.rotation || 0}
                             onChange={(e) => {
                               const newRotation = parseInt(e.target.value);
-                              decorations.forEach(decoration => {
-                                dispatch({
-                                  type: 'UPDATE_DECORATION',
-                                  payload: {
-                                    id: decoration.id,
-                                    updates: {
-                                      properties: {
-                                        ...decoration.properties,
-                                        rotation: newRotation
-                                      }
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: currentDecoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...currentDecoration.properties,
+                                      rotation: newRotation
                                     }
                                   }
-                                });
+                                }
                               });
                             }}
                             className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
@@ -1027,34 +964,32 @@ const DecoratorForm = () => {
                     )}
                     
                     {/* Frame Controls (Separator, Corner Frame, Circle Frame, Triangle Frame) */}
-                    {(firstDecoration.type === 'separator' || firstDecoration.type === 'corner-frame' || firstDecoration.type === 'circle-frame' || firstDecoration.type === 'triangle-frame') && (
+                    {(currentDecoration.type === 'separator' || currentDecoration.type === 'corner-frame' || currentDecoration.type === 'circle-frame' || currentDecoration.type === 'triangle-frame') && (
                       <>
                         {/* Thickness Slider */}
                         <div>
                           <label className="block text-primaryText/80 text-sm font-medium mb-2">
-                            Thickness: {firstDecoration.properties?.thickness || 2}px
+                            Thickness: {currentDecoration.properties?.thickness || 2}px
                           </label>
                           <input
                             type="range"
                             min="1"
                             max="10"
                             step="1"
-                            value={firstDecoration.properties?.thickness || 2}
+                            value={currentDecoration.properties?.thickness || 2}
                             onChange={(e) => {
                               const newThickness = parseInt(e.target.value);
-                              decorations.forEach(decoration => {
-                                dispatch({
-                                  type: 'UPDATE_DECORATION',
-                                  payload: {
-                                    id: decoration.id,
-                                    updates: {
-                                      properties: {
-                                        ...decoration.properties,
-                                        thickness: newThickness
-                                      }
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: currentDecoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...currentDecoration.properties,
+                                      thickness: newThickness
                                     }
                                   }
-                                });
+                                }
                               });
                             }}
                             className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
@@ -1064,25 +999,23 @@ const DecoratorForm = () => {
                         {/* Style Selector */}
                         <div>
                           <label className="block text-primaryText/80 text-sm font-medium mb-2">
-                            Border Style: {firstDecoration.properties?.style || 'solid'}
+                            Border Style: {currentDecoration.properties?.style || 'solid'}
                           </label>
                           <select
-                            value={firstDecoration.properties?.style || 'solid'}
+                            value={currentDecoration.properties?.style || 'solid'}
                             onChange={(e) => {
                               const newStyle = e.target.value as 'solid' | 'dashed' | 'dotted';
-                              decorations.forEach(decoration => {
-                                dispatch({
-                                  type: 'UPDATE_DECORATION',
-                                  payload: {
-                                    id: decoration.id,
-                                    updates: {
-                                      properties: {
-                                        ...decoration.properties,
-                                        style: newStyle
-                                      }
+                              dispatch({
+                                type: 'UPDATE_DECORATION',
+                                payload: {
+                                  id: currentDecoration.id,
+                                  updates: {
+                                    properties: {
+                                      ...currentDecoration.properties,
+                                      style: newStyle
                                     }
                                   }
-                                });
+                                }
                               });
                             }}
                             className="w-full px-3 py-2 bg-card border border-border rounded-md text-primaryText focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -1094,32 +1027,30 @@ const DecoratorForm = () => {
                         </div>
                         
                         {/* Border Radius Slider (only for Corner Frame) */}
-                         {firstDecoration.type === 'corner-frame' && (
+                         {currentDecoration.type === 'corner-frame' && (
                            <div>
                              <label className="block text-primaryText/80 text-sm font-medium mb-2">
-                               Corner Radius: {firstDecoration.properties?.borderRadius || 8}px
+                               Corner Radius: {currentDecoration.properties?.borderRadius || 8}px
                              </label>
                              <input
                                type="range"
                                min="0"
                                max="50"
                                step="2"
-                               value={firstDecoration.properties?.borderRadius || 8}
+                               value={currentDecoration.properties?.borderRadius || 8}
                                onChange={(e) => {
                                  const newBorderRadius = parseInt(e.target.value);
-                                 decorations.forEach(decoration => {
-                                   dispatch({
-                                     type: 'UPDATE_DECORATION',
-                                     payload: {
-                                       id: decoration.id,
-                                       updates: {
-                                         properties: {
-                                           ...decoration.properties,
-                                           borderRadius: newBorderRadius
-                                         }
+                                 dispatch({
+                                   type: 'UPDATE_DECORATION',
+                                   payload: {
+                                     id: currentDecoration.id,
+                                     updates: {
+                                       properties: {
+                                         ...currentDecoration.properties,
+                                         borderRadius: newBorderRadius
                                        }
                                      }
-                                   });
+                                   }
                                  });
                                }}
                                className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
@@ -1128,32 +1059,30 @@ const DecoratorForm = () => {
                          )}
                          
                          {/* Rotation Control (for Separator, Corner Frame, Circle Frame, Triangle Frame, Triangle Shape, and Square Shape) */}
-                          {(firstDecoration.type === 'separator' || firstDecoration.type === 'corner-frame' || firstDecoration.type === 'circle-frame' || firstDecoration.type === 'triangle-frame' || firstDecoration.type === 'geometric-shape' || firstDecoration.type === 'highlight-box') && (
+                          {(currentDecoration.type === 'separator' || currentDecoration.type === 'corner-frame' || currentDecoration.type === 'circle-frame' || currentDecoration.type === 'triangle-frame' || currentDecoration.type === 'geometric-shape' || currentDecoration.type === 'highlight-box') && (
                             <div>
                               <label className="block text-primaryText/80 text-sm font-medium mb-2">
-                                Rotation: {firstDecoration.properties?.rotation || 0}°
+                                Rotation: {currentDecoration.properties?.rotation || 0}°
                               </label>
                               <input
                                 type="range"
                                 min="0"
                                 max="360"
                                 step="15"
-                                value={firstDecoration.properties?.rotation || 0}
+                                value={currentDecoration.properties?.rotation || 0}
                                 onChange={(e) => {
                                   const newRotation = parseInt(e.target.value);
-                                  decorations.forEach(decoration => {
-                                    dispatch({
-                                      type: 'UPDATE_DECORATION',
-                                      payload: {
-                                        id: decoration.id,
-                                        updates: {
-                                          properties: {
-                                            ...decoration.properties,
-                                            rotation: newRotation
-                                          }
+                                  dispatch({
+                                    type: 'UPDATE_DECORATION',
+                                    payload: {
+                                      id: currentDecoration.id,
+                                      updates: {
+                                        properties: {
+                                          ...currentDecoration.properties,
+                                          rotation: newRotation
                                         }
                                       }
-                                    });
+                                    }
                                   });
                                 }}
                                 className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
@@ -1164,44 +1093,59 @@ const DecoratorForm = () => {
                     )}
                   </div>
                   
-                  {/* Individual Decoration List */}
+                  {/* Individual Element Selector */}
                   {decorations.length > 1 && (
-                    <div className="mt-4">
-                      <h5 className="text-primaryText/80 text-sm font-medium mb-2">Individual Elements:</h5>
-                      <div className="space-y-1 max-h-32 overflow-y-auto scrollbar-thin scrollbar-track-background scrollbar-thumb-accent/30 hover:scrollbar-thumb-accent/50">
+                    <div className="mt-4 p-3 bg-background rounded-lg border border-border">
+                      <h5 className="text-primaryText/80 text-sm font-medium mb-2">Select Element to Customize:</h5>
+                      <div className="grid grid-cols-1 gap-2">
                         {decorations.map((decoration, index) => (
-                          <div
+                          <button
                             key={decoration.id}
-                            className="flex items-center justify-between p-2 bg-card rounded border border-border/50"
+                            onClick={() => setSelectedElementId(decoration.id)}
+                            className={`flex items-center justify-between p-2 rounded border transition-all duration-200 ${
+                              selectedElementId === decoration.id || (!selectedElementId && index === 0)
+                                ? 'border-accent bg-accent/10 text-accent'
+                                : 'border-border/50 bg-card hover:bg-card/50 text-primaryText/80'
+                            }`}
                           >
                             <div className="flex items-center space-x-2">
                               <div 
-                                className="w-2 h-2 rounded-full" 
+                                className="w-3 h-3 rounded-full" 
                                 style={{ 
                                   backgroundColor: decoration.properties?.color || '#000000',
                                   opacity: decoration.properties?.opacity || 1
                                 }}
                               ></div>
-                              <span className="text-primaryText/80 text-xs">
+                              <span className="text-sm">
                                 {decorationType} {index + 1}
                               </span>
-                              <span className="text-primaryText/50 text-xs">
+                              <span className="text-xs opacity-60">
                                 ({Math.round(decoration.position.x)}, {Math.round(decoration.position.y)})
                               </span>
                             </div>
-                            <button
-                              onClick={() => {
-                                dispatch({
-                                  type: 'REMOVE_DECORATION',
-                                  payload: decoration.id
-                                });
-                              }}
-                              className="flex items-center justify-center w-6 h-6 text-primaryText/40 hover:text-red-500 hover:bg-red-50 rounded transition-all duration-200"
-                              title="Remove this decoration"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </div>
+                            <div className="flex items-center space-x-1">
+                              {(selectedElementId === decoration.id || (!selectedElementId && index === 0)) && (
+                                <div className="w-2 h-2 rounded-full bg-accent"></div>
+                              )}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  dispatch({
+                                    type: 'REMOVE_DECORATION',
+                                    payload: decoration.id
+                                  });
+                                  // Reset selection if we're deleting the selected element
+                                  if (selectedElementId === decoration.id) {
+                                    setSelectedElementId(null);
+                                  }
+                                }}
+                                className="flex items-center justify-center w-5 h-5 text-primaryText/40 hover:text-red-500 hover:bg-red-50 rounded transition-all duration-200"
+                                title="Remove this decoration"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -1211,8 +1155,6 @@ const DecoratorForm = () => {
             })}
           </div>
         )}
-
-
 
         {/* GDPR Content */}
         <div>

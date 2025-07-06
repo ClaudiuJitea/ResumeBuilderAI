@@ -209,6 +209,58 @@ router.post('/genie/generate', authenticateToken, async (req, res) => {
   }
 });
 
+// CVGenie - Regenerate profile with user feedback
+router.post('/genie/regenerate', authenticateToken, async (req, res) => {
+  try {
+    const { profileId, userFeedback } = req.body;
+    const userId = req.user.id;
+
+    if (!profileId || !userFeedback) {
+      return res.status(400).json({ error: 'Profile ID and user feedback are required' });
+    }
+
+    // Get the existing profile
+    const profile = database.cvProfileOperations.getCVProfileById.get(profileId, userId);
+    if (!profile) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    const currentProfile = JSON.parse(profile.combinedData);
+
+    // Regenerate profile with user feedback
+    const enhancedProfile = await aiService.regenerateProfileWithFeedback(
+      profile.targetRole,
+      currentProfile,
+      userFeedback.trim()
+    );
+
+    // Update the profile in database
+    database.cvProfileOperations.updateCVProfile.run(
+      profile.profileName,
+      profile.targetRole,
+      JSON.stringify(enhancedProfile),
+      profile.sourceFiles,
+      profileId,
+      userId
+    );
+
+    res.json({
+      message: 'Profile regenerated successfully with your feedback',
+      profile: {
+        id: profile.id,
+        profileName: profile.profileName,
+        targetRole: profile.targetRole,
+        combinedData: enhancedProfile,
+        sourceFiles: JSON.parse(profile.sourceFiles),
+        updatedAt: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error regenerating CV profile:', error);
+    res.status(500).json({ error: 'Failed to regenerate CV profile with feedback' });
+  }
+});
+
 // Get user's CV profiles
 router.get('/profiles', authenticateToken, async (req, res) => {
   try {

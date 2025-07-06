@@ -14,11 +14,13 @@ import {
   Award
 } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
+import { useNotification } from '../../context/NotificationContext';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 const FinishForm = () => {
   const { state, dispatch } = useResume();
+  const { error: showError } = useNotification();
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [downloadComplete, setDownloadComplete] = useState(false);
@@ -206,7 +208,7 @@ const FinishForm = () => {
 
       setIsDownloading(false);
       setDownloadProgress(0);
-      alert('There was an error generating your PDF. Please try again.');
+      showError('PDF Generation Failed', 'There was an error generating your PDF. Please try again.');
     }
   };
 

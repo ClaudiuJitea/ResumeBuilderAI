@@ -360,4 +360,160 @@ router.get('/verify', authenticateToken, (req, res) => {
   });
 });
 
+// Resume management endpoints
+// Get user's resumes
+router.get('/resumes', authenticateToken, (req, res) => {
+  try {
+    const userId = req.user.id;
+    const resumes = database.resumeOperations.getUserResumes.all(userId);
+    
+    res.json({
+      success: true,
+      resumes: resumes
+    });
+  } catch (error) {
+    console.error('Error fetching resumes:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch resumes'
+    });
+  }
+});
+
+// Get specific resume
+router.get('/resumes/:id', authenticateToken, (req, res) => {
+  try {
+    const resumeId = req.params.id;
+    const userId = req.user.id;
+    
+    const resume = database.resumeOperations.getResumeById.get(resumeId, userId);
+    if (!resume) {
+      return res.status(404).json({
+        success: false,
+        message: 'Resume not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      resume: resume
+    });
+  } catch (error) {
+    console.error('Error fetching resume:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch resume'
+    });
+  }
+});
+
+// Save/Create resume
+router.post('/resumes', authenticateToken, (req, res) => {
+  try {
+    const { resumeData, title, template } = req.body;
+    const userId = req.user.id;
+    
+    if (!resumeData || !title || !template) {
+      return res.status(400).json({
+        success: false,
+        message: 'Resume data, title, and template are required'
+      });
+    }
+    
+    const result = database.resumeOperations.saveResume.run(
+      userId,
+      JSON.stringify(resumeData),
+      title,
+      template
+    );
+    
+    res.status(201).json({
+      success: true,
+      message: 'Resume saved successfully',
+      resume: {
+        id: result.lastInsertRowid,
+        title: title,
+        template: template,
+        createdAt: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error saving resume:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to save resume'
+    });
+  }
+});
+
+// Update resume
+router.put('/resumes/:id', authenticateToken, (req, res) => {
+  try {
+    const resumeId = req.params.id;
+    const { resumeData, title, template } = req.body;
+    const userId = req.user.id;
+    
+    if (!resumeData || !title || !template) {
+      return res.status(400).json({
+        success: false,
+        message: 'Resume data, title, and template are required'
+      });
+    }
+    
+    const result = database.resumeOperations.updateResume.run(
+      JSON.stringify(resumeData),
+      title,
+      template,
+      resumeId,
+      userId
+    );
+    
+    if (result.changes === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Resume not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Resume updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating resume:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update resume'
+    });
+  }
+});
+
+// Delete resume
+router.delete('/resumes/:id', authenticateToken, (req, res) => {
+  try {
+    const resumeId = req.params.id;
+    const userId = req.user.id;
+    
+    const result = database.resumeOperations.deleteResume.run(resumeId, userId);
+    
+    if (result.changes === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Resume not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Resume deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting resume:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete resume'
+    });
+  }
+});
+
 module.exports = router; 

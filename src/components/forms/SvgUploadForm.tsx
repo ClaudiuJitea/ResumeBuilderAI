@@ -6,6 +6,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { useResume } from '../../context/ResumeContext';
+import { useNotification } from '../../context/NotificationContext';
 import { Decoration } from '../../types/resume';
 
 interface SvgUploadFormProps {
@@ -14,6 +15,7 @@ interface SvgUploadFormProps {
 
 const SvgUploadForm: React.FC<SvgUploadFormProps> = ({ onSvgUploaded }) => {
   const { dispatch } = useResume();
+  const { warning } = useNotification();
   const [selectedSvg, setSelectedSvg] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -36,7 +38,7 @@ const SvgUploadForm: React.FC<SvgUploadFormProps> = ({ onSvgUploaded }) => {
       };
       reader.readAsText(file);
     } else {
-      alert('Please select a valid SVG file.');
+      warning('Invalid File Type', 'Please select a valid SVG file.');
     }
   };
 

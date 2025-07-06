@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { ResumeProvider, useResume } from './context/ResumeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
 import Navigation from './components/Navigation';
 import LandingPage from './components/LandingPage';
 import TemplateSelection from './components/TemplateSelection';
@@ -10,6 +11,7 @@ import ResumeBuilder from './components/ResumeBuilder';
 import AuthPage from './components/auth/AuthPage';
 import AdminDashboard from './components/admin/AdminDashboard';
 import YourCVs from './components/YourCVs';
+import NotificationContainer from './components/NotificationContainer';
 import { loadGoogleFont, PROFESSIONAL_FONTS } from './utils/fonts';
 
 const AppContent = () => {
@@ -86,7 +88,10 @@ function App() {
   return (
     <AuthProvider>
       <ResumeProvider>
-        <AppContent />
+        <NotificationProvider>
+          <AppContent />
+          <NotificationContainer />
+        </NotificationProvider>
       </ResumeProvider>
     </AuthProvider>
   );

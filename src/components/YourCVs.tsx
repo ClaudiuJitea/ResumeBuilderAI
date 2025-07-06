@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Upload, FileText, Download, Trash2, Plus, Sparkles, FolderOpen, FileImage, ChevronRight, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
+import { useNotification } from '../context/NotificationContext';
 import CVGenie from './CVGenie';
 
 interface UploadedCV {
@@ -34,6 +35,7 @@ interface CVProfile {
 const YourCVs = () => {
   const { user } = useAuth();
   const { dispatch } = useResume();
+  const { success, error, warning } = useNotification();
   const [uploadedCVs, setUploadedCVs] = useState<UploadedCV[]>([]);
   const [generatedResumes, setGeneratedResumes] = useState<GeneratedResume[]>([]);
   const [cvProfiles, setCVProfiles] = useState<CVProfile[]>([]);
@@ -42,6 +44,12 @@ const YourCVs = () => {
   const [activeTab, setActiveTab] = useState<'uploaded' | 'generated' | 'profiles'>('uploaded');
   const [showCVGenie, setShowCVGenie] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState<{
+    show: boolean;
+    type: 'cv' | 'resume' | 'profile';
+    id: number;
+    name: string;
+  }>({ show: false, type: 'cv', id: 0, name: '' });
 
   useEffect(() => {
     fetchData();
@@ -112,7 +120,7 @@ const YourCVs = () => {
 
   const handleFileUpload = async (file: File) => {
     if (!file || file.type !== 'application/pdf') {
-      alert('Please upload a PDF file');
+      warning('Invalid File Type', 'Please upload a PDF file');
       return;
     }
 
@@ -132,14 +140,14 @@ const YourCVs = () => {
       if (response.ok) {
         const data = await response.json();
         setUploadedCVs(prev => [data.cv, ...prev]);
-        alert('CV uploaded successfully!');
+        success('CV Uploaded', 'Your CV has been uploaded and processed successfully!');
       } else {
-        const error = await response.json();
-        alert(`Upload failed: ${error.error}`);
+        const errorData = await response.json();
+        error('Upload Failed', errorData.error || 'Failed to upload CV');
       }
-    } catch (error) {
-      console.error('Error uploading CV:', error);
-      alert('Upload failed. Please try again.');
+    } catch (err) {
+      console.error('Error uploading CV:', err);
+      error('Upload Failed', 'Failed to upload CV. Please try again.');
     } finally {
       setIsUploading(false);
     }
@@ -162,8 +170,6 @@ const YourCVs = () => {
   };
 
   const deleteUploadedCV = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this CV?')) return;
-
     try {
       const response = await fetch(`/api/cvs/uploaded/${id}`, {
         method: 'DELETE',
@@ -174,19 +180,17 @@ const YourCVs = () => {
 
       if (response.ok) {
         setUploadedCVs(prev => prev.filter(cv => cv.id !== id));
-        alert('CV deleted successfully');
+        success('CV Deleted', 'Your CV has been deleted successfully');
       } else {
-        alert('Failed to delete CV');
+        error('Delete Failed', 'Failed to delete CV');
       }
-    } catch (error) {
-      console.error('Error deleting CV:', error);
-      alert('Failed to delete CV');
+    } catch (err) {
+      console.error('Error deleting CV:', err);
+      error('Delete Failed', 'Failed to delete CV');
     }
   };
 
   const deleteResume = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this resume?')) return;
-
     try {
       const response = await fetch(`/api/auth/resumes/${id}`, {
         method: 'DELETE',
@@ -197,19 +201,17 @@ const YourCVs = () => {
 
       if (response.ok) {
         setGeneratedResumes(prev => prev.filter(resume => resume.id !== id));
-        alert('Resume deleted successfully');
+        success('Resume Deleted', 'Your resume has been deleted successfully');
       } else {
-        alert('Failed to delete resume');
+        error('Delete Failed', 'Failed to delete resume');
       }
-    } catch (error) {
-      console.error('Error deleting resume:', error);
-      alert('Failed to delete resume');
+    } catch (err) {
+      console.error('Error deleting resume:', err);
+      error('Delete Failed', 'Failed to delete resume');
     }
   };
 
   const deleteCVProfile = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this CV profile?')) return;
-
     try {
       const response = await fetch(`/api/cvs/profiles/${id}`, {
         method: 'DELETE',
@@ -220,13 +222,38 @@ const YourCVs = () => {
 
       if (response.ok) {
         setCVProfiles(prev => prev.filter(profile => profile.id !== id));
-        alert('CV profile deleted successfully');
+        success('Profile Deleted', 'Your CV profile has been deleted successfully');
       } else {
-        alert('Failed to delete CV profile');
+        error('Delete Failed', 'Failed to delete CV profile');
       }
-    } catch (error) {
-      console.error('Error deleting CV profile:', error);
-      alert('Failed to delete CV profile');
+    } catch (err) {
+      console.error('Error deleting CV profile:', err);
+      error('Delete Failed', 'Failed to delete CV profile');
+    }
+  };
+
+  const handleDeleteConfirm = (type: 'cv' | 'resume' | 'profile', id: number, name: string) => {
+    setConfirmDelete({ show: true, type, id, name });
+  };
+
+  const handleDeleteCancel = () => {
+    setConfirmDelete({ show: false, type: 'cv', id: 0, name: '' });
+  };
+
+  const handleDeleteExecute = async () => {
+    const { type, id } = confirmDelete;
+    setConfirmDelete({ show: false, type: 'cv', id: 0, name: '' });
+    
+    switch (type) {
+      case 'cv':
+        await deleteUploadedCV(id);
+        break;
+      case 'resume':
+        await deleteResume(id);
+        break;
+      case 'profile':
+        await deleteCVProfile(id);
+        break;
     }
   };
 
@@ -244,13 +271,13 @@ const YourCVs = () => {
         // Update the resume context with the applied data
         dispatch({ type: 'UPDATE_RESUME_DATA', payload: data.resumeData });
         dispatch({ type: 'SET_STEP', payload: 'templates' });
-        alert(`CV profile "${data.profileInfo.profileName}" applied successfully! You can now select a template.`);
+        success('Profile Applied', `CV profile "${data.profileInfo.profileName}" applied successfully! You can now select a template.`);
       } else {
-        alert('Failed to apply CV profile');
+        error('Apply Failed', 'Failed to apply CV profile');
       }
-    } catch (error) {
-      console.error('Error applying CV profile:', error);
-      alert('Failed to apply CV profile');
+    } catch (err) {
+      console.error('Error applying CV profile:', err);
+      error('Apply Failed', 'Failed to apply CV profile');
     }
   };
 
@@ -269,13 +296,13 @@ const YourCVs = () => {
         dispatch({ type: 'UPDATE_RESUME_DATA', payload: resumeData });
         dispatch({ type: 'SET_TEMPLATE', payload: data.resume.template });
         dispatch({ type: 'SET_STEP', payload: 'builder' });
-        alert('Resume loaded successfully!');
+        success('Resume Loaded', 'Your resume has been loaded successfully!');
       } else {
-        alert('Failed to load resume');
+        error('Load Failed', 'Failed to load resume');
       }
-    } catch (error) {
-      console.error('Error loading resume:', error);
-      alert('Failed to load resume');
+    } catch (err) {
+      console.error('Error loading resume:', err);
+      error('Load Failed', 'Failed to load resume');
     }
   };
 
@@ -328,7 +355,7 @@ const YourCVs = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-heading mb-4">
-            Your <span className="bg-gradient-to-r from-accent to-heading bg-clip-text text-transparent">CVs</span>
+            Your <span className="bg-gradient-to-r from-accent to-heading bg-clip-text text-transparent">CVs & Profiles</span>
           </h1>
           <p className="text-lg text-primaryText/80 max-w-2xl mx-auto">
             Manage your uploaded CVs, generated resumes, and create intelligent CV profiles with AI
@@ -466,7 +493,7 @@ const YourCVs = () => {
                           </div>
                           <div className="flex items-center space-x-2">
                             <button
-                              onClick={() => deleteUploadedCV(cv.id)}
+                              onClick={() => handleDeleteConfirm('cv', cv.id, cv.originalName)}
                               className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors duration-200"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -511,7 +538,7 @@ const YourCVs = () => {
                             <ChevronRight className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => deleteResume(resume.id)}
+                            onClick={() => handleDeleteConfirm('resume', resume.id, resume.title)}
                             className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors duration-200"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -558,7 +585,7 @@ const YourCVs = () => {
                             <ChevronRight className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => deleteCVProfile(profile.id)}
+                            onClick={() => handleDeleteConfirm('profile', profile.id, profile.profileName)}
                             className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors duration-200"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -571,6 +598,44 @@ const YourCVs = () => {
               </div>
             )}
           </>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {confirmDelete.show && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <div className="bg-background border border-border rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                  <Trash2 className="w-6 h-6 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-heading">Confirm Deletion</h3>
+                  <p className="text-sm text-primaryText/60">This action cannot be undone</p>
+                </div>
+              </div>
+              
+              <p className="text-primaryText mb-6">
+                Are you sure you want to delete{' '}
+                <span className="font-semibold text-heading">"{confirmDelete.name}"</span>
+                {confirmDelete.type === 'profile' ? ' profile' : confirmDelete.type === 'resume' ? ' resume' : ' CV'}?
+              </p>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={handleDeleteCancel}
+                  className="px-4 py-2 border border-border rounded-lg font-medium text-primaryText hover:bg-border/50 transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteExecute}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors duration-200"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

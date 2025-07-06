@@ -50,9 +50,6 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static files (if you want to serve the built frontend)
-app.use(express.static(path.join(__dirname, '../dist')));
-
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
@@ -69,10 +66,23 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Catch-all handler for SPA (serve index.html for all non-API routes)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
-});
+// Static files and SPA routing (only in production)
+if (process.env.NODE_ENV === 'production') {
+  // Static files (serve the built frontend)
+  app.use(express.static(path.join(__dirname, '../dist')));
+  
+  // Catch-all handler for SPA (serve index.html for all non-API routes)
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
+  });
+} else {
+  // In development mode, just handle non-API routes with a simple response
+  app.get('*', (req, res) => {
+    res.json({ 
+      message: 'API server running in development mode. Frontend should be served by Vite on port 5173.' 
+    });
+  });
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {

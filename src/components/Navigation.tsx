@@ -76,7 +76,7 @@ const Navigation = () => {
                 onClick={() => dispatch({ type: 'SET_STEP', payload: 'yourCVs' })}
                 className="text-primaryText hover:text-accent transition-all duration-200 font-medium relative group"
               >
-                Your CVs
+                Your CVs & Profiles
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-200 group-hover:w-full rounded-full"></span>
               </button>
             </div>

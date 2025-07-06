@@ -547,26 +547,41 @@ For aboutMe sections: Make it professional, concise, and value-focused while mai
     const messages = [
       {
         role: 'system',
-        content: `You are a professional CV analysis and combination assistant. You will analyze multiple CVs and create a comprehensive profile optimized for a specific target role.
+        content: `You are a professional CV analysis and combination assistant specializing in job-targeted profile optimization. You will analyze multiple CVs and create a comprehensive profile specifically optimized for the target role.
 
-        Your task:
-        1. Analyze all provided CVs and extract the best information from each
-        2. Combine and optimize the information for the target role: "${targetRole}"
-        3. Remove duplicates and consolidate similar experiences
-        4. Enhance descriptions to align with the target role
-        5. Prioritize the most relevant experiences and skills
+        CRITICAL MISSION: Extract and highlight ALL information that will help the candidate get the job "${targetRole}"
 
-        Return a JSON object with these sections:
-        - personal_information (best contact info and professional title optimized for target role)
-        - work_experience (combined and optimized, most relevant first)
-        - education (all education, most relevant first)
-        - skills (comprehensive list, grouped by relevance to target role)
-        - projects (best projects that showcase relevant skills)
-        - certifications (all relevant certifications)
-        - achievements (most impressive achievements)
-        - languages (all languages with highest proficiency levels)
+        Your enhanced task:
+        1. DEEP ANALYSIS: Thoroughly analyze all CVs for job-relevant information
+        2. JOB ALIGNMENT: Optimize everything specifically for "${targetRole}" requirements
+        3. SKILL PRIORITIZATION: Identify and prioritize skills most valuable for this role
+        4. EXPERIENCE OPTIMIZATION: Reframe experiences to highlight relevance to target role
+        5. KEYWORD OPTIMIZATION: Include industry keywords and terms for "${targetRole}"
+        6. ACHIEVEMENT FOCUS: Emphasize achievements that demonstrate capability for target role
+        7. GAP IDENTIFICATION: Identify what's missing for the target role
 
-        Focus on quality over quantity and relevance to the target role.`
+        ENHANCED EXTRACTION RULES:
+        - Extract skills from ALL sections, not just skills sections
+        - Parse technical skills from job descriptions and project details
+        - Identify transferable skills from different industries
+        - Extract soft skills demonstrated through achievements
+        - Include tools, technologies, methodologies, and frameworks
+        - Capture leadership, management, and collaboration experiences
+        - Extract industry-specific knowledge and domain expertise
+
+        Return a JSON object with these optimized sections:
+        - personal_information (professional title optimized for target role, best contact info)
+        - work_experience (reframed for relevance, quantified achievements, most relevant first)
+        - education (all education, highlighting relevant coursework/projects)
+        - skills (comprehensive, categorized by relevance: critical/important/valuable)
+        - projects (best projects showcasing target-role skills)
+        - certifications (all relevant certifications, industry credentials)
+        - achievements (quantified results demonstrating target-role capabilities)
+        - languages (all languages, business relevance noted)
+        - job_relevance_score (1-10 rating of overall profile fit for target role)
+        - recommended_improvements (specific suggestions to strengthen profile for this role)
+
+        Focus on making this candidate irresistible for the "${targetRole}" position.`
       },
       {
         role: 'user',
@@ -574,7 +589,48 @@ For aboutMe sections: Make it professional, concise, and value-focused while mai
       }
     ];
 
-    const response = await this.makeRequest(messages, null, 3000);
+    const response = await this.makeRequest(messages, null, 4000);
+    return this.cleanJsonResponse(response);
+  }
+
+  async regenerateProfileWithFeedback(targetRole, currentProfile, userFeedback) {
+    const messages = [
+      {
+        role: 'system',
+        content: `You are a professional CV optimization assistant. You have created a profile for a "${targetRole}" position, and the user has provided feedback for improvements.
+
+        Your task:
+        1. Analyze the user's feedback carefully
+        2. Implement their suggestions while maintaining professional quality
+        3. Enhance the profile based on their input
+        4. Keep all good elements from the original profile
+        5. Ensure the result is still optimized for the "${targetRole}" position
+
+        FEEDBACK INTEGRATION RULES:
+        - Respect user's specific requests and preferences
+        - Add requested skills, experiences, or improvements
+        - Modify descriptions based on user input
+        - Maintain professional tone and formatting
+        - Enhance rather than replace unless specifically requested
+        - Keep the same JSON structure
+
+        Return the enhanced profile in the same JSON format with all improvements incorporated.`
+      },
+      {
+        role: 'user',
+        content: `Target role: ${targetRole}
+
+Current profile:
+${JSON.stringify(currentProfile, null, 2)}
+
+User feedback and requested changes:
+${userFeedback}
+
+Please regenerate the profile incorporating these changes and improvements.`
+      }
+    ];
+
+    const response = await this.makeRequest(messages, null, 4000);
     return this.cleanJsonResponse(response);
   }
 

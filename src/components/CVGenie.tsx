@@ -268,17 +268,17 @@ const CVGenie: React.FC<CVGenieProps> = ({ uploadedCVs, onBack, onProfileCreated
               return (
                 <>
                   <h4 className="font-semibold text-heading mb-2">Skills ({totalSkillCount} skills)</h4>
-                  <div className="bg-cardBg border border-border/30 rounded-lg p-4">
-                    <div className="flex flex-wrap gap-2">
+            <div className="bg-cardBg border border-border/30 rounded-lg p-4">
+              <div className="flex flex-wrap gap-2">
                       {skillsToDisplay.map((skill: string, index: number) => (
-                        <span key={index} className="bg-accent/20 text-accent px-2 py-1 rounded text-xs font-medium">
-                          {skill}
-                        </span>
-                      ))}
+                  <span key={index} className="bg-accent/20 text-accent px-2 py-1 rounded text-xs font-medium">
+                    {skill}
+                  </span>
+                ))}
                       {totalSkillCount > 12 && (
                         <span className="text-xs text-primaryText/90 font-medium">+{totalSkillCount - 12} more</span>
-                      )}
-                    </div>
+                )}
+              </div>
                   </div>
                 </>
               );
@@ -656,7 +656,7 @@ const CVGenie: React.FC<CVGenieProps> = ({ uploadedCVs, onBack, onProfileCreated
         </div>
       </div>
     </div>
-        );
-    };
-  
-  export default CVGenie; 
+  );
+};
+
+export default CVGenie; 

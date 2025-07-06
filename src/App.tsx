@@ -89,7 +89,7 @@ function App() {
     <AuthProvider>
       <ResumeProvider>
         <NotificationProvider>
-          <AppContent />
+        <AppContent />
           <NotificationContainer />
         </NotificationProvider>
       </ResumeProvider>

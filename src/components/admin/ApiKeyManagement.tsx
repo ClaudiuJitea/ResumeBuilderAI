@@ -12,6 +12,14 @@ interface ApiKey {
   updatedAt: string;
 }
 
+interface Model {
+  id: string;
+  name: string;
+  provider: string;
+  context_length?: number;
+  pricing?: any;
+}
+
 const ApiKeyManagement: React.FC = () => {
   const { token } = useAuth();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -20,22 +28,12 @@ const ApiKeyManagement: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
   const [newApiKey, setNewApiKey] = useState('');
-  const [selectedModel, setSelectedModel] = useState('anthropic/claude-3.5-sonnet');
+  const [selectedModel, setSelectedModel] = useState('');
   const [testing, setTesting] = useState(false);
   const [loadingModels, setLoadingModels] = useState(false);
-  const [availableModels, setAvailableModels] = useState([
-    // Fallback models in case API fails
-    { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'anthropic' },
-    { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku', provider: 'anthropic' },
-    { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'openai' },
-    { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
-    { id: 'openai/gpt-4-turbo', name: 'GPT-4 Turbo', provider: 'openai' },
-    { id: 'meta-llama/llama-3.1-70b-instruct', name: 'Llama 3.1 70B', provider: 'meta-llama' },
-    { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3.1 8B', provider: 'meta-llama' },
-    { id: 'google/gemini-pro-1.5', name: 'Gemini Pro 1.5', provider: 'google' },
-    { id: 'mistralai/mistral-large', name: 'Mistral Large', provider: 'mistralai' },
-    { id: 'perplexity/llama-3.1-sonar-large-128k-online', name: 'Sonar Large Online', provider: 'perplexity' }
-  ]);
+  const [availableModels, setAvailableModels] = useState<Model[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteService, setDeleteService] = useState<string | null>(null);
 
   const apiCall = async (endpoint: string, options: RequestInit = {}) => {
     const response = await fetch(`/api${endpoint}`, {
@@ -63,12 +61,6 @@ const ApiKeyManagement: React.FC = () => {
       
       const response = await apiCall('/admin/api-keys');
       setApiKeys(response.data.apiKeys);
-      
-      // Set current model if OpenRouter key exists
-      const openrouterKey = response.data.apiKeys.find((key: ApiKey) => key.service === 'openrouter');
-      if (openrouterKey && openrouterKey.selectedModel) {
-        setSelectedModel(openrouterKey.selectedModel);
-      }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to fetch API keys');
     } finally {
@@ -76,17 +68,24 @@ const ApiKeyManagement: React.FC = () => {
     }
   };
 
-  const fetchModels = async () => {
+  const fetchModels = async (useCurrentApiKey = false) => {
     try {
       setLoadingModels(true);
-      const response = await apiCall('/admin/api-keys/openrouter/models');
+      
+      // Build the URL with API key parameter if requested
+      let url = '/admin/api-keys/openrouter/models';
+      if (useCurrentApiKey && newApiKey.trim()) {
+        url += `?apiKey=${encodeURIComponent(newApiKey.trim())}`;
+      }
+      
+      const response = await apiCall(url);
       
       if (response.success && response.data.models) {
         setAvailableModels(response.data.models);
       }
     } catch (error) {
-      console.warn('Failed to fetch models, using fallback list:', error);
-      // Keep fallback models
+      console.warn('Failed to fetch models:', error);
+      setError('Failed to fetch models. Please check your API key and try again.');
     } finally {
       setLoadingModels(false);
     }
@@ -99,6 +98,11 @@ const ApiKeyManagement: React.FC = () => {
   const handleSaveApiKey = async () => {
     if (!newApiKey.trim()) {
       setError('API key is required');
+      return;
+    }
+
+    if (!selectedModel) {
+      setError('Please select a model. Click Refresh to load available models.');
       return;
     }
 
@@ -117,11 +121,13 @@ const ApiKeyManagement: React.FC = () => {
       
       setSuccess('API key saved successfully');
       setNewApiKey('');
+      setSelectedModel('');
+      setAvailableModels([]);
       fetchApiKeys();
       
       // Automatically fetch available models after saving API key
       setTimeout(() => {
-        fetchModels();
+        fetchModels(false);
       }, 1000);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to save API key');
@@ -147,15 +153,18 @@ const ApiKeyManagement: React.FC = () => {
   };
 
   const handleDeleteApiKey = async (service: string) => {
-    if (!confirm(`Are you sure you want to delete the ${service} API key?`)) {
-      return;
-    }
+    setDeleteService(service);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteService) return;
 
     try {
       setError(null);
       setSuccess(null);
       
-      await apiCall(`/admin/api-keys/${service}`, {
+      await apiCall(`/admin/api-keys/${deleteService}`, {
         method: 'DELETE',
       });
       
@@ -163,7 +172,15 @@ const ApiKeyManagement: React.FC = () => {
       fetchApiKeys();
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to delete API key');
+    } finally {
+      setShowDeleteConfirm(false);
+      setDeleteService(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setDeleteService(null);
   };
 
   if (loading) {
@@ -232,8 +249,8 @@ const ApiKeyManagement: React.FC = () => {
                 AI Model
               </label>
               <button
-                onClick={fetchModels}
-                disabled={loadingModels}
+                onClick={() => fetchModels(true)}
+                disabled={loadingModels || !newApiKey.trim()}
                 className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors disabled:opacity-50"
               >
                 <RefreshCw className={`w-3 h-3 ${loadingModels ? 'animate-spin' : ''}`} />
@@ -244,8 +261,9 @@ const ApiKeyManagement: React.FC = () => {
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
               className="w-full px-4 py-3 bg-background border border-border rounded-lg text-primaryText focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-              disabled={loadingModels}
+              disabled={loadingModels || availableModels.length === 0}
             >
+              <option value="">Select a model</option>
               {availableModels.map((model) => (
                 <option key={model.id} value={model.id}>
                   {model.name} ({model.provider})
@@ -253,9 +271,9 @@ const ApiKeyManagement: React.FC = () => {
               ))}
             </select>
             <p className="text-xs text-primaryText/60 mt-1">
-              {availableModels.length > 10 
+              {availableModels.length > 0 
                 ? `${availableModels.length} models available from OpenRouter`
-                : 'Select the AI model to use for resume assistance'
+                : 'Enter your API key and click Refresh to load available models'
               }
             </p>
           </div>
@@ -263,11 +281,11 @@ const ApiKeyManagement: React.FC = () => {
           <div className="flex space-x-3">
             <button
               onClick={handleSaveApiKey}
-              disabled={!newApiKey.trim()}
+              disabled={!newApiKey.trim() || !selectedModel}
               className="flex items-center space-x-2 px-4 py-2 bg-accent text-background rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="w-4 h-4" />
-              <span>Save API Key</span>
+              <span>Save & Connect</span>
             </button>
           </div>
         </div>
@@ -349,6 +367,34 @@ const ApiKeyManagement: React.FC = () => {
           <strong>💡 Tip:</strong> The model list is fetched live from OpenRouter and includes all available models with current pricing and capabilities.
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-primaryText mb-4">
+              Confirm Deletion
+            </h3>
+            <p className="text-primaryText/80 mb-6">
+              Are you sure you want to delete the <span className="font-medium capitalize">{deleteService}</span> API key? This action cannot be undone.
+            </p>
+            <div className="flex space-x-3 justify-end">
+              <button
+                onClick={cancelDelete}
+                className="px-4 py-2 bg-background border border-border text-primaryText rounded-lg hover:bg-background/80 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

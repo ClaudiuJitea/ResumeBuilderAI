@@ -579,19 +579,31 @@ router.delete('/api-keys/:service', (req, res) => {
 // Get available models from OpenRouter
 router.get('/api-keys/openrouter/models', async (req, res) => {
   try {
-    const apiKeyRecord = database.apiKeyOperations.getApiKey.get('openrouter');
+    // Check if API key is provided as query parameter (for refresh before saving)
+    const providedApiKey = req.query.apiKey;
+    let apiKey;
     
-    if (!apiKeyRecord) {
-      return res.status(400).json({
-        success: false,
-        message: 'OpenRouter API key not configured'
-      });
+    if (providedApiKey) {
+      // Use the provided API key (for refresh functionality)
+      apiKey = providedApiKey;
+    } else {
+      // Use the saved API key
+      const apiKeyRecord = database.apiKeyOperations.getApiKey.get('openrouter');
+      
+      if (!apiKeyRecord) {
+        return res.status(400).json({
+          success: false,
+          message: 'OpenRouter API key not configured'
+        });
+      }
+      
+      apiKey = apiKeyRecord.apiKey;
     }
 
     const fetch = require('node-fetch');
     const response = await fetch('https://openrouter.ai/api/v1/models', {
       headers: {
-        'Authorization': `Bearer ${apiKeyRecord.apiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'HTTP-Referer': 'http://localhost:3001',
         'X-Title': 'ResumeAI Assistant'
       }

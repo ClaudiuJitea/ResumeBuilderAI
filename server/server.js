@@ -70,11 +70,11 @@ app.get('/api/health', (req, res) => {
 if (process.env.NODE_ENV === 'production') {
   // Static files (serve the built frontend)
   app.use(express.static(path.join(__dirname, '../dist')));
-  
-  // Catch-all handler for SPA (serve index.html for all non-API routes)
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
-  });
+
+// Catch-all handler for SPA (serve index.html for all non-API routes)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
 } else {
   // In development mode, just handle non-API routes with a simple response
   app.get('*', (req, res) => {
